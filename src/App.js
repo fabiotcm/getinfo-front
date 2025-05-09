@@ -7,6 +7,7 @@ import './scss/style.scss'
 
 // We use those styles to show code examples, you should remove them in your application.
 import './scss/examples.scss'
+import CadastroContrato from './views/pages/CadastroContrato'
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
@@ -45,6 +46,7 @@ const App = () => {
         }
       >
         <Routes>
+          <Route exact path="/" name="Cadastro de Contrato" element={<CadastroContrato />} />
           <Route exact path="/login" name="Login Page" element={<Login />} />
           <Route exact path="/register" name="Register Page" element={<Register />} />
           <Route exact path="/404" name="Page 404" element={<Page404 />} />
