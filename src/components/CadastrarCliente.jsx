@@ -40,8 +40,8 @@ export default function CadastrarCliente() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Dados do contrato:", formData);
-    alert("Contrato cadastrado com sucesso!");
+    console.log("Dados do cliente:", formData);
+    alert("Cliente cadastrado com sucesso!");
       // Reset opcional
     setFormData((prev) => ({ ...prev, descricao: "", entregaveis: "" }));
   };

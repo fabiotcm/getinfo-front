@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from 'react'
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 
 import { CSpinner, useColorModes } from '@coreui/react'
@@ -38,7 +38,7 @@ const App = () => {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <HashRouter>
+    <BrowserRouter>
       <Suspense
         fallback={
           <div className="pt-3 text-center">
@@ -47,7 +47,7 @@ const App = () => {
         }
       >
         <Routes>
-          <Route exact path="/" name="Cadastro de Contrato" element={<CadastroContrato />} />
+          <Route exact path="/cadastrar-contrato" name="Cadastro de Contrato" element={<CadastroContrato />} />
           <Route exact path="/cadastrar-cliente" name="Cadastro de Cliente" element={<CadastroCliente />} />
           <Route exact path="/login" name="Login Page" element={<Login />} />
           <Route exact path="/register" name="Register Page" element={<Register />} />
@@ -56,7 +56,7 @@ const App = () => {
           <Route path="*" name="Home" element={<DefaultLayout />} />
         </Routes>
       </Suspense>
-    </HashRouter>
+    </BrowserRouter>
   )
 }
 
