@@ -40,8 +40,8 @@ export default function CadastrarCliente() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Dados do cliente:", formData);
-    alert("Cliente cadastrado com sucesso!");
+    console.log("Dados do contrato:", formData);
+    alert("Contrato cadastrado com sucesso!");
       // Reset opcional
     setFormData((prev) => ({ ...prev, descricao: "", entregaveis: "" }));
   };
@@ -224,7 +224,7 @@ export default function CadastrarCliente() {
 
         <div className="flex justify-end">
           <CButton type="submit" color="primary">
-            Salvar Contrato
+            Salvar Cliente
           </CButton>
         </div>
       </CForm>
