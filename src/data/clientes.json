@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "nomeResponsavel": "João",
+    "sobrenomeResponsavel": "Silva",
+    "cpfResponsavel": "123.456.789-00",
+    "emailResponsavel": "joao@empresa.com",
+    "telefoneResponsavel": "(11) 91234-5678",
+    "razaoSocial": "Empresa João Ltda",
+    "nomeFantasia": "JoãoTech",
+    "cnpj": "12.345.678/0001-90"
+  },
+  {
+    "id": 2,
+    "nomeResponsavel": "Maria",
+    "sobrenomeResponsavel": "Oliveira",
+    "cpfResponsavel": "987.654.321-00",
+    "emailResponsavel": "maria@empresa.com",
+    "telefoneResponsavel": "(21) 98765-4321",
+    "razaoSocial": "Oliveira e Filhos S/A",
+    "nomeFantasia": "OliveiraSoft",
+    "cnpj": "98.765.432/0001-00"
+  },
+  {
+    "id": 3,
+    "nomeResponsavel": "Carlos",
+    "sobrenomeResponsavel": "Pereira",
+    "cpfResponsavel": "111.222.333-44",
+    "emailResponsavel": "carlos@empresa.com",
+    "telefoneResponsavel": "(31) 99876-5432",
+    "razaoSocial": "Pereira Corp",
+    "nomeFantasia": "Pereira Solutions",
+    "cnpj": "11.222.333/0001-55"
+  }
+]
