@@ -1,5 +1,6 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import { SidebarDarkExample } from './SidebarDarkExample';
 
 import {
   CCloseButton,
@@ -46,12 +47,8 @@ const AppSidebar = () => {
           onClick={() => dispatch({ type: 'set', sidebarShow: false })}
         />
       </CSidebarHeader>
-      <AppSidebarNav items={navigation} />
-      <CSidebarFooter className="border-top d-none d-lg-flex">
-        <CSidebarToggler
-          onClick={() => dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })}
-        />
-      </CSidebarFooter>
+      <SidebarDarkExample/>
+      
     </CSidebar>
   )
 }
