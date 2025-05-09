@@ -9,6 +9,7 @@ import './scss/style.scss'
 import './scss/examples.scss'
 import CadastroContrato from './views/pages/CadastroContrato'
 import CadastroCliente from './views/pages/CadastroCliente'
+import Clientes from './views/pages/Clientes'
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
@@ -49,6 +50,7 @@ const App = () => {
         <Routes>
           <Route exact path="/cadastrar-contrato" name="Cadastro de Contrato" element={<CadastroContrato />} />
           <Route exact path="/cadastrar-cliente" name="Cadastro de Cliente" element={<CadastroCliente />} />
+          <Route exact path="/clientes" name="Clientes" element={<Clientes />} />
           <Route exact path="/login" name="Login Page" element={<Login />} />
           <Route exact path="/register" name="Register Page" element={<Register />} />
           <Route exact path="/404" name="Page 404" element={<Page404 />} />
