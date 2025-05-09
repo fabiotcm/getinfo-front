@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-  CBadge,
   CSidebar,
   CSidebarBrand,
   CSidebarHeader,
@@ -11,45 +10,48 @@ import {
 } from '@coreui/react'
 
 import CIcon from '@coreui/icons-react'
-import { cilCloudDownload, cilLayers, cilPuzzle, cilSpeedometer } from '@coreui/icons'
+import {
+  cilHome,
+  cilUser,
+  cilSettings,
+  cilAccountLogout,
+  cilDescription,
+} from '@coreui/icons'
 
 export const SidebarDarkExample = () => {
   return (
     <CSidebar className="border-end" colorScheme="dark">
       <CSidebarHeader className="border-bottom">
-        <CSidebarBrand>Getinfo</CSidebarBrand>
+        <CSidebarBrand>
+          <img src="src/assets/brand/logo-getinfo2.46e29e79.png" alt="Logo" style={{ height: '40px' }} />
+        </CSidebarBrand>
       </CSidebarHeader>
       <CSidebarNav>
-        <CNavTitle>Nav Title</CNavTitle>
-        <CNavItem href="#">
-          <CIcon customClassName="nav-icon" icon={cilSpeedometer} /> Nav item
+        <CNavItem href="/home">
+          <CIcon customClassName="nav-icon" icon={cilHome} /> Home
         </CNavItem>
-        <CNavItem href="#">
-          <CIcon customClassName="nav-icon" icon={cilSpeedometer} /> With badge{' '}
-          <CBadge color="primary ms-auto">NEW</CBadge>
-        </CNavItem>
+
         <CNavGroup
           toggler={
             <>
-              <CIcon customClassName="nav-icon" icon={cilPuzzle} /> Nav dropdown
+              <CIcon customClassName="nav-icon" icon={cilDescription} /> Contratos
             </>
           }
         >
-          <CNavItem href="#">
-            <span className="nav-icon">
-              <span className="nav-icon-bullet"></span>
-            </span>{' '}
-            Nav dropdown item
-          </CNavItem>
-          <CNavItem href="#">
-            <span className="nav-icon">
-              <span className="nav-icon-bullet"></span>
-            </span>{' '}
-            Nav dropdown item
-          </CNavItem>
+          <CNavItem href="/cadastrar-cliente">Cadastrar Cliente</CNavItem>
+          <CNavItem href="/cadastrar-contrato">Cadastrar Contrato</CNavItem>
         </CNavGroup>
-        <CNavItem href="https://coreui.io">
-          <CIcon customClassName="nav-icon" icon={cilCloudDownload} /> Download CoreUI
+
+        <CNavItem href="/clientes">
+          <CIcon customClassName="nav-icon" icon={cilUser} /> Clientes
+        </CNavItem>
+
+        <CNavItem href="/configuracoes">
+          <CIcon customClassName="nav-icon" icon={cilSettings} /> Configurações
+        </CNavItem>
+
+        <CNavItem href="/sair">
+          <CIcon customClassName="nav-icon" icon={cilAccountLogout} /> Sair
         </CNavItem>
       </CSidebarNav>
     </CSidebar>

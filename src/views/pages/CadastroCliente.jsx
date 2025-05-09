@@ -1,15 +1,15 @@
 import React from 'react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
-import CadastrarContrato from '../../components/CadastrarContrato'
+import CadastrarCliente from '../../components/CadastrarCliente'
 
-const CadastroContrato = () => {
+const CadastroCliente = () => {
   return (
     <div>
       <AppSidebar />
       <div className="wrapper d-flex flex-column min-vh-100">
         <AppHeader />
         <div className="body flex-grow-1">
-          <CadastrarContrato />
+          <CadastrarCliente />
         </div>
         <AppFooter />
       </div>
@@ -17,4 +17,4 @@ const CadastroContrato = () => {
   )
 }
 
-export default CadastroContrato;
+export default CadastroCliente;
