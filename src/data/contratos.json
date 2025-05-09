@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "titulo": "Contrato de Desenvolvimento Web",
+    "descricao": "Desenvolvimento de uma plataforma de e-commerce customizada.",
+    "clienteId": 1,
+    "dataInicio": "2023-01-15",
+    "dataFim": "2023-06-15",
+    "valor": 50000,
+    "status": "Ativo"
+  },
+  {
+    "id": 2,
+    "titulo": "Contrato de Suporte Técnico",
+    "descricao": "Suporte contínuo de infraestrutura e manutenção de servidores.",
+    "clienteId": 2,
+    "dataInicio": "2022-10-01",
+    "dataFim": "2024-10-01",
+    "valor": 30000,
+    "status": "Renovado"
+  },
+  {
+    "id": 3,
+    "titulo": "Contrato de Consultoria de Dados",
+    "descricao": "Consultoria para análise e visualização de dados com Power BI.",
+    "clienteId": 3,
+    "dataInicio": "2023-08-01",
+    "dataFim": "2024-02-01",
+    "valor": 20000,
+    "status": "Encerrado"
+  }
+]

@@ -26,20 +26,13 @@ export default function ClienteDetalhes() {
           <p><strong>Email:</strong> {cliente.emailResponsavel}</p>
           <p><strong>Telefone:</strong> {cliente.telefoneResponsavel}</p>
           <p><strong>CNPJ:</strong> {cliente.cnpj}</p>
+          <CRow className="gap-2">
+            <CCol sm="auto">
+              <CButton color="warning">Editar</CButton>
+            </CCol>
+          </CRow>
         </CCardBody>
       </CCard>
-
-      <CRow className="gap-2">
-        <CCol sm="auto">
-          <CButton color="warning">Editar</CButton>
-        </CCol>
-        <CCol sm="auto">
-          <CButton color="info">Inserir Aditivo</CButton>
-        </CCol>
-        <CCol sm="auto">
-          <CButton color="secondary">Inserir Repactuação</CButton>
-        </CCol>
-      </CRow>
     </div>
             </div>
             <AppFooter />

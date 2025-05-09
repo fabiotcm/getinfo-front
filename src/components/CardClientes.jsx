@@ -21,6 +21,7 @@ export default function CardClientes() {
             <CCard
               onClick={() => handleCardClick(cliente.id)}
               className="cursor-pointer hover:shadow-lg transition-shadow"
+              style={{ cursor: 'pointer' }}
             >
               <CCardBody>
                 <CCardTitle>{cliente.nomeFantasia}</CCardTitle>
