@@ -40,6 +40,7 @@ export const SidebarDarkExample = () => {
         >
           <CNavItem href="/cadastrar-empresa">Cadastrar Empresa</CNavItem>
           <CNavItem href="/cadastrar-contrato">Cadastrar Contrato</CNavItem>
+          <CNavItem href="/cadastrar-colaborador">Cadastrar Colaborador</CNavItem>
         </CNavGroup>
 
         <CNavItem href="/clientes">
