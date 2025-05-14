@@ -1,0 +1,20 @@
+import React from 'react'
+import { AppSidebar, AppHeader, AppFooter } from '../../components'
+import EditarContrato from '../../components/EditarContrato'
+
+const EdicaoContrato = () => {
+  return (
+    <div>
+      <AppSidebar />
+      <div className="wrapper d-flex flex-column min-vh-100">
+        <AppHeader />
+        <div className="body flex-grow-1">
+          <EditarContrato/>
+        </div>
+        <AppFooter />
+      </div>
+    </div>
+  )
+}
+
+export default EdicaoContrato;
