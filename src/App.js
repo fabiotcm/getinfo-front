@@ -13,6 +13,7 @@ import ClienteDetalhes from './views/pages/ClienteDetalhes'
 import Home from './views/pages/Home'
 import ContratoDetalhes from './views/pages/ContratoDetalhes'
 import CadastroEmpresa from './views/pages/CadastroEmpresa'
+import CadastroColaborador from './views/pages/CadastroColaborador'
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
@@ -53,6 +54,7 @@ const App = () => {
         <Routes>
           <Route exact path="/cadastrar-contrato" name="Cadastro de Contrato" element={<CadastroContrato />} />
           <Route exact path="/cadastrar-empresa" name="Cadastro de Cliente" element={<CadastroEmpresa />} />
+          <Route exact path="/cadastrar-colaborador" name="Cadastro de Colaborador" element={<CadastroColaborador />} />
           <Route path="/clientes/:id" element={<ClienteDetalhes />} />
           <Route path="/contrato/:id" element={<ContratoDetalhes />} />
           <Route path='/home' name="Home" element={<Home/>}/>
