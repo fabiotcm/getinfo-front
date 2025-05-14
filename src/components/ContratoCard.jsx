@@ -23,6 +23,10 @@ export default function ContratoCard() {
     return cliente?.nome || 'Cliente não encontrado'
   }
 
+  const handleRowClick = (id) => {
+    navigate(`/contrato/${id}`)
+  }
+
   const handleEdit = (id) => {
     navigate(`/contrato/${id}/editar`)
   }
@@ -32,7 +36,7 @@ export default function ContratoCard() {
   }
 
   const handleAdd = () => {
-    navigate('/contrato/novo')
+    navigate('/cadastrar-contrato')
   }
 
   return (
@@ -52,10 +56,10 @@ export default function ContratoCard() {
         <CTableBody>
           {contratos.map((contrato) => (
             <CTableRow key={contrato.id}>
-              <CTableDataCell>{contrato.titulo}</CTableDataCell>
-              <CTableDataCell>{getClienteNome(contrato.clienteId)}</CTableDataCell>
-              <CTableDataCell>R$ {contrato.valor.toLocaleString()}</CTableDataCell>
-              <CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>{contrato.titulo}</CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>{getClienteNome(contrato.clienteId)}</CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>R$ {contrato.valor.toLocaleString()}</CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>
                 {contrato.dataInicio} → {contrato.dataFim}
               </CTableDataCell>
               <CTableDataCell className="text-end">
