@@ -14,7 +14,7 @@ export default function CardClientes() {
 
   return (
     <div className="p-4 space-y-4">
-      <h2>Clientes Cadastrados</h2>
+      <h2>Empresas Cadastradas</h2>
       <CRow className="g-4">
         {clientes.map((cliente) => (
           <CCol key={cliente.id} md={4}>

@@ -9,6 +9,8 @@ import {
   CNavTitle,
 } from '@coreui/react'
 
+import logo_getinfo from 'src/assets/brand/logo-getinfo2.46e29e79.png'
+
 import CIcon from '@coreui/icons-react'
 import {
   cilHome,
@@ -23,7 +25,7 @@ export const SidebarDarkExample = () => {
     <CSidebar className="border-end" colorScheme="dark">
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand>
-          <img src="src/assets/brand/logo-getinfo2.46e29e79.png" alt="Logo" style={{ height: '40px' }} />
+          <img src={logo_getinfo} alt="Logo" style={{ height: '33px' }} />
         </CSidebarBrand>
       </CSidebarHeader>
       <CSidebarNav>
@@ -44,14 +46,14 @@ export const SidebarDarkExample = () => {
         </CNavGroup>
 
         <CNavItem href="/clientes">
-          <CIcon customClassName="nav-icon" icon={cilUser} /> Clientes
+          <CIcon customClassName="nav-icon" icon={cilUser} /> Empresas
         </CNavItem>
 
         <CNavItem href="/configuracoes">
           <CIcon customClassName="nav-icon" icon={cilSettings} /> Configurações
         </CNavItem>
 
-        <CNavItem href="/sair">
+        <CNavItem href="/login">
           <CIcon customClassName="nav-icon" icon={cilAccountLogout} /> Sair
         </CNavItem>
       </CSidebarNav>
