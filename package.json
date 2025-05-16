@@ -21,6 +21,7 @@
   "dependencies": {
     "@coreui/chartjs": "^4.1.0",
     "@coreui/coreui": "^5.3.1",
+    "@coreui/coreui-free-react-admin-template": "file:",
     "@coreui/icons": "^3.0.1",
     "@coreui/icons-react": "^2.3.0",
     "@coreui/react": "^5.5.0",
