@@ -8,6 +8,7 @@ import {
   CCol,
   CFormLabel,
 } from "@coreui/react";
+import { createEmpresa } from "../services/empresaService";
 
 export default function CadastrarEmpresa() {
   const [formData, setFormData] = useState({
@@ -34,10 +35,15 @@ export default function CadastrarEmpresa() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      await createEmpresa(formData);
+      alert('Empresa cadastrado com sucesso!')
+      } catch (err) {
+      console.error('Erro ao cadastrar cliente', err)
+    }
     console.log("Dados da Empresa:", formData);
-    alert("Empresa cadastrada com sucesso!");
   };
 
   return (
