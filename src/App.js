@@ -55,6 +55,7 @@ const App = () => {
         }
       >
         <Routes>
+          <Route exact path="/" name="Login" element={<Login />} />
           <Route exact path="/cadastrar-contrato" name="Cadastro de Contrato" element={<CadastroContrato />} />
           <Route exact path="/cadastrar-empresa" name="Cadastro de Cliente" element={<CadastroEmpresa />} />
           <Route exact path="/cadastrar-colaborador" name="Cadastro de Colaborador" element={<CadastroColaborador />} />
@@ -65,7 +66,6 @@ const App = () => {
           <Route path="/contrato/:id/repactuacao" element={<Repactuacao />} />
           <Route path='/home' name="Home" element={<Home/>}/>
           <Route exact path="/clientes" name="Clientes" element={<Clientes />} />
-          <Route exact path="/login" name="Login Page" element={<Login />} />
           <Route exact path="/register" name="Register Page" element={<Register />} />
           <Route exact path="/404" name="Page 404" element={<Page404 />} />
           <Route exact path="/500" name="Page 500" element={<Page500 />} />

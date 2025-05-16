@@ -53,7 +53,7 @@ export const SidebarDarkExample = () => {
           <CIcon customClassName="nav-icon" icon={cilSettings} /> Configurações
         </CNavItem>
 
-        <CNavItem href="/login">
+        <CNavItem href="/">
           <CIcon customClassName="nav-icon" icon={cilAccountLogout} /> Sair
         </CNavItem>
       </CSidebarNav>
