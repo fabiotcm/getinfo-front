@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import contratos from '../data/contratos.json'
 import clientes from '../data/clientes.json'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +10,7 @@ import {
   CTableBody,
   CTableDataCell,
   CButton,
+  CFormInput,
   CTooltip,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -17,6 +18,7 @@ import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
 
 export default function ContratoCard() {
   const navigate = useNavigate()
+  const [searchTerm, setSearchTerm] = useState('')
 
   const getClienteNome = (clienteId) => {
     const cliente = clientes.find(c => c.id === clienteId)
@@ -39,9 +41,28 @@ export default function ContratoCard() {
     navigate('/cadastrar-contrato')
   }
 
+  const filteredContratos = contratos.filter((contrato) => {
+    const clienteNome = getClienteNome(contrato.clienteId).toLowerCase()
+    const search = searchTerm.toLowerCase()
+    return (
+      contrato.titulo.toLowerCase().includes(search) ||
+      clienteNome.includes(search) ||
+      contrato.valor.toString().includes(search)
+    )
+  })
+
   return (
     <div className="p-4 position-relative">
-      <h2 className="mb-4">Contratos</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Contratos</h2>
+        <CFormInput
+          type="search"
+          placeholder="Buscar..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ maxWidth: '250px' }}
+        />
+      </div>
 
       <CTable hover responsive>
         <CTableHead color="light">
@@ -54,7 +75,7 @@ export default function ContratoCard() {
           </CTableRow>
         </CTableHead>
         <CTableBody>
-          {contratos.map((contrato) => (
+          {filteredContratos.map((contrato) => (
             <CTableRow key={contrato.id}>
               <CTableDataCell onClick={() => handleRowClick(contrato.id)}>{contrato.titulo}</CTableDataCell>
               <CTableDataCell onClick={() => handleRowClick(contrato.id)}>{getClienteNome(contrato.clienteId)}</CTableDataCell>
