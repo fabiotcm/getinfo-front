@@ -12,124 +12,116 @@ import {
   CCardBody,
   CCardTitle,
   CCardText,
-} from '@coreui/react'
-import clientes from '../data/clientes.json'
 
-export default function CadastrarEmpresaManualStepper() {
-  const [step, setStep] = useState(0)
-  const [finish, setFinish] = useState(false)
-  const [cnpjError, setCnpjError] = useState(false)
+} from "@coreui/react";
+import { createEmpresa } from "../services/empresaService";
+
+export default function CadastrarEmpresa() {
+  const [step, setStep] = useState(0);
+  const [finish, setFinish] = useState(false);
 
   const [formData, setFormData] = useState({
-    cnpj: '',
-    razaoSocial: '',
-    nomeFantasia: '',
-    tipoEmpresa: '',
-    cep: '',
-    logradouro: '',
-    bairro: '',
-    numero: '',
-    cidade: '',
-    complemento: '',
-    emailEmpresa: '',
-    telefoneEmpresa: '',
-    nomeResponsavel: '',
-    emailResponsavel: '',
-    telefoneResponsavel: '',
-    cpfResponsavel: '',
-  })
+    cnpj: "",
+    razaoSocial: "",
+    nomeFantasia: "",
+    tipo: "",
+    cep: "",
+    logradouro: "",
+    bairro: "",
+    numero: "",
+    cidade: "",
+    estado: "",
+    complemento: "",
+    email: "",
+    telefone: "",
+    nomeResponsavel: "",
+    emailResponsavel: "",
+    telefoneResponsavel: "",
+    cpfResponsavel: "",
+  });
 
   const requiredFieldsPerStep = [
-    ['cnpj', 'razaoSocial', 'nomeFantasia', 'tipoEmpresa'],
-    ['cep', 'logradouro', 'bairro', 'numero', 'cidade'],
-    ['emailEmpresa', 'telefoneEmpresa'],
-    ['nomeResponsavel', 'emailResponsavel', 'telefoneResponsavel', 'cpfResponsavel'],
-  ]
+    ["cnpj", "razaoSocial", "nomeFantasia", "tipo"],
+    ["cep", "logradouro", "bairro", "numero", "cidade", "estado"],
+    ["email", "telefone"],
+    ["nomeResponsavel", "emailResponsavel", "telefoneResponsavel", "cpfResponsavel"],
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const verificarCNPJ = () => {
-    const exists = clientes.some((cliente) => cliente.cnpj === formData.cnpj)
-    setCnpjError(exists)
-    return !exists
-  }
 
   const isStepValid = () => {
-    const requiredFields = requiredFieldsPerStep[step]
-    return requiredFields.every((field) => formData[field] && formData[field].trim() !== '')
-  }
+    const requiredFields = requiredFieldsPerStep[step];
+    return requiredFields.every((field) => formData[field] && formData[field].trim() !== "");
+  };
 
   const handleNext = () => {
-    if (step === 0 && !verificarCNPJ()) return
     if (!isStepValid()) {
-      alert('Preencha todos os campos obrigatórios desta etapa.')
-      return
+      alert("Preencha todos os campos obrigatórios desta etapa.");
+      return;
     }
-    setStep((prev) => prev + 1)
-  }
+    setStep((prev) => prev + 1);
+  };
 
   const handleBack = () => {
-    setStep((prev) => prev - 1)
-  }
+    setStep((prev) => prev - 1);
+  };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (!isStepValid()) {
-      alert('Preencha todos os campos obrigatórios desta etapa.')
-      return
+      alert("Preencha todos os campos obrigatórios desta etapa.");
+      return;
     }
-    console.log('Dados cadastrados:', formData)
-    alert('Empresa cadastrada com sucesso!')
-    setFinish(true)
-  }
+    try {
+      await createEmpresa(formData);
+      alert("Empresa cadastrada com sucesso!");
+      setFinish(true);
+    } catch (error) {
+      console.error("Erro ao cadastrar cliente", error);
+      console.error("Detalhes do backend:", error.response?.data);
+      alert(
+        "Erro ao cadastrar: " +
+          (error.response?.data?.message || "Verifique os campos")
+      );
+    }
+  };
 
   const handleReset = () => {
     setFormData({
-      cnpj: '',
-      razaoSocial: '',
-      nomeFantasia: '',
-      tipoEmpresa: '',
-      cep: '',
-      logradouro: '',
-      bairro: '',
-      numero: '',
-      cidade: '',
-      complemento: '',
-      emailEmpresa: '',
-      telefoneEmpresa: '',
-      nomeResponsavel: '',
-      emailResponsavel: '',
-      telefoneResponsavel: '',
-      cpfResponsavel: '',
-    })
-    setCnpjError(false)
-    setFinish(false)
-    setStep(0)
-}
+      cnpj: "",
+      razaoSocial: "",
+      nomeFantasia: "",
+      tipo: "",
+      cep: "",
+      logradouro: "",
+      bairro: "",
+      numero: "",
+      cidade: "",
+      estado: "",
+      complemento: "",
+      email: "",
+      telefone: "",
+      nomeResponsavel: "",
+      emailResponsavel: "",
+      telefoneResponsavel: "",
+      cpfResponsavel: "",
+    });
+    setFinish(false);
+    setStep(0);
+  };
 
   const steps = [
     {
-      title: 'Informações Básicas',
+      title: "Informações Básicas",
       content: (
         <>
           <CCol md={4}>
             <CFormLabel>CNPJ</CFormLabel>
-            <CFormInput
-              mask="99.999.999/9999-99"
-              id="cnpj"
-              name="cnpj"
-              value={formData.cnpj}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-            {cnpjError && (
-              <CFormFeedback invalid className="d-block">
-                CNPJ já cadastrado
-              </CFormFeedback>
-            )}
+
+            <CFormInput name="cnpj" value={formData.cnpj} onChange={handleChange} required />
           </CCol>
           <CCol md={4}>
             <CFormLabel>Razão Social</CFormLabel>
@@ -141,17 +133,19 @@ export default function CadastrarEmpresaManualStepper() {
           </CCol>
           <CCol md={4}>
             <CFormLabel>Tipo de Empresa</CFormLabel>
-            <CFormSelect name="tipoEmpresa" value={formData.tipoEmpresa} onChange={handleChange} required>
+
+            <CFormSelect name="tipo" value={formData.tipo} onChange={handleChange} required>
               <option value="">Selecione...</option>
-              <option value="publica">Pública</option>
-              <option value="privada">Privada</option>
+              <option value="PUBLICA">Pública</option>
+              <option value="PRIVADA">Privada</option>
             </CFormSelect>
           </CCol>
         </>
       ),
     },
     {
-      title: 'Endereço',
+
+      title: "Endereço",
       content: (
         <>
           <CCol md={4}>
@@ -175,6 +169,16 @@ export default function CadastrarEmpresaManualStepper() {
             <CFormInput name="cidade" value={formData.cidade} onChange={handleChange} required />
           </CCol>
           <CCol md={3}>
+
+            <CFormLabel>Estado</CFormLabel>
+            <CFormSelect name="estado" value={formData.estado} onChange={handleChange} required>
+              <option value="">Selecione...</option>
+              {["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"].map(uf => (
+                <option key={uf} value={uf}>{uf}</option>
+              ))}
+            </CFormSelect>
+          </CCol>
+          <CCol md={3}>
             <CFormLabel>Complemento</CFormLabel>
             <CFormInput name="complemento" value={formData.complemento} onChange={handleChange} />
           </CCol>
@@ -182,22 +186,25 @@ export default function CadastrarEmpresaManualStepper() {
       ),
     },
     {
-      title: 'Contato da Empresa',
+
+      title: "Contato da Empresa",
       content: (
         <>
           <CCol md={6}>
             <CFormLabel>Email</CFormLabel>
-            <CFormInput type="email" name="emailEmpresa" value={formData.emailEmpresa} onChange={handleChange} required />
+
+            <CFormInput type="email" name="email" value={formData.email} onChange={handleChange} required />
           </CCol>
           <CCol md={6}>
             <CFormLabel>Telefone</CFormLabel>
-            <CFormInput type="tel" name="telefoneEmpresa" value={formData.telefoneEmpresa} onChange={handleChange} required />
+            <CFormInput type="tel" name="telefone" value={formData.telefone} onChange={handleChange} required />
           </CCol>
         </>
       ),
     },
     {
-      title: 'Responsável',
+
+      title: "Responsável",
       content: (
         <>
           <CCol md={6}>
@@ -219,7 +226,8 @@ export default function CadastrarEmpresaManualStepper() {
         </>
       ),
     },
-  ]
+
+  ];
 
   return (
     <CCard className="p-4">
@@ -229,36 +237,28 @@ export default function CadastrarEmpresaManualStepper() {
           <>
             <div className="d-flex justify-content-between mb-4">
               {steps.map((s, index) => (
-                <div
-                  key={index}
-                  className={`text-center flex-fill px-2 position-relative`}
-                  style={{
-                    zIndex: 1,
-                  }}
-                >
+
+                <div key={index} className="text-center flex-fill px-2 position-relative" style={{ zIndex: 1 }}>
                   <div
                     className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
                       index === step
-                        ? 'bg-primary text-white'
+                        ? "bg-primary text-white"
                         : index < step
-                        ? 'bg-success text-white'
-                        : 'bg-light text-muted'
+                        ? "bg-success text-white"
+                        : "bg-light text-muted"
                     }`}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      border: '2px solid #ccc',
-                    }}
+                    style={{ width: "40px", height: "40px", border: "2px solid #ccc" }}
                   >
                     {index + 1}
                   </div>
                   <small
                     className={`d-block ${
                       index === step
-                        ? 'fw-bold text-primary'
+
+                        ? "fw-bold text-primary"
                         : index < step
-                        ? 'text-success'
-                        : 'text-muted'
+                        ? "text-success"
+                        : "text-muted"
                     }`}
                   >
                     {s.title}
@@ -301,5 +301,6 @@ export default function CadastrarEmpresaManualStepper() {
         )}
       </CCardBody>
     </CCard>
-  )
+
+  );
 }

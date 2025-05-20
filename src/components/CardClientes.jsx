@@ -1,6 +1,6 @@
 
-import React from 'react'
-import clientes from '../data/clientes.json'
+import React, { useEffect, useState } from 'react'
+import { getEmpresas } from '../services/empresaService'
 import { CCard, CCardBody, CCardTitle, CRow, CCol } from '@coreui/react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -19,7 +19,24 @@ import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
 
 export default function CardClientes() {
 
+  const [clientes, setClientes] = useState([])
   const navigate = useNavigate()
+
+  useEffect(() => {
+  async function fetchEmpresas() {
+    try {
+      const response = await getEmpresas()
+      const data = Array.isArray(response) ? response : response.data || []  // <- garante array
+      setClientes(data)
+    } catch (error) {
+      console.error('Erro ao buscar empresas:', error)
+      setClientes([]) // garante que não quebre o .map()
+    }
+  }
+
+  fetchEmpresas()
+}, [])
+
 
   const handleCardClick = (id) => {
     navigate(`/clientes/${id}`)
