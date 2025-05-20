@@ -13,9 +13,7 @@ import {
   CCardTitle,
   CCardText,
 } from '@coreui/react'
-
 import clientes from '../data/clientes.json'
-
 
 export default function CadastrarEmpresaManualStepper() {
   const [step, setStep] = useState(0)
@@ -42,8 +40,7 @@ export default function CadastrarEmpresaManualStepper() {
   })
 
   const requiredFieldsPerStep = [
-    ['cnpj'],
-    ['razaoSocial', 'nomeFantasia', 'tipoEmpresa'],
+    ['cnpj', 'razaoSocial', 'nomeFantasia', 'tipoEmpresa'],
     ['cep', 'logradouro', 'bairro', 'numero', 'cidade'],
     ['emailEmpresa', 'telefoneEmpresa'],
     ['nomeResponsavel', 'emailResponsavel', 'telefoneResponsavel', 'cpfResponsavel'],
@@ -114,29 +111,26 @@ export default function CadastrarEmpresaManualStepper() {
 
   const steps = [
     {
-      title: 'CNPJ',
-      content: (
-        <CCol md={6}>
-          <CFormLabel>CNPJ</CFormLabel>
-          <CFormInput
-            name="cnpj"
-            value={formData.cnpj}
-            onChange={handleChange}
-            isInvalid={cnpjError}
-            required
-          />
-          {cnpjError && (
-            <CFormFeedback invalid className="d-block">
-              CNPJ já cadastrado
-            </CFormFeedback>
-          )}
-        </CCol>
-      ),
-    },
-    {
       title: 'Informações Básicas',
       content: (
         <>
+          <CCol md={4}>
+            <CFormLabel>CNPJ</CFormLabel>
+            <CFormInput
+              mask="99.999.999/9999-99"
+              id="cnpj"
+              name="cnpj"
+              value={formData.cnpj}
+              onChange={handleChange}
+              className="form-control"
+              required
+            />
+            {cnpjError && (
+              <CFormFeedback invalid className="d-block">
+                CNPJ já cadastrado
+              </CFormFeedback>
+            )}
+          </CCol>
           <CCol md={4}>
             <CFormLabel>Razão Social</CFormLabel>
             <CFormInput name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} required />
@@ -234,45 +228,45 @@ export default function CadastrarEmpresaManualStepper() {
         {!finish ? (
           <>
             <div className="d-flex justify-content-between mb-4">
-  {steps.map((s, index) => (
-    <div
-      key={index}
-      className={`text-center flex-fill px-2 position-relative`}
-      style={{
-        zIndex: 1,
-      }}
-    >
-      <div
-        className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
-          index === step
-            ? 'bg-primary text-white'
-            : index < step
-            ? 'bg-success text-white'
-            : 'bg-light text-muted'
-        }`}
-        style={{
-          width: '40px',
-          height: '40px',
-          border: '2px solid #ccc',
-        }}
-      >
-        {index + 1}
-      </div>
-      <small
-        className={`d-block ${
-          index === step
-            ? 'fw-bold text-primary'
-            : index < step
-            ? 'text-success'
-            : 'text-muted'
-        }`}
-      >
-        {s.title}
-      </small>
-      
-    </div>
-  ))}
-</div>
+              {steps.map((s, index) => (
+                <div
+                  key={index}
+                  className={`text-center flex-fill px-2 position-relative`}
+                  style={{
+                    zIndex: 1,
+                  }}
+                >
+                  <div
+                    className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
+                      index === step
+                        ? 'bg-primary text-white'
+                        : index < step
+                        ? 'bg-success text-white'
+                        : 'bg-light text-muted'
+                    }`}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      border: '2px solid #ccc',
+                    }}
+                  >
+                    {index + 1}
+                  </div>
+                  <small
+                    className={`d-block ${
+                      index === step
+                        ? 'fw-bold text-primary'
+                        : index < step
+                        ? 'text-success'
+                        : 'text-muted'
+                    }`}
+                  >
+                    {s.title}
+                  </small>
+
+                </div>
+              ))}
+            </div>
 
             <h5>{steps[step].title}</h5>
             <CForm className="row g-3 mt-2">{steps[step].content}</CForm>

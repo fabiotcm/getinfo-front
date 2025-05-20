@@ -22,7 +22,7 @@ export default function ContratoCard() {
 
   const getClienteNome = (clienteId) => {
     const cliente = clientes.find(c => c.id === clienteId)
-    return cliente?.nome || 'Cliente não encontrado'
+    return cliente?.nome || 'Empresa não encontrada'
   }
 
   const handleRowClick = (id) => {
@@ -67,8 +67,8 @@ export default function ContratoCard() {
       <CTable hover responsive>
         <CTableHead color="light">
           <CTableRow>
-            <CTableHeaderCell>Título</CTableHeaderCell>
-            <CTableHeaderCell>Cliente</CTableHeaderCell>
+            <CTableHeaderCell>N° do Contrato</CTableHeaderCell>
+            <CTableHeaderCell>Empresa</CTableHeaderCell>
             <CTableHeaderCell>Valor</CTableHeaderCell>
             <CTableHeaderCell>Período</CTableHeaderCell>
             <CTableHeaderCell className="text-end">Ações</CTableHeaderCell>
@@ -77,7 +77,7 @@ export default function ContratoCard() {
         <CTableBody>
           {filteredContratos.map((contrato) => (
             <CTableRow key={contrato.id}>
-              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>{contrato.titulo}</CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>{contrato.id}</CTableDataCell>
               <CTableDataCell onClick={() => handleRowClick(contrato.id)}>{getClienteNome(contrato.clienteId)}</CTableDataCell>
               <CTableDataCell onClick={() => handleRowClick(contrato.id)}>R$ {contrato.valor.toLocaleString()}</CTableDataCell>
               <CTableDataCell onClick={() => handleRowClick(contrato.id)}>
