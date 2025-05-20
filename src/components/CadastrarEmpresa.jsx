@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useState } from 'react'
 import {
   CForm,
   CFormInput,
   CFormSelect,
   CButton,
-  CRow,
   CCol,
+  CRow,
   CFormLabel,
   CFormFeedback,
   CCard,
   CCardBody,
   CCardTitle,
   CCardText,
+
 } from "@coreui/react";
 import { createEmpresa } from "../services/empresaService";
 
@@ -47,9 +48,10 @@ export default function CadastrarEmpresa() {
   ];
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
 
   const isStepValid = () => {
     const requiredFields = requiredFieldsPerStep[step];
@@ -118,6 +120,7 @@ export default function CadastrarEmpresa() {
         <>
           <CCol md={4}>
             <CFormLabel>CNPJ</CFormLabel>
+
             <CFormInput name="cnpj" value={formData.cnpj} onChange={handleChange} required />
           </CCol>
           <CCol md={4}>
@@ -130,6 +133,7 @@ export default function CadastrarEmpresa() {
           </CCol>
           <CCol md={4}>
             <CFormLabel>Tipo de Empresa</CFormLabel>
+
             <CFormSelect name="tipo" value={formData.tipo} onChange={handleChange} required>
               <option value="">Selecione...</option>
               <option value="PUBLICA">Pública</option>
@@ -140,6 +144,7 @@ export default function CadastrarEmpresa() {
       ),
     },
     {
+
       title: "Endereço",
       content: (
         <>
@@ -164,6 +169,7 @@ export default function CadastrarEmpresa() {
             <CFormInput name="cidade" value={formData.cidade} onChange={handleChange} required />
           </CCol>
           <CCol md={3}>
+
             <CFormLabel>Estado</CFormLabel>
             <CFormSelect name="estado" value={formData.estado} onChange={handleChange} required>
               <option value="">Selecione...</option>
@@ -180,11 +186,13 @@ export default function CadastrarEmpresa() {
       ),
     },
     {
+
       title: "Contato da Empresa",
       content: (
         <>
           <CCol md={6}>
             <CFormLabel>Email</CFormLabel>
+
             <CFormInput type="email" name="email" value={formData.email} onChange={handleChange} required />
           </CCol>
           <CCol md={6}>
@@ -195,6 +203,7 @@ export default function CadastrarEmpresa() {
       ),
     },
     {
+
       title: "Responsável",
       content: (
         <>
@@ -217,6 +226,7 @@ export default function CadastrarEmpresa() {
         </>
       ),
     },
+
   ];
 
   return (
@@ -227,6 +237,7 @@ export default function CadastrarEmpresa() {
           <>
             <div className="d-flex justify-content-between mb-4">
               {steps.map((s, index) => (
+
                 <div key={index} className="text-center flex-fill px-2 position-relative" style={{ zIndex: 1 }}>
                   <div
                     className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
@@ -243,6 +254,7 @@ export default function CadastrarEmpresa() {
                   <small
                     className={`d-block ${
                       index === step
+
                         ? "fw-bold text-primary"
                         : index < step
                         ? "text-success"
@@ -251,6 +263,7 @@ export default function CadastrarEmpresa() {
                   >
                     {s.title}
                   </small>
+
                 </div>
               ))}
             </div>
@@ -288,5 +301,6 @@ export default function CadastrarEmpresa() {
         )}
       </CCardBody>
     </CCard>
+
   );
 }

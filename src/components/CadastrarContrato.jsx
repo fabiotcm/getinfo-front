@@ -1,71 +1,147 @@
-import React, { useState } from "react";
+import React, { useState } from 'react'
 import {
   CForm,
   CFormInput,
   CFormSelect,
   CFormTextarea,
   CButton,
-  CRow,
   CCol,
+  CRow,
   CFormLabel,
-} from "@coreui/react";
+  CCard,
+  CCardBody,
+  CCardTitle,
+  CCardText,
+} from '@coreui/react'
+import { Link } from 'react-router-dom'
 
-export default function CadastrarContrato() {
+// Simulando CNPJs já cadastrados
+const cnpjsCadastrados = ['12345678000190', '98765432000100', '11223344000155']
+
+export default function CadastrarContratoStepper() {
+  const [step, setStep] = useState(0)
+  const [finish, setFinish] = useState(false)
+  const [cnpjInvalido, setCnpjInvalido] = useState(false)
+
   const [formData, setFormData] = useState({
-    cnpj: "",
-    tipoContrato: "",
-    valorContrato: "",
-    descricao: "",
+    cnpj: '',
+    tipoContrato: '',
+    valorContrato: '',
+    funcionarioResponsavel: '',
+    prazo: '',
+    dataInicio: '',
+    dataEntrega: '',
+    descricao: '',
+    entregaveis: '',
     anexo: null,
-    funcionarioResponsavel: "",
-    entregaveis: "",
-    prazo: "",
-    dataInicio: "",
-    dataEntrega: "",
-  });
+  })
+
+  const requiredFieldsPerStep = [
+    ['cnpj'],
+    ['tipoContrato', 'valorContrato', 'prazo', 'funcionarioResponsavel'],
+    ['dataInicio', 'dataEntrega'],
+    ['descricao', 'entregaveis'],
+  ]
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "anexo") {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
+    const { name, value, files } = e.target
+    if (name === 'anexo') {
+      setFormData((prev) => ({ ...prev, [name]: files[0] }))
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }))
     }
-  };
+    if (name === 'cnpj') {
+      setCnpjInvalido(false)
+    }
+  }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Dados do contrato:", formData);
-    alert("Contrato cadastrado com sucesso!");
-      // Reset opcional
-    setFormData((prev) => ({ ...prev, descricao: "", entregaveis: "" }));
-  };
+  const isStepValid = () => {
+    const requiredFields = requiredFieldsPerStep[step]
+    return requiredFields.every((field) => formData[field] && formData[field].trim() !== '')
+  }
 
-  return (
-    <div className="p-4 space-y-4">
-      <CForm onSubmit={handleSubmit} className="space-y-4">
-        <h4>Cadastro de Contrato</h4>
+  const handleNext = () => {
+    if (!isStepValid()) {
+      alert('Preencha todos os campos obrigatórios desta etapa.')
+      return
+    }
 
-        <CRow>
-          <CCol md={6} className="space-y-1">
-            <CFormLabel htmlFor="cnpj">CNPJ</CFormLabel>
-            <CFormInput
-              id="cnpj"
-              name="cnpj"
-              value={formData.cnpj}
-              onChange={handleChange}
-              required
-            />
-          </CCol>
-          <CCol md={6} className="space-y-1">
-            <CFormLabel htmlFor="tipoContrato">Tipo de Contrato</CFormLabel>
-            <CFormSelect
-              id="tipoContrato"
-              name="tipoContrato"
-              value={formData.tipoContrato}
-              onChange={handleChange}
-              required
-            >
+    if (step === 0) {
+      const cnpjLimpo = formData.cnpj.replace(/\D/g, '')
+      if (!cnpjsCadastrados.includes(cnpjLimpo)) {
+        setCnpjInvalido(true)
+        return
+      }
+    }
+
+    setStep((prev) => prev + 1)
+  }
+
+  const handleBack = () => {
+    setStep((prev) => prev - 1)
+  }
+
+  const handleFinish = () => {
+    if (!isStepValid()) {
+      alert('Preencha todos os campos obrigatórios desta etapa.')
+      return
+    }
+    console.log('Dados do contrato:', formData)
+    alert('Contrato cadastrado com sucesso!')
+    setFinish(true)
+  }
+
+  const handleReset = () => {
+    setFormData({
+      cnpj: '',
+      tipoContrato: '',
+      valorContrato: '',
+      funcionarioResponsavel: '',
+      prazo: '',
+      dataInicio: '',
+      dataEntrega: '',
+      descricao: '',
+      entregaveis: '',
+      anexo: null,
+    })
+    setStep(0)
+    setFinish(false)
+    setCnpjInvalido(false)
+  }
+
+  const steps = [
+    {
+      title: 'CNPJ',
+      content: (
+        <CCol md={6}>
+          <CFormLabel>CNPJ</CFormLabel>
+          <CFormInput
+            name="cnpj"
+            value={formData.cnpj}
+            onChange={handleChange}
+            required
+            invalid={cnpjInvalido}
+          />
+          {cnpjInvalido && (
+            <div className="text-danger mt-2">
+              Este CNPJ não está cadastrado no sistema.
+              <div>
+                <Link to="/cadastrar-empresa" className="text-decoration-underline">
+                  Gostaria de cadastrar essa empresa?
+                </Link>
+              </div>
+            </div>
+          )}
+        </CCol>
+      ),
+    },
+    {
+      title: 'Detalhes do Contrato',
+      content: (
+        <>
+          <CCol md={3}>
+            <CFormLabel>Tipo de Contrato</CFormLabel>
+            <CFormSelect name="tipoContrato" value={formData.tipoContrato} onChange={handleChange} required>
               <option value="">Selecione</option>
               <option value="servico">Serviço</option>
               <option value="comunicacao">Comunicação</option>
@@ -73,115 +149,121 @@ export default function CadastrarContrato() {
               <option value="desenvolvimento">Desenvolvimento</option>
             </CFormSelect>
           </CCol>
-        </CRow>
-
-        <CRow>
-          <CCol md={4} className="space-y-1">
-            <CFormLabel htmlFor="valorContrato">Valor do Contrato</CFormLabel>
+          <CCol md={3}>
+            <CFormLabel>Valor</CFormLabel>
             <CFormInput
               type="number"
-              id="valorContrato"
               name="valorContrato"
               value={formData.valorContrato}
               onChange={handleChange}
               required
             />
           </CCol>
-          <CCol md={4} className="space-y-1">
-            <CFormLabel htmlFor="prazo">Prazo</CFormLabel>
-            <CFormInput
-              id="prazo"
-              name="prazo"
-              value={formData.prazo}
-              onChange={handleChange}
-              required
-            />
+          <CCol md={3}>
+            <CFormLabel>Prazo</CFormLabel>
+            <CFormInput name="prazo" value={formData.prazo} onChange={handleChange} required />
           </CCol>
-          <CCol md={4} className="space-y-1">
-            <CFormLabel htmlFor="funcionarioResponsavel">Colaborador Responsável</CFormLabel>
-            <CFormInput
-              id="funcionarioResponsavel"
-              name="funcionarioResponsavel"
-              value={formData.funcionarioResponsavel}
-              onChange={handleChange}
-              required
-            />
+          <CCol md={3}>
+            <CFormLabel>Responsável</CFormLabel>
+            <CFormInput name="funcionarioResponsavel" value={formData.funcionarioResponsavel} onChange={handleChange} required />
           </CCol>
-        </CRow>
+        </>
+      ),
+    },
+    {
+      title: 'Datas',
+      content: (
+        <>
+          <CCol md={6}>
+            <CFormLabel>Data de Início</CFormLabel>
+            <CFormInput type="date" name="dataInicio" value={formData.dataInicio} onChange={handleChange} required />
+          </CCol>
+          <CCol md={6}>
+            <CFormLabel>Data de Entrega</CFormLabel>
+            <CFormInput type="date" name="dataEntrega" value={formData.dataEntrega} onChange={handleChange} required />
+          </CCol>
+        </>
+      ),
+    },
+    {
+      title: 'Descrição e Entregáveis',
+      content: (
+        <>
+          <CCol md={12}>
+            <CFormLabel>Descrição</CFormLabel>
+            <CFormTextarea name="descricao" value={formData.descricao} onChange={handleChange} rows={4} required />
+          </CCol>
+          <CCol md={12}>
+            <CFormLabel>Entregáveis</CFormLabel>
+            <CFormTextarea name="entregaveis" value={formData.entregaveis} onChange={handleChange} rows={3} required />
+          </CCol>
+          <CCol md={12}>
+            <CFormLabel>Anexo</CFormLabel>
+            <CFormInput type="file" name="anexo" onChange={handleChange} accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" />
+          </CCol>
+        </>
+      ),
+    },
+  ]
 
-        <CRow>
-          <CCol md={6} className="space-y-1">
-            <CFormLabel htmlFor="dataInicio">Data de Início</CFormLabel>
-            <CFormInput
-              type="date"
-              id="dataInicio"
-              name="dataInicio"
-              value={formData.dataInicio}
-              onChange={handleChange}
-              required
-            />
-          </CCol>
-          <CCol md={6} className="space-y-1">
-            <CFormLabel htmlFor="dataEntrega">Data de Entrega</CFormLabel>
-            <CFormInput
-              type="date"
-              id="dataEntrega"
-              name="dataEntrega"
-              value={formData.dataEntrega}
-              onChange={handleChange}
-              required
-            />
-          </CCol>
-        </CRow>
+  return (
+    <CCard className="p-4">
+      <CCardBody>
+        <CCardTitle className="h4 mb-3">Cadastro de Contrato</CCardTitle>
+        {!finish ? (
+          <>
+            <div className="d-flex justify-content-between mb-4">
+              {steps.map((s, index) => (
+                <div key={index} className="text-center flex-fill px-2 position-relative" style={{ zIndex: 1 }}>
+                  <div
+                    className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
+                      index === step
+                        ? 'bg-primary text-white'
+                        : index < step
+                        ? 'bg-success text-white'
+                        : 'bg-light text-muted'
+                    }`}
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      border: '2px solid #ccc',
+                    }}
+                  >
+                    {index + 1}
+                  </div>
+                  <small
+                    className={`d-block ${
+                      index === step
+                        ? 'fw-bold text-primary'
+                        : index < step
+                        ? 'text-success'
+                        : 'text-muted'
+                    }`}
+                  >
+                    {s.title}
+                  </small>
+                </div>
+              ))}
+            </div>
 
-        <CRow>
-          <CCol md={12} className="space-y-1">
-            <CFormLabel htmlFor="descricao">Descrição</CFormLabel>
-            <CFormTextarea
-              id="descricao"
-              name="descricao"
-              value={formData.descricao}
-              onChange={handleChange}
-              rows={4}
-              placeholder="Descreva o escopo do contrato"
-              required
-            />
-          </CCol>
-        </CRow>
+            <h5>{steps[step].title}</h5>
+            <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
 
-        <CRow>
-          <CCol md={12} className="space-y-1">
-            <CFormLabel htmlFor="entregaveis">Entregáveis</CFormLabel>
-            <CFormTextarea
-              id="entregaveis"
-              name="entregaveis"
-              value={formData.entregaveis}
-              onChange={handleChange}
-              rows={3}
-              placeholder="Liste os entregáveis separados por vírgula ou linha"
-            />
-          </CCol>
-        </CRow>
-
-        <CRow>
-          <CCol md={12} className="space-y-1">
-            <CFormLabel htmlFor="anexo">Anexo de Documentos</CFormLabel>
-            <CFormInput
-              type="file"
-              id="anexo"
-              name="anexo"
-              onChange={handleChange}
-              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-            />
-          </CCol>
-        </CRow>
-
-        <div className="flex justify-end">
-          <CButton type="submit" color="primary">
-            Salvar Contrato
-          </CButton>
-        </div>
-      </CForm>
-    </div>
-  );
+            <div className="mt-4 d-flex justify-content-between">
+              {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
+              {step < steps.length - 1 && <CButton color="primary" onClick={handleNext}>Próximo</CButton>}
+              {step === steps.length - 1 && <CButton color="success" onClick={handleFinish}>Finalizar</CButton>}
+            </div>
+          </>
+        ) : (
+          <>
+            <CCardText className="text-success mt-3">Contrato cadastrado com sucesso!</CCardText>
+            <CButton color="danger" className="mt-3" onClick={handleReset}>
+              Cadastrar Novo Contrato
+            </CButton>
+          </>
+        )}
+      </CCardBody>
+    </CCard>
+  )
 }
