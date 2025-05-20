@@ -53,14 +53,15 @@ export default function CardClientes() {
   };
 
   const filteredClientes = clientes.filter((cliente) => {
-    const termo = searchTerm.toLowerCase();
-    return (
-      cliente.nomeFantasia.toLowerCase().includes(termo) ||
-      cliente.razaoSocial.toLowerCase().includes(termo) ||
-      cliente.nomeResponsavel.toLowerCase().includes(termo) ||
-      cliente.sobrenomeResponsavel.toLowerCase().includes(termo)
-    );
-  });
+  const termo = searchTerm.toLowerCase()
+  return (
+    (cliente.nomeFantasia?.toLowerCase() || "").includes(termo) ||
+    (cliente.razaoSocial?.toLowerCase() || "").includes(termo) ||
+    (cliente.nomeResponsavel?.toLowerCase() || "").includes(termo) ||
+    (cliente.sobrenomeResponsavel?.toLowerCase() || "").includes(termo)
+  )
+})
+
 
   return (
     <div className="p-4 position-relative">
