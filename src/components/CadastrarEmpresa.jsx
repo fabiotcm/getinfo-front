@@ -15,15 +15,16 @@ export default function CadastrarEmpresa() {
     cnpj: "",
     razaoSocial: "",
     nomeFantasia: "",
-    tipoEmpresa: "",
+    tipo: "",
     cep: "",
     logradouro: "",
     bairro: "",
     numero: "",
     cidade: "",
+    estado: "", // Novo campo
     complemento: "",
-    emailEmpresa: "",
-    telefoneEmpresa: "",
+    email: "",
+    telefone: "",
     nomeResponsavel: "",
     emailResponsavel: "",
     telefoneResponsavel: "",
@@ -39,10 +40,13 @@ export default function CadastrarEmpresa() {
     e.preventDefault();
     try {
       await createEmpresa(formData);
-      alert('Empresa cadastrado com sucesso!')
-      } catch (err) {
-      console.error('Erro ao cadastrar cliente', err)
+      alert('Empresa cadastrada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao cadastrar cliente', error);
+      console.error('Detalhes do backend:', error.response?.data);
+      alert('Erro ao cadastrar: ' + (error.response?.data?.message || 'Verifique os campos'));
     }
+
     console.log("Dados da Empresa:", formData);
   };
 
@@ -88,17 +92,17 @@ export default function CadastrarEmpresa() {
 
         <CRow className="mb-3">
           <CCol md={4}>
-            <CFormLabel htmlFor="tipoEmpresa">Tipo de Empresa</CFormLabel>
+            <CFormLabel htmlFor="tipo">Tipo de Empresa</CFormLabel>
             <CFormSelect
-              id="tipoEmpresa"
-              name="tipoEmpresa"
-              value={formData.tipoEmpresa}
+              id="tipo"
+              name="tipo"
+              value={formData.tipo}
               onChange={handleChange}
               required
             >
               <option value="">Selecione...</option>
-              <option value="publica">Pública</option>
-              <option value="privada">Privada</option>
+              <option value="PUBLICA">Pública</option>
+              <option value="PRIVADA">Privada</option>
             </CFormSelect>
           </CCol>
 
@@ -126,7 +130,7 @@ export default function CadastrarEmpresa() {
         </CRow>
 
         <CRow className="mb-3">
-          <CCol md={4}>
+          <CCol md={3}>
             <CFormLabel htmlFor="bairro">Bairro</CFormLabel>
             <CFormInput
               id="bairro"
@@ -159,7 +163,47 @@ export default function CadastrarEmpresa() {
             />
           </CCol>
 
-          <CCol md={3}>
+          <CCol md={2}>
+            <CFormLabel htmlFor="estado">Estado</CFormLabel>
+            <CFormSelect
+              id="estado"
+              name="estado"
+              value={formData.estado}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Selecione...</option>
+              <option value="AC">AC</option>
+              <option value="AL">AL</option>
+              <option value="AP">AP</option>
+              <option value="AM">AM</option>
+              <option value="BA">BA</option>
+              <option value="CE">CE</option>
+              <option value="DF">DF</option>
+              <option value="ES">ES</option>
+              <option value="GO">GO</option>
+              <option value="MA">MA</option>
+              <option value="MG">MG</option>
+              <option value="MS">MS</option>
+              <option value="MT">MT</option>
+              <option value="PA">PA</option>
+              <option value="PB">PB</option>
+              <option value="PE">PE</option>
+              <option value="PI">PI</option>
+              <option value="PR">PR</option>
+              <option value="RJ">RJ</option>
+              <option value="RN">RN</option>
+              <option value="RO">RO</option>
+              <option value="RR">RR</option>
+              <option value="RS">RS</option>
+              <option value="SC">SC</option>
+              <option value="SE">SE</option>
+              <option value="SP">SP</option>
+              <option value="TO">TO</option>
+            </CFormSelect>
+          </CCol>
+
+          <CCol md={2}>
             <CFormLabel htmlFor="complemento">Complemento</CFormLabel>
             <CFormInput
               id="complemento"
@@ -172,24 +216,24 @@ export default function CadastrarEmpresa() {
 
         <CRow className="mb-3">
           <CCol md={6}>
-            <CFormLabel htmlFor="emailEmpresa">Email da Empresa</CFormLabel>
+            <CFormLabel htmlFor="email">Email da Empresa</CFormLabel>
             <CFormInput
               type="email"
-              id="emailEmpresa"
-              name="emailEmpresa"
-              value={formData.emailEmpresa}
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               required
             />
           </CCol>
 
           <CCol md={6}>
-            <CFormLabel htmlFor="telefoneEmpresa">Telefone da Empresa</CFormLabel>
+            <CFormLabel htmlFor="telefone">Telefone da Empresa</CFormLabel>
             <CFormInput
               type="tel"
-              id="telefoneEmpresa"
-              name="telefoneEmpresa"
-              value={formData.telefoneEmpresa}
+              id="telefone"
+              name="telefone"
+              value={formData.telefone}
               onChange={handleChange}
               required
             />
