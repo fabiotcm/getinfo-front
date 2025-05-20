@@ -1,8 +1,7 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getEmpresas } from "../services/empresaService";
 
-import React, { useEffect, useState } from 'react'
-import { getEmpresas } from '../services/empresaService'
-import { CCard, CCardBody, CCardTitle, CRow, CCol } from '@coreui/react'
-import { useNavigate } from 'react-router-dom'
 import {
   CTable,
   CTableHead,
@@ -13,58 +12,122 @@ import {
   CButton,
   CFormInput,
   CTooltip,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
+} from "@coreui/react";
+import CIcon from "@coreui/icons-react";
+import { cilPencil, cilTrash, cilPlus } from "@coreui/icons";
 
 export default function CardClientes() {
-
-  const [clientes, setClientes] = useState([])
-  const navigate = useNavigate()
+  const [clientes, setClientes] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-  async function fetchEmpresas() {
-    try {
-      const response = await getEmpresas()
-      const data = Array.isArray(response) ? response : response.data || []  // <- garante array
-      setClientes(data)
-    } catch (error) {
-      console.error('Erro ao buscar empresas:', error)
-      setClientes([]) // garante que não quebre o .map()
+    async function fetchEmpresas() {
+      try {
+        const response = await getEmpresas();
+        const data = Array.isArray(response) ? response : response.data || [];
+        setClientes(data);
+      } catch (error) {
+        console.error("Erro ao buscar empresas:", error);
+        setClientes([]);
+      }
     }
-  }
 
-  fetchEmpresas()
-}, [])
+    fetchEmpresas();
+  }, []);
 
+  const handleEdit = (id) => {
+    console.log(`Editar cliente ${id}`);
+  };
 
-  const handleCardClick = (id) => {
-    navigate(`/clientes/${id}`)
-  }
+  const handleDelete = (id) => {
+    console.log(`Excluir cliente ${id}`);
+  };
+
+  const handleAdd = () => {
+    navigate("/cadastrar-cliente");
+  };
+
+  const handleRowClick = (id) => {
+    navigate(`/clientes/${id}`);
+  };
+
+  const filteredClientes = clientes.filter((cliente) => {
+    const termo = searchTerm.toLowerCase();
+    return (
+      cliente.nomeFantasia.toLowerCase().includes(termo) ||
+      cliente.razaoSocial.toLowerCase().includes(termo) ||
+      cliente.nomeResponsavel.toLowerCase().includes(termo) ||
+      cliente.sobrenomeResponsavel.toLowerCase().includes(termo)
+    );
+  });
 
   return (
-    <div className="p-4 space-y-4">
-      <h2>Empresas Cadastradas</h2>
+    <div className="p-4 position-relative">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Empresas Cadastradas</h2>
+        <CFormInput
+          type="search"
+          placeholder="Buscar..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ maxWidth: "250px" }}
+        />
+      </div>
 
-      <CRow className="g-4">
-        {clientes.map((cliente) => (
-          <CCol key={cliente.id} md={4}>
-            <CCard
-              onClick={() => handleCardClick(cliente.id)}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              style={{ cursor: 'pointer' }}
-            >
-              <CCardBody>
-                <CCardTitle>{cliente.nomeFantasia}</CCardTitle>
-                <p><strong>Razão Social:</strong> {cliente.razaoSocial}</p>
-                <p><strong>Responsável:</strong> {cliente.nomeResponsavel} {cliente.sobrenomeResponsavel}</p>
-                <p><strong>Email:</strong> {cliente.emailResponsavel}</p>
-                <p><strong>CNPJ:</strong> {cliente.cnpj}</p>
-              </CCardBody>
-            </CCard>
-          </CCol>
-        ))}
-      </CRow>
+      <CTable hover responsive>
+        <CTableHead color="light">
+          <CTableRow>
+            <CTableHeaderCell>Razão Social</CTableHeaderCell>
+            <CTableHeaderCell>Nome Fantasia</CTableHeaderCell>
+            <CTableHeaderCell>Responsável</CTableHeaderCell>
+            <CTableHeaderCell className="text-end">Ações</CTableHeaderCell>
+          </CTableRow>
+        </CTableHead>
+        <CTableBody>
+          {filteredClientes.map((cliente) => (
+            <CTableRow key={cliente.id}>
+              <CTableDataCell onClick={() => handleRowClick(cliente.id)}>{cliente.razaoSocial}</CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(cliente.id)}>{cliente.nomeFantasia}</CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(cliente.id)}>
+                {cliente.nomeResponsavel} {cliente.sobrenomeResponsavel}
+              </CTableDataCell>
+              <CTableDataCell className="text-end">
+                <CButton
+                  color="success"
+                  variant="outline"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleEdit(cliente.id)}
+                >
+                  <CIcon icon={cilPencil} />
+                </CButton>
+                <CButton
+                  color="danger"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDelete(cliente.id)}
+                >
+                  <CIcon icon={cilTrash} />
+                </CButton>
+              </CTableDataCell>
+            </CTableRow>
+          ))}
+        </CTableBody>
+      </CTable>
+
+      <div className="position-fixed bottom-4 end-4">
+        <CTooltip content="Adicionar nova empresa" placement="top">
+          <CButton
+            color="success"
+            shape="rounded-pill"
+            style={{ borderRadius: "12px", width: "56px", height: "56px" }}
+            onClick={handleAdd}
+          >
+            <CIcon icon={cilPlus} size="lg" />
+          </CButton>
+        </CTooltip>
+      </div>
     </div>
-  )
+  );
 }
