@@ -6,7 +6,9 @@ import {
   CButton,
   CRow,
   CCol,
+  CFormSelect,
 } from "@coreui/react";
+import { createColaborador } from "../services/colaboradorService";
 
 export default function CadastrarColaborador() {
   const [formData, setFormData] = useState({
@@ -16,6 +18,7 @@ export default function CadastrarColaborador() {
     email: "",
     telefone: "",
     cargo: "",
+    status: "ATIVO",
   });
 
   const handleChange = (e) => {
@@ -23,19 +26,25 @@ export default function CadastrarColaborador() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Dados do Colaborador:", formData);
-    alert("Colaborador cadastrado com sucesso!");
-    // Reset opcional
-    setFormData({
-      nome: "",
-      sobrenome: "",
-      cpf: "",
-      email: "",
-      telefone: "",
-      cargo: "",
-    });
+
+    try {
+      await createColaborador(formData);
+      alert("Colaborador cadastrado com sucesso!");
+      setFormData({
+        nome: "",
+        sobrenome: "",
+        cpf: "",
+        email: "",
+        telefone: "",
+        cargo: "",
+        status: "ATIVO",
+      });
+    } catch (error) {
+      console.error("Erro ao cadastrar colaborador:", error);
+      alert("Erro ao cadastrar colaborador. Verifique os dados e tente novamente.");
+    }
   };
 
   return (
@@ -110,6 +119,19 @@ export default function CadastrarColaborador() {
               onChange={handleChange}
               required
             />
+          </CCol>
+          <CCol md={6}>
+            <CFormLabel htmlFor="status">Status</CFormLabel>
+            <CFormSelect
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              required
+            >
+              <option value="ATIVO">Ativo</option>
+              <option value="DESLIGADO">Desligado</option>
+            </CFormSelect>
           </CCol>
         </CRow>
 
