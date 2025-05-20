@@ -1,9 +1,24 @@
+
 import React, { useEffect, useState } from 'react'
 import { getEmpresas } from '../services/empresaService'
 import { CCard, CCardBody, CCardTitle, CRow, CCol } from '@coreui/react'
 import { useNavigate } from 'react-router-dom'
+import {
+  CTable,
+  CTableHead,
+  CTableRow,
+  CTableHeaderCell,
+  CTableBody,
+  CTableDataCell,
+  CButton,
+  CFormInput,
+  CTooltip,
+} from '@coreui/react'
+import CIcon from '@coreui/icons-react'
+import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
 
 export default function CardClientes() {
+
   const [clientes, setClientes] = useState([])
   const navigate = useNavigate()
 
@@ -30,6 +45,7 @@ export default function CardClientes() {
   return (
     <div className="p-4 space-y-4">
       <h2>Empresas Cadastradas</h2>
+
       <CRow className="g-4">
         {clientes.map((cliente) => (
           <CCol key={cliente.id} md={4}>
