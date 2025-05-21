@@ -32,7 +32,7 @@ export const SidebarDarkExample = () => {
       </CSidebarHeader>
       <CSidebarNav>
         <CNavItem href="/home">
-          <CIcon customClassName="nav-icon" icon={cilHome} /> Home
+          <CIcon customClassName="nav-icon" icon={cilHome} /> Dashboard
         </CNavItem>
 
         <CNavGroup
