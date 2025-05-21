@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getEmpresas } from "../services/empresaService";
+import { getEmpresas, deleteEmpresa } from "../services/empresaService";
+
 
 import {
   CTable,
@@ -37,11 +38,20 @@ export default function CardClientes() {
   }, []);
 
   const handleEdit = (id) => {
+    navigate(`/clientes/${id}/editar`);
     console.log(`Editar cliente ${id}`);
   };
 
-  const handleDelete = (id) => {
-    console.log(`Excluir cliente ${id}`);
+  const handleDelete = async (id) => {
+  if (window.confirm("Tem certeza que deseja excluir esta empresa?")) {
+    try {
+      await deleteEmpresa(id);
+      setClientes((prev) => prev.filter((cliente) => cliente.id !== id));
+    } catch (error) {
+      console.error("Erro ao excluir empresa:", error);
+      alert("Erro ao excluir empresa. Verifique se ela existe.");
+    }
+  }
   };
 
   const handleAdd = () => {
