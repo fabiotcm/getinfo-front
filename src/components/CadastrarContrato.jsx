@@ -14,6 +14,8 @@ import {
   CCardText,
 } from '@coreui/react'
 import { Link } from 'react-router-dom'
+import $ from 'jquery';
+import 'jquery-mask-plugin'
 
 // Simulando CNPJs já cadastrados
 const cnpjsCadastrados = ['12345678000190', '98765432000100', '11223344000155']
@@ -109,6 +111,11 @@ export default function CadastrarContratoStepper() {
     setCnpjInvalido(false)
   }
 
+  $(document).ready(function () {
+    // Máscara para CNPJ
+    $('.cnpj').mask('00.000.000/0000-00')
+  })
+
   const steps = [
     {
       title: 'CNPJ',
@@ -117,10 +124,12 @@ export default function CadastrarContratoStepper() {
           <CFormLabel>CNPJ</CFormLabel>
           <CFormInput
             name="cnpj"
+            className="cnpj"
             value={formData.cnpj}
             onChange={handleChange}
             required
             invalid={cnpjInvalido}
+            placeholder='00.000.000/0000-00'
           />
           {cnpjInvalido && (
             <div className="text-danger mt-2">
@@ -165,7 +174,12 @@ export default function CadastrarContratoStepper() {
           </CCol>
           <CCol md={3}>
             <CFormLabel>Responsável</CFormLabel>
-            <CFormInput name="funcionarioResponsavel" value={formData.funcionarioResponsavel} onChange={handleChange} required />
+            <CFormInput
+              name="funcionarioResponsavel"
+              value={formData.funcionarioResponsavel}
+              onChange={handleChange}
+              required
+            />
           </CCol>
         </>
       ),
@@ -176,11 +190,23 @@ export default function CadastrarContratoStepper() {
         <>
           <CCol md={6}>
             <CFormLabel>Data de Início</CFormLabel>
-            <CFormInput type="date" name="dataInicio" value={formData.dataInicio} onChange={handleChange} required />
+            <CFormInput
+              type="date"
+              name="dataInicio"
+              value={formData.dataInicio}
+              onChange={handleChange}
+              required
+            />
           </CCol>
           <CCol md={6}>
             <CFormLabel>Data de Entrega</CFormLabel>
-            <CFormInput type="date" name="dataEntrega" value={formData.dataEntrega} onChange={handleChange} required />
+            <CFormInput
+              type="date"
+              name="dataEntrega"
+              value={formData.dataEntrega}
+              onChange={handleChange}
+              required
+            />
           </CCol>
         </>
       ),
@@ -191,15 +217,32 @@ export default function CadastrarContratoStepper() {
         <>
           <CCol md={12}>
             <CFormLabel>Descrição</CFormLabel>
-            <CFormTextarea name="descricao" value={formData.descricao} onChange={handleChange} rows={4} required />
+            <CFormTextarea
+              name="descricao"
+              value={formData.descricao}
+              onChange={handleChange}
+              rows={4}
+              required
+            />
           </CCol>
           <CCol md={12}>
             <CFormLabel>Entregáveis</CFormLabel>
-            <CFormTextarea name="entregaveis" value={formData.entregaveis} onChange={handleChange} rows={3} required />
+            <CFormTextarea
+              name="entregaveis"
+              value={formData.entregaveis}
+              onChange={handleChange}
+              rows={3}
+              required
+            />
           </CCol>
           <CCol md={12}>
             <CFormLabel>Anexo</CFormLabel>
-            <CFormInput type="file" name="anexo" onChange={handleChange} accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" />
+            <CFormInput
+              type="file"
+              name="anexo"
+              onChange={handleChange}
+              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+            />
           </CCol>
         </>
       ),
