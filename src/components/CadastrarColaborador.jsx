@@ -9,6 +9,8 @@ import {
   CFormSelect,
 } from "@coreui/react";
 import { createColaborador } from "../services/colaboradorService";
+import $ from 'jquery';
+import 'jquery-mask-plugin'
 
 export default function CadastrarColaborador() {
   const [formData, setFormData] = useState({
@@ -47,6 +49,16 @@ export default function CadastrarColaborador() {
     }
   };
 
+  $(document).ready(function () {
+    $('.email').unmask()
+
+    // Máscara para telefone
+    $('.tel').mask('(00) 00000-0000')
+
+    //Máscara para CPF
+    $('.cpf').mask('000.000.000-00')
+  })
+
   return (
     <div className="p-4 space-y-4">
       <h4>Cadastro de Colaborador</h4>
@@ -79,10 +91,12 @@ export default function CadastrarColaborador() {
             <CFormLabel htmlFor="cpf">CPF</CFormLabel>
             <CFormInput
               id="cpf"
+              className="cpf"
               name="cpf"
               value={formData.cpf}
               onChange={handleChange}
               required
+              placeholder="000.000.000-00"
             />
           </CCol>
           <CCol md={4}>
@@ -94,6 +108,7 @@ export default function CadastrarColaborador() {
               value={formData.email}
               onChange={handleChange}
               required
+              placeholder="seu@email.com"
             />
           </CCol>
           <CCol md={4}>
@@ -101,10 +116,12 @@ export default function CadastrarColaborador() {
             <CFormInput
               type="tel"
               id="telefone"
+              className="tel"
               name="telefone"
               value={formData.telefone}
               onChange={handleChange}
               required
+              placeholder="(00) 00000-0000"
             />
           </CCol>
         </CRow>

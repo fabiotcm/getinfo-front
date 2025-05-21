@@ -15,6 +15,8 @@ import {
 
 } from "@coreui/react";
 import { createEmpresa } from "../services/empresaService";
+import $ from 'jquery';
+import 'jquery-mask-plugin'
 
 export default function CadastrarEmpresa() {
   const [step, setStep] = useState(0);
@@ -113,19 +115,47 @@ export default function CadastrarEmpresa() {
     setStep(0);
   };
 
+  $(document).ready(function () {
+    // Máscara para CNPJ
+    $('.cnpj').mask('00.000.000/0000-00')
+
+    // Máscara para CEP
+    $('.cep').mask('00000-000')
+
+    $('.email').unmask()
+
+    // Máscara para telefone
+    $('.tel').mask('(00) 00000-0000')
+
+    //Máscara para CPF
+    $('.cpfResponsavel').mask('000.000.000-00')
+  })
+
   const steps = [
     {
-      title: "Informações Básicas",
+      title: 'Informações Básicas',
       content: (
         <>
           <CCol md={4}>
             <CFormLabel>CNPJ</CFormLabel>
 
-            <CFormInput name="cnpj" value={formData.cnpj} onChange={handleChange} required />
+            <CFormInput
+              name="cnpj"
+              className="cnpj"
+              value={formData.cnpj}
+              onChange={handleChange}
+              required
+              placeholder="00.000.000/0000-00"
+            />
           </CCol>
           <CCol md={4}>
             <CFormLabel>Razão Social</CFormLabel>
-            <CFormInput name="razaoSocial" value={formData.razaoSocial} onChange={handleChange} required />
+            <CFormInput
+              name="razaoSocial"
+              value={formData.razaoSocial}
+              onChange={handleChange}
+              required
+            />
           </CCol>
           <CCol md={4}>
             <CFormLabel>Nome Fantasia</CFormLabel>
@@ -150,7 +180,7 @@ export default function CadastrarEmpresa() {
         <>
           <CCol md={4}>
             <CFormLabel>CEP</CFormLabel>
-            <CFormInput name="cep" value={formData.cep} onChange={handleChange} required />
+            <CFormInput name="cep" className='cep' value={formData.cep} onChange={handleChange} required />
           </CCol>
           <CCol md={4}>
             <CFormLabel>Logradouro</CFormLabel>
@@ -186,18 +216,25 @@ export default function CadastrarEmpresa() {
       ),
     },
     {
-
       title: "Contato da Empresa",
       content: (
         <>
           <CCol md={6}>
             <CFormLabel>Email</CFormLabel>
 
-            <CFormInput type="email" name="email" value={formData.email} onChange={handleChange} required />
+            <CFormInput
+              type="email"
+              className="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="seu@email.com"
+            />
           </CCol>
           <CCol md={6}>
             <CFormLabel>Telefone</CFormLabel>
-            <CFormInput type="tel" name="telefone" value={formData.telefone} onChange={handleChange} required />
+            <CFormInput type="tel" className="tel" name="telefone" value={formData.telefone} onChange={handleChange} required placeholder='(00) 00000-0000' />
           </CCol>
         </>
       ),
@@ -213,15 +250,21 @@ export default function CadastrarEmpresa() {
           </CCol>
           <CCol md={6}>
             <CFormLabel>Email</CFormLabel>
-            <CFormInput type="email" name="emailResponsavel" value={formData.emailResponsavel} onChange={handleChange} required />
+            <CFormInput type="email" className='email' name="emailResponsavel" value={formData.emailResponsavel} onChange={handleChange} required placeholder="seu@email.com" />
           </CCol>
           <CCol md={6}>
             <CFormLabel>Telefone</CFormLabel>
-            <CFormInput type="tel" name="telefoneResponsavel" value={formData.telefoneResponsavel} onChange={handleChange} required />
+            <CFormInput type="tel" className='tel' name="telefoneResponsavel" value={formData.telefoneResponsavel} onChange={handleChange} required placeholder='(00) 00000-0000' />
           </CCol>
           <CCol md={6}>
             <CFormLabel>CPF</CFormLabel>
-            <CFormInput name="cpfResponsavel" value={formData.cpfResponsavel} onChange={handleChange} required />
+            <CFormInput
+              name="cpfResponsavel"
+              className="cpfResponsavel"
+              value={formData.cpfResponsavel}
+              onChange={handleChange}
+              required
+            />
           </CCol>
         </>
       ),

@@ -31,11 +31,11 @@ export default function ContratoDetalhes() {
               <CCardBody>
                 <CCardTitle className="h4">{contrato.titulo}</CCardTitle>
                 <CCardText>
-                  <strong>Cliente:</strong> {cliente?.nome}<br />
-                  <strong>Valor:</strong> R$ {contrato.valor.toLocaleString()}<br />
-                  <strong>Data Início:</strong> {contrato.dataInicio}<br />
-                  <strong>Data Fim:</strong> {contrato.dataFim}<br />
-                  <strong>Status:</strong> {contrato.status}<br />
+                  <strong>Empresa:</strong> {cliente.nomeFantasia} <br />
+                  <strong>Valor:</strong> R$ {contrato.valor.toLocaleString()} <br />
+                  <strong>Data Início:</strong> {contrato.dataInicio} <br />
+                  <strong>Data Fim:</strong> {contrato.dataFim} <br />
+                  <strong>Status:</strong> {contrato.status} <br />
                   <strong>Descrição:</strong> {contrato.descricao}
                 </CCardText>
 
