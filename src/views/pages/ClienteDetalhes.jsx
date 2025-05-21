@@ -1,6 +1,6 @@
 // src/pages/ClienteDetalhes.jsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import {
   CCard,
   CCardBody,
@@ -18,6 +18,7 @@ export default function ClienteDetalhes() {
   const [cliente, setCliente] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchCliente() {
@@ -46,6 +47,10 @@ export default function ClienteDetalhes() {
 
   if (erro || !cliente) {
     return <p className="p-4">{erro || "Cliente não encontrado."}</p>;
+  }
+
+  const handleNavigateToEdit = () => {
+    navigate(`/clientes/${id}/editar`);
   }
 
   return (
@@ -77,7 +82,7 @@ export default function ClienteDetalhes() {
                 </p>
                 <CRow className="gap-2">
                   <CCol sm="auto">
-                    <CButton color="warning">Editar</CButton>
+                    <CButton color="warning" onClick={handleNavigateToEdit}>Editar</CButton>
                   </CCol>
                 </CRow>
               </CCardBody>
