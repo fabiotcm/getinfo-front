@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
-import contratos from '../data/contratos.json'
-import clientes from '../data/clientes.json'
+import contratos from '../data/contratos_detalhados.json'
 import { useNavigate } from 'react-router-dom'
 import {
   CTable,
@@ -12,6 +11,7 @@ import {
   CButton,
   CFormInput,
   CTooltip,
+  CBadge,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
@@ -19,11 +19,6 @@ import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
 export default function ContratoCard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
-
-  const getClienteNome = (clienteId) => {
-    const cliente = clientes.find(c => c.id === clienteId)
-    return cliente?.nome || 'Empresa não encontrada'
-  }
 
   const handleRowClick = (id) => {
     navigate(`/contrato/${id}`)
@@ -41,12 +36,23 @@ export default function ContratoCard() {
     navigate('/cadastrar-contrato')
   }
 
+  const getStatusBadgeColor = (status) => {
+    const desc = status?.descricao?.toLowerCase()
+    if (desc === 'ativo') return 'success'
+    if (desc === 'encerrado') return 'secondary'
+    if (desc === 'cancelado') return 'danger'
+    if (desc === 'em andamento') return 'info'
+    return 'dark'
+  }
+
   const filteredContratos = contratos.filter((contrato) => {
-    const clienteNome = getClienteNome(contrato.clienteId).toLowerCase()
+    const nomeFantasia = contrato.empresa?.nome_fantasia?.toLowerCase() || ''
+    const razaoSocial = contrato.empresa?.razao_social?.toLowerCase() || ''
     const search = searchTerm.toLowerCase()
     return (
-      contrato.titulo.toLowerCase().includes(search) ||
-      clienteNome.includes(search) ||
+      contrato.descricao.toLowerCase().includes(search) ||
+      nomeFantasia.includes(search) ||
+      razaoSocial.includes(search) ||
       contrato.valor.toString().includes(search)
     )
   })
@@ -71,17 +77,27 @@ export default function ContratoCard() {
             <CTableHeaderCell>Empresa</CTableHeaderCell>
             <CTableHeaderCell>Valor</CTableHeaderCell>
             <CTableHeaderCell>Período</CTableHeaderCell>
+            <CTableHeaderCell>Status</CTableHeaderCell>
             <CTableHeaderCell className="text-end">Ações</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
         <CTableBody>
           {filteredContratos.map((contrato) => (
-            <CTableRow key={contrato.id}>
-              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>{contrato.id}</CTableDataCell>
-              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>{getClienteNome(contrato.clienteId)}</CTableDataCell>
-              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>R$ {contrato.valor.toLocaleString()}</CTableDataCell>
-              <CTableDataCell onClick={() => handleRowClick(contrato.id)}>
-                {contrato.dataInicio} → {contrato.dataFim}
+            <CTableRow key={contrato.id_contrato}>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)}>{contrato.id_contrato}</CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)}>
+                {contrato.empresa?.nome_fantasia || 'Empresa não encontrada'}
+              </CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)}>
+                R$ {Number(contrato.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)}>
+                {contrato.data_inicio} → {contrato.data_final}
+              </CTableDataCell>
+              <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)}>
+                <CBadge color={getStatusBadgeColor(contrato.status)}>
+                  {contrato.status?.descricao || 'Desconhecido'}
+                </CBadge>
               </CTableDataCell>
               <CTableDataCell className="text-end">
                 <CButton
@@ -89,7 +105,7 @@ export default function ContratoCard() {
                   variant="outline"
                   size="sm"
                   className="me-2"
-                  onClick={() => handleEdit(contrato.id)}
+                  onClick={() => handleEdit(contrato.id_contrato)}
                 >
                   <CIcon icon={cilPencil} />
                 </CButton>
@@ -97,7 +113,7 @@ export default function ContratoCard() {
                   color="danger"
                   variant="outline"
                   size="sm"
-                  onClick={() => handleArchive(contrato.id)}
+                  onClick={() => handleArchive(contrato.id_contrato)}
                 >
                   <CIcon icon={cilTrash} />
                 </CButton>
@@ -107,7 +123,6 @@ export default function ContratoCard() {
         </CTableBody>
       </CTable>
 
-      {/* Botão flutuante adicionar novo contrato */}
       <div className="position-fixed bottom-4 end-4">
         <CTooltip content="Adicionar novo contrato" placement="top">
           <CButton
