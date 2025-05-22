@@ -98,7 +98,8 @@ export default function ExibirColaboradores() {
                   variant="outline"
                   size="sm"
                   className="me-2"
-                  onClick={() => console.log(`Editar ${colab.id}`)}
+                  onClick={() => navigate(`/colaboradores/${colab.id}/editar`)}
+
                 >
                   <CIcon icon={cilPencil} />
                 </CButton>
