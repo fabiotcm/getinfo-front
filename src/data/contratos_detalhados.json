@@ -1,0 +1,219 @@
+[
+  {
+    "id_contrato": 1,
+    "valor": 150000.0,
+    "descricao": "Contrato para desenvolvimento de sistema web.",
+    "tipo_contrato": "Desenvolvimento",
+    "data_inicio": "2024-01-10",
+    "data_final": "2024-12-10",
+    "prazo": "2024-12-10T00:00:00",
+    "status": {
+      "id_status": 1,
+      "descricao": "Ativo"
+    },
+    "empresa": {
+      "id_empresa": 1,
+      "cnpj": "12.345.678/0001-90",
+      "razao_social": "Tech Solutions S.A.",
+      "nome_fantasia": "Tech Solutions",
+      "tipo": 1
+    },
+    "responsavel": {
+      "id_responsavel": 1,
+      "nome": "Marcos",
+      "sobrenome": "Pereira",
+      "cpf": "123.456.789-00",
+      "email": "marcos@techsolutions.com",
+      "telefone": "(11) 91234-5678"
+    },
+    "funcionarioResponsavel": {
+      "id_funcionarioResponsavel": 1,
+      "nome": "Ana Costa",
+      "cpf": "111.222.333-44",
+      "contato": "(11) 98888-1111",
+      "cargo": {
+        "id_cargo": 1,
+        "descricao": "Gerente de Projetos"
+      }
+    },
+    "colaboradores": [
+      {
+        "id_funcionario": 4,
+        "nome": "João Mendes",
+        "cpf": "555.666.777-88",
+        "contato": "(11) 90000-1111",
+        "cargo": {
+          "id_cargo": 4,
+          "descricao": "Desenvolvedor Backend"
+        }
+      },
+      {
+        "id_funcionario": 5,
+        "nome": "Fernanda Lima",
+        "cpf": "666.777.888-99",
+        "contato": "(11) 98888-9999",
+        "cargo": {
+          "id_cargo": 5,
+          "descricao": "UI Designer"
+        }
+      }
+    ],
+    "entregaveis": [
+      {
+        "id_entregavel": 1,
+        "descricao": "Entrega da Fase 1",
+        "prazo": 60,
+        "data_entrega": "2024-03-10",
+        "status": {
+          "id_status": 1,
+          "descricao": "Concluído"
+        }
+      },
+      {
+        "id_entregavel": 2,
+        "descricao": "Entrega da Fase 2",
+        "prazo": 60,
+        "status": {
+          "id_status": 2,
+          "descricao": "Em andamento"
+        }
+      }
+    ],
+    "anexos": [
+      {
+        "id_anexo": 1,
+        "nome_arquivo": "contrato.pdf"
+      }
+    ]
+  },
+  {
+    "id_contrato": 2,
+    "valor": 85000.0,
+    "descricao": "Contrato de manutenção de sistemas legados.",
+    "tipo_contrato": "Manutenção",
+    "data_inicio": "2023-01-01",
+    "data_final": "2023-12-31",
+    "prazo": "2023-12-31T00:00:00",
+    "status": {
+      "id_status": 3,
+      "descricao": "Encerrado"
+    },
+    "empresa": {
+      "id_empresa": 2,
+      "cnpj": "98.765.432/0001-99",
+      "razao_social": "SoftPro Ltda.",
+      "nome_fantasia": "SoftPro",
+      "tipo": 2
+    },
+    "responsavel": {
+      "id_responsavel": 2,
+      "nome": "Luciana",
+      "sobrenome": "Almeida",
+      "cpf": "987.654.321-00",
+      "email": "luciana@softpro.com.br",
+      "telefone": "(21) 99876-5432"
+    },
+    "funcionarioResponsavel": {
+      "id_funcionarioResponsavel": 2,
+      "nome": "Carlos Eduardo",
+      "cpf": "222.333.444-55",
+      "contato": "(21) 97777-2222",
+      "cargo": {
+        "id_cargo": 2,
+        "descricao": "Analista de Sistemas"
+      }
+    },
+    "colaboradores": [
+      {
+        "id_funcionario": 6,
+        "nome": "Roberta Silva",
+        "cpf": "777.888.999-00",
+        "contato": "(21) 98765-4321",
+        "cargo": {
+          "id_cargo": 6,
+          "descricao": "Suporte Técnico"
+        }
+      }
+    ],
+    "entregaveis": [],
+    "anexos": [
+      {
+        "id_anexo": 2,
+        "nome_arquivo": "aditivo1.pdf"
+      },
+      {
+        "id_anexo": 3,
+        "nome_arquivo": "relatorio_final.pdf"
+      }
+    ]
+  },
+  {
+    "id_contrato": 3,
+    "valor": 120000.0,
+    "descricao": "Contrato para implantação de ERP.",
+    "tipo_contrato": "Implantação",
+    "data_inicio": "2024-05-01",
+    "data_final": "2025-05-01",
+    "prazo": "2025-05-01T00:00:00",
+    "status": {
+      "id_status": 4,
+      "descricao": "Cancelado"
+    },
+    "empresa": {
+      "id_empresa": 3,
+      "cnpj": "00.111.222/0001-33",
+      "razao_social": "Global Business",
+      "nome_fantasia": "GlobalBiz",
+      "tipo": 1
+    },
+    "responsavel": {
+      "id_responsavel": 3,
+      "nome": "Pedro",
+      "sobrenome": "Souza",
+      "cpf": "444.555.666-77",
+      "email": "pedro@globalbiz.com",
+      "telefone": "(31) 93456-7890"
+    },
+    "funcionarioResponsavel": {
+      "id_funcionarioResponsavel": 3,
+      "nome": "Juliana Mendes",
+      "cpf": "333.222.111-00",
+      "contato": "(31) 98888-3333",
+      "cargo": {
+        "id_cargo": 3,
+        "descricao": "Consultora de Negócios"
+      }
+    },
+    "colaboradores": [
+      {
+        "id_funcionario": 7,
+        "nome": "Tiago Oliveira",
+        "cpf": "555.444.333-22",
+        "contato": "(31) 94567-8910",
+        "cargo": {
+          "id_cargo": 7,
+          "descricao": "Consultor ERP"
+        }
+      }
+    ],
+    "entregaveis": [
+      {
+        "id_entregavel": 3,
+        "descricao": "Etapa 1 - Diagnóstico",
+        "prazo": 30,
+        "status": {
+          "id_status": 4,
+          "descricao": "Cancelado"
+        },
+        "just_canc": "Cliente solicitou encerramento por motivo de orçamento.",
+        "data_canc": "2024-06-15"
+      }
+    ],
+    "anexos": [
+      {
+        "id_anexo": 4,
+        "nome_arquivo": "cancelamento.pdf"
+      }
+    ]
+  }
+]
