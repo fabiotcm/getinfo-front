@@ -337,7 +337,7 @@ export default function CadastrarEmpresa() {
             <CCardText className="text-success mt-3">
               Empresa cadastrada com sucesso!
             </CCardText>
-            <CButton color="danger" className="mt-3" onClick={handleReset}>
+            <CButton color="success" className="mt-3" onClick={handleReset}>
               Cadastrar Nova Empresa
             </CButton>
           </>
