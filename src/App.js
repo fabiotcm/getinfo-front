@@ -20,6 +20,7 @@ import Repactuacao from './views/pages/Repactuacao'
 import Colaboradores from './views/pages/Colaboradores'
 import EdicaoEmpresa from './views/pages/EdicaoEmpresa'
 import EdicaoColaborador from './views/pages/EdicaoColaborador'
+import Colaborador from './views/pages/Colaborador'
 
 
 // Containers
@@ -64,6 +65,7 @@ const App = () => {
           <Route exact path="/cadastrar-empresa" name="Cadastro de Cliente" element={<CadastroEmpresa />} />
           <Route exact path="/cadastrar-colaborador" name="Cadastro de Colaborador" element={<CadastroColaborador />} />
           <Route exact path="/colaboradores" element={<Colaboradores />} />
+          <Route path="/colaboradores/:id" element={<Colaborador />} />
           <Route path="/colaboradores/:id/editar" element={<EdicaoColaborador />} />
           <Route path="/clientes/:id" element={<ClienteDetalhes />} />
           <Route path="/clientes/:id/editar" element={<EdicaoEmpresa />} />

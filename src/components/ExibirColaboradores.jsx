@@ -55,6 +55,10 @@ export default function ExibirColaboradores() {
 
   const handleAdd = () => navigate("/cadastrar-colaborador");
 
+  const handleRowClick = (id) => {
+    navigate(`/colaboradores/${id}`);
+  };
+
   const filteredColaboradores = colaboradores.filter((colab) => {
     const fullName = `${colab.nome} ${colab.sobrenome}`.toLowerCase();
     return (
@@ -89,10 +93,10 @@ export default function ExibirColaboradores() {
         <CTableBody>
           {filteredColaboradores.map((colab) => (
             <CTableRow key={colab.id}>
-              <CTableDataCell>{colab.nome} {colab.sobrenome}</CTableDataCell>
-              <CTableDataCell>{colab.cargo}</CTableDataCell>
-              <CTableDataCell>{colab.status}</CTableDataCell>
-              <CTableDataCell className="text-end">
+              <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.nome} {colab.sobrenome}</CTableDataCell>
+              <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.cargo}</CTableDataCell>
+              <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.status}</CTableDataCell>
+              <CTableDataCell className="text-end" onClick={() => {handleRowClick(colab.id)}}>
                 <CButton
                   color="success"
                   variant="outline"
