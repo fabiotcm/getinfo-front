@@ -1,7 +1,6 @@
 import React from 'react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
-import ContratoCard from '../../components/ContratoCard'
-
+import DashboardContratos from '../../components/DashboardContratos'
 const Home = () => {
   return (
     <div>
@@ -9,7 +8,7 @@ const Home = () => {
       <div className="wrapper d-flex flex-column min-vh-100">
         <AppHeader />
         <div className="body flex-grow-1">
-          <ContratoCard/>
+          <DashboardContratos/>
         </div>
         <AppFooter />
       </div>
