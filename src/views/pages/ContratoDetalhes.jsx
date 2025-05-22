@@ -40,15 +40,20 @@ export default function ContratoDetalhes() {
       <div className="wrapper d-flex flex-column min-vh-100">
         <AppHeader />
         <div className="body flex-grow-1">
-          <div className="p-4">
+          <div className="p-5" style={{ paddingTop: '5px' }}>
             <CCard className="mb-4">
               <CCardBody>
                 <CCardTitle className="h4">{contrato.tipo_contrato}</CCardTitle>
                 <CCardText>
-                  <strong>Empresa:</strong> {contrato.empresa.nome_fantasia} <br />
-                  <strong>Valor:</strong> R$ {contrato.valor.toLocaleString()} <br />
-                  <strong>Data Início:</strong> {formatarData(contrato.data_inicio)} <br />
-                  <strong>Data Fim:</strong> {formatarData(contrato.data_final)} <br />
+                  {/* Tô fazendo testes, mas fui interrompido */}
+                  <CRow>
+                    <CCol><strong>Empresa:</strong> {contrato.empresa.nome_fantasia}</CCol>
+                    <CCol><strong>Valor:</strong> R$ {contrato.valor.toLocaleString()}</CCol>
+                    <CCol><strong>Data Início:</strong> {formatarData(contrato.data_inicio)} <br /></CCol>
+                    <CCol><strong>Data Fim:</strong> {formatarData(contrato.data_final)} <br /></CCol>
+                    <CCol></CCol>
+                    <CCol></CCol>
+                  </CRow>
                   <strong>Tempo Restante:</strong> {calcularDiasRestantes(contrato.data_final)} <br />
                   <strong>Status:</strong> {contrato.status.descricao} <br />
                   <strong>Descrição:</strong> {contrato.descricao}
@@ -121,7 +126,7 @@ export default function ContratoDetalhes() {
 
             <CCard className="mb-4">
               <CCardBody>
-                <CCardTitle className="h5">Anexos</CCardTitle>
+                <CCardTitle className="h5">Aditivos</CCardTitle>
                 {contrato.anexos.length === 0 ? (
                   <p>Nenhum anexo disponível.</p>
                 ) : (
