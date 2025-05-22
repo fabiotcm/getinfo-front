@@ -96,7 +96,7 @@ export default function ExibirColaboradores() {
               <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.nome} {colab.sobrenome}</CTableDataCell>
               <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.cargo}</CTableDataCell>
               <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.status}</CTableDataCell>
-              <CTableDataCell className="text-end" onClick={() => {handleRowClick(colab.id)}}>
+              <CTableDataCell className="text-end">
                 <CButton
                   color="success"
                   variant="outline"
