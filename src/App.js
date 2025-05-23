@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { pdfjs } from 'react-pdf'
 
 import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
@@ -23,7 +24,10 @@ import Colaborador from './views/pages/Colaborador'
 import Dashboard from './views/pages/Dashboard'
 import Contratos from './views/pages/Contratos'
 
-
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+	'pdfjs-dist/build/pdf.worker.min.mjs',
+	import.meta.url,
+).toString();
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
 

@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { Document, Page } from 'react-pdf';
 import { useParams, useNavigate } from 'react-router-dom'
 import contratos from '../../data/contratos_detalhados.json'
 import { CButton, CCard, CCardBody, CCardTitle, CCardText, CListGroup, CListGroupItem, CRow, CContainer, CProgress, CCol } from '@coreui/react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
+import 'react-pdf/dist/Page/TextLayer.css';
 
 export default function ContratoDetalhes() {
   const { id } = useParams()
@@ -76,38 +78,36 @@ export default function ContratoDetalhes() {
             <CCard className="mb-4">
               <CCardBody>
                 <CCardTitle className="h4">{contrato.tipo_contrato}</CCardTitle>
-                <CCardText>
-                  <CRow>
-                    <CCol>
-                      <strong>Empresa:</strong> {contrato.empresa.nome_fantasia} <br />
-                      <strong>Descrição:</strong> {contrato.descricao}
-                    </CCol>
-                    <CCol>
-                      <strong>Valor:</strong> R$ {contrato.valor.toLocaleString()} <br />
-                      <strong>Status:</strong> {contrato.status.descricao}
-                    </CCol>
-                  </CRow>
-                  <CRow className='mt-3'>
-                    <CCol>
-                      <CProgress 
-                        thin 
-                        color={getCorProgresso(porcentagemRestante)} 
-                        value={porcentagemRestante}
-                      />
-                    </CCol>
-                  </CRow>
-                  <CRow className='mt-1'>
-                    <CCol>
-                      <strong>Data Início:</strong> {formatarData(contrato.data_inicio)}
-                    </CCol>
-                    <CCol>
-                      <strong>Tempo Restante:</strong> {calcularDiasRestantes(contrato.data_final)}
-                    </CCol>
-                    <CCol>
-                      <strong>Data Fim:</strong> {formatarData(contrato.data_final)}
-                    </CCol>
-                  </CRow>
-                </CCardText>
+                <CRow>
+                  <CCol>
+                    <strong>Empresa:</strong> {contrato.empresa.nome_fantasia} <br />
+                    <strong>Descrição:</strong> {contrato.descricao}
+                  </CCol>
+                  <CCol>
+                    <strong>Valor:</strong> R$ {contrato.valor.toLocaleString()} <br />
+                    <strong>Status:</strong> {contrato.status.descricao}
+                  </CCol>
+                </CRow>
+                <CRow className='mt-3'>
+                  <CCol>
+                    <CProgress 
+                      thin 
+                      color={getCorProgresso(porcentagemRestante)} 
+                      value={porcentagemRestante}
+                    />
+                  </CCol>
+                </CRow>
+                <CRow className='mt-1'>
+                  <CCol>
+                    <strong>Data Início:</strong> {formatarData(contrato.data_inicio)}
+                  </CCol>
+                  <CCol className='flex-center'>
+                    <strong>Tempo Restante:</strong> {calcularDiasRestantes(contrato.data_final)}
+                  </CCol>
+                  <CCol className='flex-end'>
+                    <strong>Data Fim:</strong> {formatarData(contrato.data_final)}
+                  </CCol>
+                </CRow>
               </CCardBody>
             </CCard>
             <CRow>
@@ -181,12 +181,30 @@ export default function ContratoDetalhes() {
                   <p>Nenhum anexo disponível.</p>
                 ) : (
                   <CListGroup flush>
-                    {contrato.anexos.map(a => (
-                      <CListGroupItem key={a.id_anexo}>{a.nome_arquivo}</CListGroupItem>
-                    ))}
+                    {contrato.anexos.map(a => {
+                      const url = `/pdfs/${a.nome_arquivo}`
+
+                      return (
+                        <CListGroupItem key={a.id_anexo} className="d-flex align-items-center justify-content-between">
+                          <div className="d-flex align-items-center gap-3">
+                            <Document file={url}>
+                              <Page pageNumber={1} width={200} height={100} />
+                            </Document>
+                            <span>{a.nome_arquivo}</span>
+                          </div>
+                          <div className="d-flex gap-2">
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary">
+                              Visualizar
+                            </a>
+                            <a href={url} download className="btn btn-sm btn-outline-success">
+                              Baixar
+                            </a>
+                          </div>
+                        </CListGroupItem>
+                      )
+                    })}
                   </CListGroup>
                 )}
-                <p>(Tentar fazer que nem anexo do Gmail)</p>
               </CCardBody>
             </CCard>
 

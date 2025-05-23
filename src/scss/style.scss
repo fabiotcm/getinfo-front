@@ -56,6 +56,31 @@ body {
   min-height: calc(3rem + 1px); // stylelint-disable-line function-disallowed-list
 }
 
+.flex-center {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.flex-end {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.3rem;
+}
+
+.react-pdf__Document > div {
+  height: 5rem;
+  min-height: 0!important;
+}
+
+.react-pdf__Page {
+  overflow: clip;
+}
+
+.react-pdf__Page div {
+  display: none;
+}
+
 @include color-mode(dark) {
   body {
     background-color: var(--cui-dark-bg-subtle);
