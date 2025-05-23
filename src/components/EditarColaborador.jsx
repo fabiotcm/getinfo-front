@@ -5,14 +5,15 @@ import {
   patchColaborador,
 } from "../services/colaboradorService";
 import {
+  CCol,
   CForm,
   CFormInput,
   CFormLabel,
   CButton,
   CFormSelect,
-  CCard,
-  CCardBody,
-  CCardHeader,
+  CCard,        // Mantendo CCard
+  CCardBody,    // Mantendo CCardBody
+  CCardTitle,   // Adicionando CCardTitle para o título
   CSpinner,
   CAlert,
 } from "@coreui/react";
@@ -20,7 +21,8 @@ import {
 export default function EditarColaborador() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Loading para buscar dados iniciais
+  const [isSaving, setIsSaving] = useState(false); // Novo estado para o botão Salvar
   const [formData, setFormData] = useState({
     status: "",
     email: "",
@@ -28,6 +30,7 @@ export default function EditarColaborador() {
     cargo: "",
   });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchColaborador = async () => {
@@ -42,7 +45,7 @@ export default function EditarColaborador() {
         });
       } catch (error) {
         console.error("Erro ao buscar colaborador:", error);
-        alert("Não foi possível carregar os dados do colaborador.");
+        setError("Não foi possível carregar os dados do colaborador.");
       } finally {
         setLoading(false);
       }
@@ -53,42 +56,69 @@ export default function EditarColaborador() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Limpa alerts e erros ao começar a digitar/alterar
+    setShowSuccessAlert(false);
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSaving(true); // Ativa o estado de salvando
+    setShowSuccessAlert(false); // Esconde alert de sucesso anterior
+    setError(null); // Limpa erro anterior
+
     try {
       await patchColaborador(id, formData);
       setShowSuccessAlert(true);
 
-      // Esconde alerta após 3 segundos e redireciona
+      // Não redireciona imediatamente, espera o alert desaparecer
       setTimeout(() => {
         setShowSuccessAlert(false);
         navigate("/colaboradores");
-      }, 3000);
+      }, 3000); // Exibe o alert por 3 segundos
     } catch (error) {
       console.error("Erro ao atualizar colaborador:", error);
-      alert("Erro ao atualizar colaborador.");
+      setError("Erro ao atualizar colaborador. Verifique os campos.");
+    } finally {
+      setIsSaving(false); // Desativa o estado de salvando
     }
   };
 
-  if (loading) return <CSpinner color="primary" />;
+  const handleCancel = () => {
+    navigate("/colaboradores"); // Redireciona de volta para a lista de colaboradores
+  };
+
+  if (loading) {
+    return (
+      <CCard className="p-4 d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+        <CSpinner color="primary" />
+      </CCard>
+    );
+  }
 
   return (
-    <CCard className="p-4">
-      <CCardHeader>
-        <h4>Editar Colaborador</h4>
-      </CCardHeader>
+    <CCard className="p-4"> {/* O Card principal */}
       <CCardBody>
+        <CCardTitle className="h4 mb-3">Editar Colaborador</CCardTitle> {/* Título usando CCardTitle */}
+
+        {/* Alertas de sucesso/erro */}
         {showSuccessAlert && (
-          <CAlert color="success" dismissible>
+          <CAlert color="success" dismissible className="mb-3">
             Colaborador atualizado com sucesso!
           </CAlert>
         )}
-        <CForm onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <CFormLabel>Status</CFormLabel>
+        {error && (
+          <CAlert color="danger" dismissible className="mb-3">
+            {error}
+          </CAlert>
+        )}
+
+        <CForm onSubmit={handleSubmit} className="row g-3"> {/* row g-3 para espaçamento Bootstrap */}
+          {/* Status */}
+          <div className="col-md-6"> {/* Usando col-md para layout responsivo */}
+            <CFormLabel htmlFor="status">Status</CFormLabel>
             <CFormSelect
+              id="status"
               name="status"
               value={formData.status}
               onChange={handleChange}
@@ -100,9 +130,12 @@ export default function EditarColaborador() {
               required
             />
           </div>
-          <div className="mb-3">
-            <CFormLabel>Email</CFormLabel>
+
+          {/* Email */}
+          <div className="col-md-6">
+            <CFormLabel htmlFor="email">Email</CFormLabel>
             <CFormInput
+              id="email"
               name="email"
               type="email"
               value={formData.email}
@@ -110,29 +143,47 @@ export default function EditarColaborador() {
               required
             />
           </div>
-          <div className="mb-3">
-            <CFormLabel>Telefone</CFormLabel>
+
+          {/* Telefone */}
+          <div className="col-md-6">
+            <CFormLabel htmlFor="telefone">Telefone</CFormLabel>
             <CFormInput
+              id="telefone"
               name="telefone"
               value={formData.telefone}
               onChange={handleChange}
               required
             />
           </div>
-          <div className="mb-3">
-            <CFormLabel>Cargo</CFormLabel>
+
+          {/* Cargo */}
+          <div className="col-md-6">
+            <CFormLabel htmlFor="cargo">Cargo</CFormLabel>
             <CFormInput
+              id="cargo"
               name="cargo"
               value={formData.cargo}
               onChange={handleChange}
               required
             />
           </div>
-          <div className="text-end">
-            <CButton type="submit" color="primary">
-              Salvar Alterações
+
+          {/* Botões de Ação */}
+          <CCol xs={12} className="mt-4 text-end">
+            <CButton color="secondary" onClick={handleCancel} className="me-2">
+              Cancelar
             </CButton>
-          </div>
+            <CButton type="submit" color="success" disabled={isSaving} className="text-white">
+              {isSaving ? (
+                <>
+                  <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar Alterações"
+              )}
+            </CButton>
+          </CCol>
         </CForm>
       </CCardBody>
     </CCard>
