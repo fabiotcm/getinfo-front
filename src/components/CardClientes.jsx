@@ -137,7 +137,7 @@ export default function CardClientes() {
             style={{ borderRadius: "12px", width: "56px", height: "56px" }}
             onClick={handleAdd}
           >
-            <CIcon icon={cilPlus} size="lg" />
+            <CIcon icon={cilPlus} size="lg" style={{color: "#FFFFFF"}} />
           </CButton>
         </CTooltip>
       </div>

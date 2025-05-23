@@ -66,7 +66,7 @@ export default function ExibirColaboradores() {
     return (
       fullName.includes(searchTerm.toLowerCase()) ||
       colab.cargo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      colab.status.toLowerCase().includes(searchTerm.toLowerCase())
+      colab.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -132,7 +132,7 @@ export default function ExibirColaboradores() {
             style={{ borderRadius: "12px", width: "56px", height: "56px" }}
             onClick={handleAdd}
           >
-            <CIcon icon={cilPlus} size="lg" />
+            <CIcon icon={cilPlus} size="lg" style={{color: "#FFFFFF"}}/>
           </CButton>
         </CTooltip>
       </div>
