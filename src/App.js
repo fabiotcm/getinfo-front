@@ -10,7 +10,6 @@ import './scss/examples.scss'
 import CadastroContrato from './views/pages/CadastroContrato'
 import Clientes from './views/pages/Clientes'
 import ClienteDetalhes from './views/pages/ClienteDetalhes'
-import Home from './views/pages/Home'
 import ContratoDetalhes from './views/pages/ContratoDetalhes'
 import CadastroEmpresa from './views/pages/CadastroEmpresa'
 import CadastroColaborador from './views/pages/CadastroColaborador'
@@ -21,6 +20,8 @@ import Colaboradores from './views/pages/Colaboradores'
 import EdicaoEmpresa from './views/pages/EdicaoEmpresa'
 import EdicaoColaborador from './views/pages/EdicaoColaborador'
 import Colaborador from './views/pages/Colaborador'
+import Dashboard from './views/pages/Dashboard'
+import Contratos from './views/pages/Contratos'
 
 
 // Containers
@@ -69,11 +70,12 @@ const App = () => {
           <Route path="/colaboradores/:id/editar" element={<EdicaoColaborador />} />
           <Route path="/clientes/:id" element={<ClienteDetalhes />} />
           <Route path="/clientes/:id/editar" element={<EdicaoEmpresa />} />
+          <Route path="/contrato" element={<Contratos />} />
           <Route path="/contrato/:id" element={<ContratoDetalhes />} />
           <Route path="/contrato/:id/editar" element={<EdicaoContrato />} />
           <Route path="/contrato/:id/aditivo" element={<Aditivo />} />
           <Route path="/contrato/:id/repactuacao" element={<Repactuacao />} />
-          <Route path='/home' name="Home" element={<Home/>}/>
+          <Route path='/home' name="Home" element={<Dashboard/>}/>
           <Route exact path="/clientes" name="Clientes" element={<Clientes />} />
           <Route exact path="/register" name="Register Page" element={<Register />} />
           <Route exact path="/404" name="Page 404" element={<Page404 />} />

@@ -2,7 +2,7 @@ import React from 'react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
 import ContratoCard from '../../components/ContratoCard'
 
-const Home = () => {
+const Contratos = () => {
   return (
     <div>
       <AppSidebar />
@@ -17,4 +17,4 @@ const Home = () => {
   )
 }
 
-export default Home;
+export default Contratos;
