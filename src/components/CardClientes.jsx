@@ -27,7 +27,9 @@ export default function CardClientes() {
       try {
         const response = await getEmpresas();
         const data = Array.isArray(response) ? response : response.data || [];
-        setClientes(data);
+        const data_filtered = data.filter((empresa) => empresa.ativo === true);
+        setClientes(data_filtered);
+        console.log(data_filtered);
       } catch (error) {
         console.error("Erro ao buscar empresas:", error);
         setClientes([]);
@@ -55,7 +57,7 @@ export default function CardClientes() {
   };
 
   const handleAdd = () => {
-    navigate("/cadastrar-cliente");
+    navigate("/cadastrar-empresa");
   };
 
   const handleRowClick = (id) => {
