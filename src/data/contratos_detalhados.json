@@ -62,8 +62,7 @@
       {
         "id_entregavel": 1,
         "descricao": "Entrega da Fase 1",
-        "prazo": 60,
-        "data_entrega": "2024-03-10",
+        "data_entrega": "2025-06-10",
         "status": {
           "id_status": 1,
           "descricao": "Concluído"
@@ -72,7 +71,7 @@
       {
         "id_entregavel": 2,
         "descricao": "Entrega da Fase 2",
-        "prazo": 60,
+        "data_entrega": "2025-07-10",
         "status": {
           "id_status": 2,
           "descricao": "Em andamento"

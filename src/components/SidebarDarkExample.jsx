@@ -20,6 +20,7 @@ import {
   cilDescription,
   cilUserPlus,
   cilBuilding,
+  cilChart,
 } from '@coreui/icons'
 
 export const SidebarDarkExample = () => {
@@ -32,7 +33,7 @@ export const SidebarDarkExample = () => {
       </CSidebarHeader>
       <CSidebarNav>
         <CNavItem href="/home">
-          <CIcon customClassName="nav-icon" icon={cilHome} /> Dashboard
+          <CIcon customClassName="nav-icon" icon={cilChart} /> Dashboard
         </CNavItem>
 
         <CNavGroup
@@ -42,7 +43,7 @@ export const SidebarDarkExample = () => {
             </>
           }
         >
-          <CNavItem href="/home">Visualizar Contratos</CNavItem>
+          <CNavItem href="/contrato">Visualizar Contratos</CNavItem>
           <CNavItem href="/cadastrar-contrato">Cadastrar Contrato</CNavItem>
         </CNavGroup>
 
@@ -67,10 +68,6 @@ export const SidebarDarkExample = () => {
           <CNavItem href="/clientes"> Visualizar Empresas</CNavItem>
           <CNavItem href="/cadastrar-empresa">Cadastrar Empresa</CNavItem>
         </CNavGroup>
-
-        <CNavItem href="/configuracoes">
-          <CIcon customClassName="nav-icon" icon={cilSettings} /> Configurações
-        </CNavItem>
 
         <CNavItem href="/">
           <CIcon customClassName="nav-icon" icon={cilAccountLogout} /> Sair
