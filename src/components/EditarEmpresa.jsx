@@ -202,8 +202,15 @@ export default function EditarEmpresa() {
             <CButton color="secondary" className="me-2" onClick={() => navigate("/clientes")}>
               Cancelar
             </CButton>
-            <CButton color="success" onClick={handleSave} disabled={saving}>
-              {saving ? "Salvando..." : "Salvar Alterações"}
+            <CButton color="success" onClick={handleSave} disabled={saving} className="text-white">
+              {saving ? (
+                <>
+                  <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar Alterações"
+              )}
             </CButton>
           </CCol>
         </CForm>
