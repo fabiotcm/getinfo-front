@@ -126,7 +126,7 @@ export default function ContratoDetalhes() {
               <CCol>
                 <CCard className="mb-4">
                   <CCardBody>
-                    <CCardTitle className="h5">Funcionário Responsável</CCardTitle>
+                    <CCardTitle className="h5">Colaborador Responsável</CCardTitle>
                     <CListGroup flush>
                       <CListGroupItem><strong>Nome:</strong> {contrato.funcionarioResponsavel.nome}</CListGroupItem>
                       <CListGroupItem><strong>Contato:</strong> {contrato.funcionarioResponsavel.contato}</CListGroupItem>
@@ -212,10 +212,10 @@ export default function ContratoDetalhes() {
               <CButton color="primary" onClick={() => handleNavigate('editar')}>
                 Editar
               </CButton>
-              <CButton color="warning" onClick={() => handleNavigate('aditivo')}>
+              <CButton className='text-white' color="danger" onClick={() => handleNavigate('aditivo')}>
                 Inserir Aditivo
               </CButton>
-              <CButton color="info" onClick={() => handleNavigate('repactuacao')}>
+              <CButton className='text-white' color="warning" onClick={() => handleNavigate('repactuacao')}>
                 Inserir Repactuação
               </CButton>
             </div>
