@@ -148,7 +148,7 @@ export default function DashboardContratos() {
             <CCardBody className="d-flex align-items-start gap-3">
               <CIcon icon={cilCheckCircle} size="xl" className="text-success"/>
               <div>
-                <CCardTitle className="h6">Encerrados</CCardTitle>
+                <CCardTitle className="h6">Concluídos</CCardTitle>
                 <p className="fs-4 mb-0">{encerrados}</p>
               </div>
             </CCardBody>
