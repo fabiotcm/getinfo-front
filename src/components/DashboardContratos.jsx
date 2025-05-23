@@ -15,7 +15,7 @@ import {
   CBadge,
 } from "@coreui/react";
 import { CChartPie, CChartBar } from "@coreui/react-chartjs";
-import { cilList, cilCheckCircle, cilBan, cilXCircle } from "@coreui/icons";
+import { cilList, cilCheckCircle, cilBan, cilXCircle, cilClock } from "@coreui/icons";
 import CIcon from "@coreui/icons-react";
 import dayjs from "dayjs";
 import contratosData from "../data/contratos_detalhados.json";
@@ -55,7 +55,7 @@ export default function DashboardContratos() {
 
       const dataFinal = dayjs(contrato.data_final);
       const diasRestantes = dataFinal.diff(hoje, "day");
-      if (diasRestantes <= 60 && diasRestantes >= 0) {
+      if (diasRestantes <= 30 && diasRestantes >= 0) {
         contratosProx.push({
           id: contrato.id_contrato,
           descricao: contrato.descricao,
@@ -69,7 +69,7 @@ export default function DashboardContratos() {
         if (entregavel.data_entrega) {
           const dataEntrega = dayjs(entregavel.data_entrega);
           const diasEntrega = dataEntrega.diff(hoje, "day");
-          if (diasEntrega <= 60 && diasEntrega >= 0) {
+          if (diasEntrega <= 30 && diasEntrega >= 0) {
             entregaveisProx.push({
               id: entregavel.id_entregavel,
               descricao: entregavel.descricao,
@@ -112,8 +112,8 @@ export default function DashboardContratos() {
   const totalContratos = ativos + encerrados + cancelados;
 
   const prioridade = (dias) => {
-    if (dias <= 19) return <CBadge style={{ backgroundColor: '#FF0000' }}>Máxima</CBadge>;
-    if (dias <= 39) return <CBadge style={{ backgroundColor: '#FF4D00' }}>Muito urgente</CBadge>;
+    if (dias <= 10) return <CBadge style={{ backgroundColor: '#FF0000' }}>Máxima</CBadge>;
+    if (dias <= 20) return <CBadge style={{ backgroundColor: '#FF4D00' }}>Muito urgente</CBadge>;
     return <CBadge color="warning">Urgente</CBadge>;
   };
 
@@ -135,7 +135,7 @@ export default function DashboardContratos() {
         <CCol md={3}>
           <CCard>
             <CCardBody className="d-flex align-items-start gap-3">
-              <CIcon icon={cilCheckCircle} size="xl" className="text-success"/>
+              <CIcon icon={cilClock} size="xl" className="text-primary"/>
               <div>
                 <CCardTitle className="h6">Ativos</CCardTitle>
                 <p className="fs-4 mb-0">{ativos}</p>
@@ -146,7 +146,7 @@ export default function DashboardContratos() {
         <CCol md={3}>
           <CCard>
             <CCardBody className="d-flex align-items-start gap-3">
-              <CIcon icon={cilXCircle} size="xl" className="text-primary"/>
+              <CIcon icon={cilCheckCircle} size="xl" className="text-success"/>
               <div>
                 <CCardTitle className="h6">Encerrados</CCardTitle>
                 <p className="fs-4 mb-0">{encerrados}</p>
@@ -251,7 +251,7 @@ export default function DashboardContratos() {
 
       {/* Contratos próximos ao vencimento */}
       <CCard className="mb-4">
-        <CCardHeader>Contratos Próximos ao Vencimento (≤ 60 dias)</CCardHeader>
+        <CCardHeader>Contratos Próximos ao Vencimento (30 dias)</CCardHeader>
         <CCardBody>
           <CTable striped>
             <CTableHead>
@@ -280,7 +280,7 @@ export default function DashboardContratos() {
 
       {/* Entregáveis próximos */}
       <CCard>
-        <CCardHeader>Entregáveis Próximos (≤ 60 dias)</CCardHeader>
+        <CCardHeader>Entregáveis Próximos (30 dias)</CCardHeader>
         <CCardBody>
           <CTable striped>
             <CTableHead>

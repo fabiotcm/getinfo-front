@@ -180,7 +180,7 @@ export default function CadastrarEmpresa() {
         <>
           <CCol md={4}>
             <CFormLabel>CEP</CFormLabel>
-            <CFormInput name="cep" className='cep' value={formData.cep} onChange={handleChange} required />
+            <CFormInput name="cep" className='cep' value={formData.cep} onChange={handleChange} placeholder='00000-000' required />
           </CCol>
           <CCol md={4}>
             <CFormLabel>Logradouro</CFormLabel>
