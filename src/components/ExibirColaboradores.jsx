@@ -29,7 +29,9 @@ export default function ExibirColaboradores() {
         if (Array.isArray(response)) {
           setColaboradores(response);
         } else if (Array.isArray(response.data)) {
-          setColaboradores(response.data);
+          const data_filtered = response.data.filter((colaborador) => colaborador.status == "ATIVO");
+          setColaboradores(data_filtered);
+          console.log(data_filtered);
         } else {
           console.error("Formato de dados inesperado:", response);
           setColaboradores([]); // fallback seguro
@@ -86,7 +88,7 @@ export default function ExibirColaboradores() {
           <CTableRow>
             <CTableHeaderCell>Nome Completo</CTableHeaderCell>
             <CTableHeaderCell>Cargo</CTableHeaderCell>
-            <CTableHeaderCell>Status</CTableHeaderCell>
+            <CTableHeaderCell>Email</CTableHeaderCell>
             <CTableHeaderCell className="text-end">Ações</CTableHeaderCell>
           </CTableRow>
         </CTableHead>
@@ -95,7 +97,7 @@ export default function ExibirColaboradores() {
             <CTableRow key={colab.id}>
               <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.nome} {colab.sobrenome}</CTableDataCell>
               <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.cargo}</CTableDataCell>
-              <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.status}</CTableDataCell>
+              <CTableDataCell onClick={() => {handleRowClick(colab.id)}}>{colab.email}</CTableDataCell>
               <CTableDataCell className="text-end">
                 <CButton
                   color="success"
