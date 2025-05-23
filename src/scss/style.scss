@@ -68,6 +68,19 @@ body {
   gap: 0.3rem;
 }
 
+.react-pdf__Document > div {
+  height: 5rem;
+  min-height: 0!important;
+}
+
+.react-pdf__Page {
+  overflow: clip;
+}
+
+.react-pdf__Page div {
+  display: none;
+}
+
 @include color-mode(dark) {
   body {
     background-color: var(--cui-dark-bg-subtle);
