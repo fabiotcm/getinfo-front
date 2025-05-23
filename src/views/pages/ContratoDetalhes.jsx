@@ -100,10 +100,10 @@ export default function ContratoDetalhes() {
                     <CCol>
                       <strong>Data Início:</strong> {formatarData(contrato.data_inicio)}
                     </CCol>
-                    <CCol>
+                    <CCol className='flex-center'>
                       <strong>Tempo Restante:</strong> {calcularDiasRestantes(contrato.data_final)}
                     </CCol>
-                    <CCol>
+                    <CCol className='flex-end'>
                       <strong>Data Fim:</strong> {formatarData(contrato.data_final)}
                     </CCol>
                   </CRow>
@@ -181,9 +181,26 @@ export default function ContratoDetalhes() {
                   <p>Nenhum anexo disponível.</p>
                 ) : (
                   <CListGroup flush>
-                    {contrato.anexos.map(a => (
-                      <CListGroupItem key={a.id_anexo}>{a.nome_arquivo}</CListGroupItem>
-                    ))}
+                    {contrato.anexos.map(a => {
+                      const url = `/pdfs/${a.nome_arquivo}`
+
+                      return (
+                        <CListGroupItem key={a.id_anexo} className="d-flex align-items-center justify-content-between">
+                          <div className="d-flex align-items-center gap-3">
+                            <img src="/icons/PDF_file_icon.svg" alt="PDF" width="32" />
+                            <span>{a.nome_arquivo}</span>
+                          </div>
+                          <div className="d-flex gap-2">
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary">
+                              Visualizar
+                            </a>
+                            <a href={url} download className="btn btn-sm btn-outline-success">
+                              Baixar
+                            </a>
+                          </div>
+                        </CListGroupItem>
+                      )
+                    })}
                   </CListGroup>
                 )}
                 <p>(Tentar fazer que nem anexo do Gmail)</p>
