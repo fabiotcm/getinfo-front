@@ -1,7 +1,7 @@
 import React from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import contratos from '../../data/contratos_detalhados.json'
-import { CButton, CCard, CCardBody, CCardTitle, CCardText, CListGroup, CListGroupItem, CRow, CContainer, CCol } from '@coreui/react'
+import { CButton, CCard, CCardBody, CCardTitle, CCardText, CListGroup, CListGroupItem, CRow, CContainer, CProgress, CCol } from '@coreui/react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
 
 export default function ContratoDetalhes() {
@@ -21,12 +21,36 @@ export default function ContratoDetalhes() {
   const calcularDiasRestantes = (dataFinal) => {
     const hoje = new Date()
     const final = new Date(dataFinal)
+
+    hoje.setHours(0, 0, 0, 0)
+    final.setHours(0, 0, 0, 0)
+
     const diffMs = final - hoje
 
-    if (diffMs <= 0) return 'Contrato encerrado'
-
+    if (diffMs < 0) return 'Contrato encerrado'
     const dias = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
-    return `Faltam ${dias} dias`
+    if (dias === 0) return 'Último dia'
+    if (dias === 1) return '1 dia'
+    return `${dias} dias`
+  }
+
+  const calcularPorcentagemRestante = (dataInicio, dataFinal) => {
+    const inicio = new Date(dataInicio)
+    const final = new Date(dataFinal)
+    const hoje = new Date()
+
+    inicio.setHours(0, 0, 0, 0)
+    final.setHours(0, 0, 0, 0)
+    hoje.setHours(0, 0, 0, 0)
+
+    const totalDuracao = final - inicio
+    const restante = final - hoje
+
+    if (restante < 0) return 0
+    if (hoje < inicio) return 100
+
+    const porcentagem = (restante / totalDuracao) * 100
+    return Math.round(porcentagem)
   }
 
   const formatarData = (dataISO) => {
@@ -34,29 +58,55 @@ export default function ContratoDetalhes() {
     return new Intl.DateTimeFormat('pt-BR').format(data)
   }
 
+  const getCorProgresso = (porcentagem) => {
+    if (porcentagem > 60) return 'success'
+    if (porcentagem > 30) return 'warning'
+    return 'danger'
+  }
+
+  const porcentagemRestante = calcularPorcentagemRestante(contrato.data_inicio, contrato.data_final)
+
   return (
     <div>
       <AppSidebar />
       <div className="wrapper d-flex flex-column min-vh-100">
         <AppHeader />
         <div className="body flex-grow-1">
-          <div className="p-5" style={{ paddingTop: '5px' }}>
+          <div className="p-4">
             <CCard className="mb-4">
               <CCardBody>
                 <CCardTitle className="h4">{contrato.tipo_contrato}</CCardTitle>
                 <CCardText>
-                  {/* Tô fazendo testes, mas fui interrompido */}
                   <CRow>
-                    <CCol><strong>Empresa:</strong> {contrato.empresa.nome_fantasia}</CCol>
-                    <CCol><strong>Valor:</strong> R$ {contrato.valor.toLocaleString()}</CCol>
-                    <CCol><strong>Data Início:</strong> {formatarData(contrato.data_inicio)} <br /></CCol>
-                    <CCol><strong>Data Fim:</strong> {formatarData(contrato.data_final)} <br /></CCol>
-                    <CCol></CCol>
-                    <CCol></CCol>
+                    <CCol>
+                      <strong>Empresa:</strong> {contrato.empresa.nome_fantasia} <br />
+                      <strong>Descrição:</strong> {contrato.descricao}
+                    </CCol>
+                    <CCol>
+                      <strong>Valor:</strong> R$ {contrato.valor.toLocaleString()} <br />
+                      <strong>Status:</strong> {contrato.status.descricao}
+                    </CCol>
                   </CRow>
-                  <strong>Tempo Restante:</strong> {calcularDiasRestantes(contrato.data_final)} <br />
-                  <strong>Status:</strong> {contrato.status.descricao} <br />
-                  <strong>Descrição:</strong> {contrato.descricao}
+                  <CRow className='mt-3'>
+                    <CCol>
+                      <CProgress 
+                        thin 
+                        color={getCorProgresso(porcentagemRestante)} 
+                        value={porcentagemRestante}
+                      />
+                    </CCol>
+                  </CRow>
+                  <CRow className='mt-1'>
+                    <CCol>
+                      <strong>Data Início:</strong> {formatarData(contrato.data_inicio)}
+                    </CCol>
+                    <CCol>
+                      <strong>Tempo Restante:</strong> {calcularDiasRestantes(contrato.data_final)}
+                    </CCol>
+                    <CCol>
+                      <strong>Data Fim:</strong> {formatarData(contrato.data_final)}
+                    </CCol>
+                  </CRow>
                 </CCardText>
               </CCardBody>
             </CCard>
