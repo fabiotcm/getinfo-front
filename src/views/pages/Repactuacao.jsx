@@ -68,7 +68,7 @@ export default function Repactuacao() {
           multiple
         />
 
-        <CButton type="submit" color="info">Salvar Repactuação</CButton>
+        <CButton className='mt-3' type="submit" color="info">Salvar Repactuação</CButton>
       </CForm>
     </div>
 

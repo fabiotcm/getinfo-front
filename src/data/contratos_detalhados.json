@@ -4,9 +4,8 @@
     "valor": 150000.0,
     "descricao": "Contrato para desenvolvimento de sistema web.",
     "tipo_contrato": "Desenvolvimento",
-    "data_inicio": "2024-01-10",
-    "data_final": "2025-12-10",
-    "prazo": "2025-12-10T00:00:00",
+    "data_inicio": "2025-01-10",
+    "data_final": "2025-09-23",
     "status": {
       "id_status": 1,
       "descricao": "Ativo"
@@ -92,7 +91,6 @@
     "tipo_contrato": "Manutenção",
     "data_inicio": "2023-01-01",
     "data_final": "2023-12-31",
-    "prazo": "2023-12-31T00:00:00",
     "status": {
       "id_status": 3,
       "descricao": "Encerrado"
@@ -153,7 +151,6 @@
     "tipo_contrato": "Implantação",
     "data_inicio": "2024-05-01",
     "data_final": "2025-05-01",
-    "prazo": "2025-05-01T00:00:00",
     "status": {
       "id_status": 4,
       "descricao": "Cancelado"
@@ -199,7 +196,6 @@
       {
         "id_entregavel": 3,
         "descricao": "Etapa 1 - Diagnóstico",
-        "prazo": 30,
         "status": {
           "id_status": 4,
           "descricao": "Cancelado"
@@ -212,6 +208,208 @@
       {
         "id_anexo": 4,
         "nome_arquivo": "cancelamento.pdf"
+      }
+    ]
+  },
+  {
+    "id_contrato": 4,
+    "valor": 95000.0,
+    "descricao": "Desenvolvimento de aplicativo mobile.",
+    "tipo_contrato": "Desenvolvimento",
+    "data_inicio": "2025-04-01",
+    "data_final": "2025-12-15",
+    "status": {
+      "id_status": 1,
+      "descricao": "Ativo"
+    },
+    "empresa": {
+      "id_empresa": 4,
+      "cnpj": "33.444.555/0001-66",
+      "razao_social": "Inova App Ltda",
+      "nome_fantasia": "InovaApp",
+      "tipo": 2
+    },
+    "responsavel": {
+      "id_responsavel": 4,
+      "nome": "Débora",
+      "sobrenome": "Castro",
+      "cpf": "333.444.555-66",
+      "email": "debora@inovaapp.com",
+      "telefone": "(21) 94567-1234"
+    },
+    "funcionarioResponsavel": {
+      "id_funcionarioResponsavel": 4,
+      "nome": "Felipe Torres",
+      "cpf": "444.555.666-77",
+      "contato": "(21) 92345-6789",
+      "cargo": {
+        "id_cargo": 8,
+        "descricao": "Product Owner"
+      }
+    },
+    "colaboradores": [],
+    "entregaveis": [
+      {
+        "id_entregavel": 4,
+        "descricao": "Protótipo funcional",
+        "data_entrega": "2025-06-01",
+        "status": {
+          "id_status": 2,
+          "descricao": "Em andamento"
+        }
+      },
+      {
+        "id_entregavel": 5,
+        "descricao": "Versão beta",
+        "data_entrega": "2025-08-15",
+        "status": {
+          "id_status": 5,
+          "descricao": "Planejado"
+        }
+      }
+    ],
+    "anexos": []
+  },
+  {
+    "id_contrato": 5,
+    "valor": 220000.0,
+    "descricao": "Contrato de suporte e operação em nuvem.",
+    "tipo_contrato": "Suporte",
+    "data_inicio": "2025-01-15",
+    "data_final": "2026-01-15",
+    "status": {
+      "id_status": 1,
+      "descricao": "Ativo"
+    },
+    "empresa": {
+      "id_empresa": 5,
+      "cnpj": "22.333.444/0001-55",
+      "razao_social": "CloudOps Serviços Digitais",
+      "nome_fantasia": "CloudOps",
+      "tipo": 1
+    },
+    "responsavel": {
+      "id_responsavel": 5,
+      "nome": "Renato",
+      "sobrenome": "Silveira",
+      "cpf": "888.999.000-11",
+      "email": "renato@cloudops.com",
+      "telefone": "(41) 99887-6655"
+    },
+    "funcionarioResponsavel": {
+      "id_funcionarioResponsavel": 5,
+      "nome": "Larissa Freitas",
+      "cpf": "777.666.555-44",
+      "contato": "(41) 98765-3322",
+      "cargo": {
+        "id_cargo": 9,
+        "descricao": "Gestora de Contas"
+      }
+    },
+    "colaboradores": [],
+    "entregaveis": [
+      {
+        "id_entregavel": 6,
+        "descricao": "Setup inicial",
+        "data_entrega": "2025-05-20",
+        "status": {
+          "id_status": 1,
+          "descricao": "Concluído"
+        }
+      },
+      {
+        "id_entregavel": 7,
+        "descricao": "Relatório mensal 1",
+        "data_entrega": "2025-06-15",
+        "status": {
+          "id_status": 2,
+          "descricao": "Em andamento"
+        }
+      },
+      {
+        "id_entregavel": 8,
+        "descricao": "Relatório mensal 2",
+        "data_entrega": "2025-07-15",
+        "status": {
+          "id_status": 5,
+          "descricao": "Planejado"
+        }
+      }
+    ],
+    "anexos": []
+  },
+  {
+    "id_contrato": 6,
+    "valor": 50000.0,
+    "descricao": "Campanha de marketing digital para redes sociais.",
+    "tipo_contrato": "Comunicação",
+    "data_inicio": "2025-05-23",
+    "data_final": "2025-07-22",
+    "status": {
+      "id_status": 1,
+      "descricao": "Ativo"
+    },
+    "empresa": {
+      "id_empresa": 6,
+      "cnpj": "11.222.333/0001-44",
+      "razao_social": "Marketing Solutions Ltda.",
+      "nome_fantasia": "MarkeTech",
+      "tipo": 2
+    },
+    "responsavel": {
+      "id_responsavel": 6,
+      "nome": "Mariana",
+      "sobrenome": "Santos",
+      "cpf": "123.123.123-12",
+      "email": "mariana@marketech.com.br",
+      "telefone": "(11) 99111-2222"
+    },
+    "funcionarioResponsavel": {
+      "id_funcionarioResponsavel": 6,
+      "nome": "Patrícia Fernandes",
+      "cpf": "999.888.777-66",
+      "contato": "(11) 93333-4444",
+      "cargo": {
+        "id_cargo": 10,
+        "descricao": "Coordenadora de Marketing"
+      }
+    },
+    "colaboradores": [
+      {
+        "id_funcionario": 8,
+        "nome": "Rafael Brandão",
+        "cpf": "000.111.222-33",
+        "contato": "(11) 95555-6666",
+        "cargo": {
+          "id_cargo": 11,
+          "descricao": "Especialista em Mídias Sociais"
+        }
+      }
+    ],
+    "entregaveis": [
+      {
+        "id_entregavel": 9,
+        "descricao": "Plano de mídia e conteúdo",
+        "data_entrega": "2025-06-10",
+        "status": {
+          "id_status": 1,
+          "descricao": "Concluído"
+        }
+      },
+      {
+        "id_entregavel": 10,
+        "descricao": "Relatório de desempenho da campanha",
+        "data_entrega": "2025-07-20",
+        "status": {
+          "id_status": 2,
+          "descricao": "Em andamento"
+        }
+      }
+    ],
+    "anexos": [
+      {
+        "id_anexo": 5,
+        "nome_arquivo": "proposta_marketing.pdf"
       }
     ]
   }

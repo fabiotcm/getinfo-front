@@ -67,7 +67,7 @@ export default function Aditivo() {
           multiple
         />
 
-        <CButton type="submit" color="warning">Salvar Aditivo</CButton>
+        <CButton className="mt-3" type="submit" color="warning">Salvar Aditivo</CButton>
       </CForm>
     </div>
 
