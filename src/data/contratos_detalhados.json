@@ -344,7 +344,7 @@
     "descricao": "Campanha de marketing digital para redes sociais.",
     "tipo_contrato": "Comunicação",
     "data_inicio": "2025-05-23",
-    "data_final": "2025-07-22",
+    "data_final": "2025-06-22",
     "status": {
       "id_status": 1,
       "descricao": "Ativo"
@@ -399,7 +399,7 @@
       {
         "id_entregavel": 10,
         "descricao": "Relatório de desempenho da campanha",
-        "data_entrega": "2025-07-20",
+        "data_entrega": "2025-06-20",
         "status": {
           "id_status": 2,
           "descricao": "Em andamento"
