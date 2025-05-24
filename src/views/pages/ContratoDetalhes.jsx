@@ -181,7 +181,7 @@ export default function ContratoDetalhes() {
                 {contrato.anexos.length === 0 ? (
                   <p>Nenhum anexo disponível.</p>
                 ) : (
-                  <CListGroup flush>
+                  <CListGroup flush className='flex-row'>
                     {contrato.anexos.map(a => {
                       const url = `/pdfs/${a.nome_arquivo}`
                       return (

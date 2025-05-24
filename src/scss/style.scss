@@ -56,6 +56,11 @@ body {
   min-height: calc(3rem + 1px); // stylelint-disable-line function-disallowed-list
 }
 
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
 .flex-center {
   display: flex;
   justify-content: center;
