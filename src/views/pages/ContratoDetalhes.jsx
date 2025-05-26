@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import contratos from '../../data/contratos_detalhados.json'
 import { CButton, CCard, CCardBody, CCardTitle, CCardText, CListGroup, CListGroupItem, CRow, CContainer, CProgress, CCol } from '@coreui/react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
+import { GoDownload } from "react-icons/go";
 import 'react-pdf/dist/Page/TextLayer.css';
 
 export default function ContratoDetalhes() {
@@ -180,24 +181,29 @@ export default function ContratoDetalhes() {
                 {contrato.anexos.length === 0 ? (
                   <p>Nenhum anexo disponível.</p>
                 ) : (
-                  <CListGroup flush>
+                  <CListGroup flush className='flex-row'>
                     {contrato.anexos.map(a => {
                       const url = `/pdfs/${a.nome_arquivo}`
-
                       return (
                         <CListGroupItem key={a.id_anexo} className="d-flex align-items-center justify-content-between">
-                          <div className="d-flex align-items-center gap-3">
-                            <Document file={url}>
-                              <Page pageNumber={1} width={200} height={100} />
-                            </Document>
-                            <span>{a.nome_arquivo}</span>
-                          </div>
-                          <div className="d-flex gap-2">
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary">
-                              Visualizar
-                            </a>
-                            <a href={url} download className="btn btn-sm btn-outline-success">
-                              Baixar
+                          <div className="d-flex relative">
+                            <div className="download-button">
+                              <a href={url} download>
+                                <GoDownload fontSize={'1.3rem'} color='white' />
+                              </a>
+                            </div>
+                            <a href={url} target="_blank" rel="noopener noreferrer">
+                              <Document file={url}>
+                                <Page pageNumber={1} width={200} height={100} />
+                              </Document>
+                              <div className='documento-titulo'>
+                                <div>
+                                  <img src="/icons/pdf_icon.png" alt="PDF icon"/>
+                                </div>
+                                <CCardText>
+                                  {a.nome_arquivo}
+                                </CCardText>
+                              </div>
                             </a>
                           </div>
                         </CListGroupItem>
