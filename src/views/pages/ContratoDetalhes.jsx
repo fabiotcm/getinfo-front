@@ -4,8 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import contratos from '../../data/contratos_detalhados.json'
 import { CButton, CCard, CCardBody, CCardTitle, CCardText, CListGroup, CListGroupItem, CRow, CContainer, CProgress, CCol } from '@coreui/react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
-import { GoDownload } from "react-icons/go";
 import 'react-pdf/dist/Page/TextLayer.css';
+import { CIcon } from '@coreui/icons-react'
+import { cilDataTransferDown } from '@coreui/icons';
 
 export default function ContratoDetalhes() {
   const { id } = useParams()
@@ -189,7 +190,7 @@ export default function ContratoDetalhes() {
                           <div className="d-flex relative">
                             <div className="download-button">
                               <a href={url} download>
-                                <GoDownload fontSize={'1.3rem'} color='white' />
+                                <CIcon icon={cilDataTransferDown} title='download' fontSize={'1.3rem'} color='white' className='text-white' />
                               </a>
                             </div>
                             <a href={url} target="_blank" rel="noopener noreferrer">
