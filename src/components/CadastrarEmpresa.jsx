@@ -130,6 +130,69 @@ export default function CadastrarEmpresa() {
     //Máscara para CPF
     $('.cpfResponsavel').mask('000.000.000-00')
   })
+  
+  $(document).ready(function() {
+    function limpa_formulário_cep() {
+        // Limpa valores do formulário de cep.
+        $("#rua").val("");
+        $("#bairro").val("");
+        $("#cidade").val("");
+        $("#complemento").val("");
+        // $("#uf").val("");
+    }
+    
+    //Quando o campo cep perde o foco.
+    $("#cep").blur(function() {
+
+      //Nova variável "cep" somente com dígitos.
+      var cep = $(this).val().replace(/\D/g, '');
+
+      //Verifica se campo cep possui valor informado.
+      if (cep != "") {
+
+          //Expressão regular para validar o CEP.
+          var validacep = /^[0-9]{8}$/;
+
+          //Valida o formato do CEP.
+          if(validacep.test(cep)) {
+
+              //Preenche os campos com "..." enquanto consulta webservice.
+              $("#rua").val("...");
+              $("#bairro").val("...");
+              $("#cidade").val("...");
+              $("#complemento").val("...");
+              $("#uf").val("...");
+
+              //Consulta o webservice viacep.com.br/
+              $.getJSON("https://viacep.com.br/ws/"+ cep +"/json/?callback=?", function(dados) {
+
+                  if (!("erro" in dados)) {
+                      //Atualiza os campos com os valores da consulta.
+                      $("#rua").val(dados.logradouro);
+                      $("#bairro").val(dados.bairro);
+                      $("#cidade").val(dados.localidade);
+                      $("#complemento").val(dados.complemento);
+                      $("#uf").val(dados.uf);
+                  } //end if.
+                  else {
+                      //CEP pesquisado não foi encontrado.
+                      limpa_formulário_cep();
+                      alert("CEP não encontrado.");
+                  }
+              });
+          } //end if.
+          else {
+              //cep é inválido.
+              limpa_formulário_cep();
+              alert("Formato de CEP inválido.");
+          }
+      } //end if.
+      else {
+          //cep sem valor, limpa formulário.
+          limpa_formulário_cep();
+      }
+    });
+  });
 
   const steps = [
     {
@@ -174,34 +237,38 @@ export default function CadastrarEmpresa() {
       ),
     },
     {
-
       title: "Endereço",
       content: (
         <>
           <CCol md={4}>
-            <CFormLabel>CEP</CFormLabel>
-            <CFormInput name="cep" className='cep' value={formData.cep} onChange={handleChange} placeholder='00000-000' required />
+            <CFormLabel className='d-flex align-items-center justify-content-between'> 
+              CEP
+              <CButton id='buscar' color="primary">
+                Buscar
+              </CButton>
+            </CFormLabel>
+            <CFormInput id='cep' name="cep" className='cep' value={formData.cep} onChange={handleChange} placeholder='00000-000' required />
           </CCol>
           <CCol md={4}>
             <CFormLabel>Logradouro</CFormLabel>
-            <CFormInput name="logradouro" value={formData.logradouro} onChange={handleChange} required />
+            <CFormInput id='rua' name="logradouro" value={formData.logradouro} onChange={handleChange} required />
           </CCol>
           <CCol md={4}>
             <CFormLabel>Bairro</CFormLabel>
-            <CFormInput name="bairro" value={formData.bairro} onChange={handleChange} required />
+            <CFormInput id='bairro' name="bairro" value={formData.bairro} onChange={handleChange} required />
           </CCol>
           <CCol md={2}>
             <CFormLabel>Número</CFormLabel>
-            <CFormInput name="numero" value={formData.numero} onChange={handleChange} required />
+            <CFormInput id='numero' name="numero" value={formData.numero} onChange={handleChange} required />
           </CCol>
           <CCol md={3}>
             <CFormLabel>Cidade</CFormLabel>
-            <CFormInput name="cidade" value={formData.cidade} onChange={handleChange} required />
+            <CFormInput id='cidade' name="cidade" value={formData.cidade} onChange={handleChange} required />
           </CCol>
           <CCol md={3}>
 
             <CFormLabel>Estado</CFormLabel>
-            <CFormSelect name="estado" value={formData.estado} onChange={handleChange} required>
+            <CFormSelect id='uf' name="estado" value={formData.estado} onChange={handleChange} required>
               <option value="">Selecione...</option>
               {["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"].map(uf => (
                 <option key={uf} value={uf}>{uf}</option>
@@ -210,7 +277,7 @@ export default function CadastrarEmpresa() {
           </CCol>
           <CCol md={3}>
             <CFormLabel>Complemento</CFormLabel>
-            <CFormInput name="complemento" value={formData.complemento} onChange={handleChange} />
+            <CFormInput id='complemento' name="complemento" value={formData.complemento} onChange={handleChange} />
           </CCol>
         </>
       ),
@@ -240,7 +307,6 @@ export default function CadastrarEmpresa() {
       ),
     },
     {
-
       title: "Responsável",
       content: (
         <>
