@@ -7,6 +7,7 @@ import {
   CRow,
   CCol,
   CFormSelect,
+  CCard,
 } from "@coreui/react";
 import { createColaborador } from "../services/colaboradorService";
 import $ from 'jquery';
@@ -60,7 +61,8 @@ export default function CadastrarColaborador() {
   })
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4">
+      <CCard className="p-4 space-y-4">
       <h4>Cadastro de Colaborador</h4>
       <CForm onSubmit={handleSubmit} className="space-y-4">
         <CRow>
@@ -158,6 +160,7 @@ export default function CadastrarColaborador() {
           </CButton>
         </div>
       </CForm>
+      </CCard>
     </div>
   );
 }

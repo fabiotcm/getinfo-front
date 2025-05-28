@@ -82,8 +82,7 @@ export default function EditarEmpresa() {
             <CFormInput
               name="cnpj"
               value={formData.cnpj}
-              disabled
-              style={{ cursor: "not-allowed" }}
+              onChange={handleChange}
             />
           </CCol>
 
@@ -92,8 +91,7 @@ export default function EditarEmpresa() {
             <CFormInput
               name="razaoSocial"
               value={formData.razaoSocial}
-              disabled
-              style={{ cursor: "not-allowed" }}
+              onChange={handleChange}
             />
           </CCol>
 

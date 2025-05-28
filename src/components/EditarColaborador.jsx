@@ -11,9 +11,9 @@ import {
   CFormLabel,
   CButton,
   CFormSelect,
-  CCard,        // Mantendo CCard
-  CCardBody,    // Mantendo CCardBody
-  CCardTitle,   // Adicionando CCardTitle para o título
+  CCard,
+  CCardBody,
+  CCardTitle,
   CSpinner,
   CAlert,
 } from "@coreui/react";
@@ -24,6 +24,8 @@ export default function EditarColaborador() {
   const [loading, setLoading] = useState(true); // Loading para buscar dados iniciais
   const [isSaving, setIsSaving] = useState(false); // Novo estado para o botão Salvar
   const [formData, setFormData] = useState({
+    nome: "",         // Adicionado nome
+    sobrenome: "",    // Adicionado sobrenome
     status: "",
     email: "",
     telefone: "",
@@ -38,6 +40,8 @@ export default function EditarColaborador() {
         const response = await getColaboradorById(id);
         const data = response.data;
         setFormData({
+          nome: data.nome || "",       // Popula o campo nome
+          sobrenome: data.sobrenome || "", // Popula o campo sobrenome
           status: data.status || "",
           email: data.email || "",
           telefone: data.telefone || "",
@@ -68,7 +72,7 @@ export default function EditarColaborador() {
     setError(null); // Limpa erro anterior
 
     try {
-      await patchColaborador(id, formData);
+      await patchColaborador(id, formData); // Envia formData com nome e sobrenome
       setShowSuccessAlert(true);
 
       // Não redireciona imediatamente, espera o alert desaparecer
@@ -114,8 +118,32 @@ export default function EditarColaborador() {
         )}
 
         <CForm onSubmit={handleSubmit} className="row g-3"> {/* row g-3 para espaçamento Bootstrap */}
+          {/* Nome */}
+          <CCol md={6}>
+            <CFormLabel htmlFor="nome">Nome</CFormLabel>
+            <CFormInput
+              id="nome"
+              name="nome"
+              value={formData.nome}
+              onChange={handleChange}
+              required
+            />
+          </CCol>
+
+          {/* Sobrenome */}
+          <CCol md={6}>
+            <CFormLabel htmlFor="sobrenome">Sobrenome</CFormLabel>
+            <CFormInput
+              id="sobrenome"
+              name="sobrenome"
+              value={formData.sobrenome}
+              onChange={handleChange}
+              required
+            />
+          </CCol>
+
           {/* Status */}
-          <div className="col-md-6"> {/* Usando col-md para layout responsivo */}
+          <CCol md={6}> {/* Usando CCol para layout responsivo */}
             <CFormLabel htmlFor="status">Status</CFormLabel>
             <CFormSelect
               id="status"
@@ -129,10 +157,10 @@ export default function EditarColaborador() {
               ]}
               required
             />
-          </div>
+          </CCol>
 
           {/* Email */}
-          <div className="col-md-6">
+          <CCol md={6}>
             <CFormLabel htmlFor="email">Email</CFormLabel>
             <CFormInput
               id="email"
@@ -142,10 +170,10 @@ export default function EditarColaborador() {
               onChange={handleChange}
               required
             />
-          </div>
+          </CCol>
 
           {/* Telefone */}
-          <div className="col-md-6">
+          <CCol md={6}>
             <CFormLabel htmlFor="telefone">Telefone</CFormLabel>
             <CFormInput
               id="telefone"
@@ -154,10 +182,10 @@ export default function EditarColaborador() {
               onChange={handleChange}
               required
             />
-          </div>
+          </CCol>
 
           {/* Cargo */}
-          <div className="col-md-6">
+          <CCol md={6}>
             <CFormLabel htmlFor="cargo">Cargo</CFormLabel>
             <CFormInput
               id="cargo"
@@ -166,7 +194,7 @@ export default function EditarColaborador() {
               onChange={handleChange}
               required
             />
-          </div>
+          </CCol>
 
           {/* Botões de Ação */}
           <CCol xs={12} className="mt-4 text-end">

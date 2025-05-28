@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react' // Importe useEffect
 import {
   CForm,
   CFormInput,
@@ -7,12 +7,11 @@ import {
   CCol,
   CRow,
   CFormLabel,
-  CFormFeedback,
+  CFormFeedback, // Mantido, embora não esteja sendo usado com as validações atuais
   CCard,
   CCardBody,
   CCardTitle,
   CCardText,
-
 } from "@coreui/react";
 import { createEmpresa } from "../services/empresaService";
 import $ from 'jquery';
@@ -53,7 +52,6 @@ export default function CadastrarEmpresa() {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
-
 
   const isStepValid = () => {
     const requiredFields = requiredFieldsPerStep[step];
@@ -100,6 +98,7 @@ export default function CadastrarEmpresa() {
       cep: "",
       logradouro: "",
       bairro: "",
+      tag: "", // Você não tinha 'tag' no formData inicial
       numero: "",
       cidade: "",
       estado: "",
@@ -115,84 +114,77 @@ export default function CadastrarEmpresa() {
     setStep(0);
   };
 
-  $(document).ready(function () {
-    // Máscara para CNPJ
-    $('.cnpj').mask('00.000.000/0000-00')
+  // useEffect para aplicar máscaras e lógica do CEP após a renderização
+  useEffect(() => {
+    // Máscaras (aplicadas no carregamento do componente)
+    $('.cnpj').mask('00.000.000/0000-00');
+    $('.cep').mask('00000-000');
+    $('.email').unmask(); // Se necessário
+    $('.tel').mask('(00) 00000-0000');
+    $('.cpfResponsavel').mask('000.000.000-00');
 
-    // Máscara para CEP
-    $('.cep').mask('00000-000')
-
-    $('.email').unmask()
-
-    // Máscara para telefone
-    $('.tel').mask('(00) 00000-0000')
-
-    //Máscara para CPF
-    $('.cpfResponsavel').mask('000.000.000-00')
-  })
-  
-  $(document).ready(function() {
-    function limpa_formulário_cep() {
-        // Limpa valores do formulário de cep.
-        $("#rua").val("");
-        $("#bairro").val("");
-        $("#cidade").val("");
-        $("#complemento").val("");
-        // $("#uf").val("");
+    function limpa_formulario_cep_state() {
+      // Limpa valores no estado do React
+      setFormData(prev => ({
+        ...prev,
+        logradouro: "",
+        bairro: "",
+        cidade: "",
+        complemento: "",
+        estado: "", // Limpa o estado também
+        cep: "", // Limpa o próprio campo CEP no estado
+      }));
     }
-    
-    //Quando o campo cep perde o foco.
-    $("#cep").blur(function() {
 
-      //Nova variável "cep" somente com dígitos.
-      var cep = $(this).val().replace(/\D/g, '');
+    // Função para buscar CEP
+    const buscarCep = async () => {
+      const cep = formData.cep.replace(/\D/g, ''); // Pega o CEP do estado
+      if (cep !== "" && /^[0-9]{8}$/.test(cep)) {
+        setFormData(prev => ({ // Preenche com "..." no estado
+          ...prev,
+          logradouro: "...",
+          bairro: "...",
+          cidade: "...",
+          complemento: "...",
+          estado: "...",
+        }));
 
-      //Verifica se campo cep possui valor informado.
-      if (cep != "") {
-
-          //Expressão regular para validar o CEP.
-          var validacep = /^[0-9]{8}$/;
-
-          //Valida o formato do CEP.
-          if(validacep.test(cep)) {
-
-              //Preenche os campos com "..." enquanto consulta webservice.
-              $("#rua").val("...");
-              $("#bairro").val("...");
-              $("#cidade").val("...");
-              $("#complemento").val("...");
-              $("#uf").val("...");
-
-              //Consulta o webservice viacep.com.br/
-              $.getJSON("https://viacep.com.br/ws/"+ cep +"/json/?callback=?", function(dados) {
-
-                  if (!("erro" in dados)) {
-                      //Atualiza os campos com os valores da consulta.
-                      $("#rua").val(dados.logradouro);
-                      $("#bairro").val(dados.bairro);
-                      $("#cidade").val(dados.localidade);
-                      $("#complemento").val(dados.complemento);
-                      $("#uf").val(dados.uf);
-                  } //end if.
-                  else {
-                      //CEP pesquisado não foi encontrado.
-                      limpa_formulário_cep();
-                      alert("CEP não encontrado.");
-                  }
-              });
-          } //end if.
-          else {
-              //cep é inválido.
-              limpa_formulário_cep();
-              alert("Formato de CEP inválido.");
+        try {
+          const response = await $.getJSON(`https://viacep.com.br/ws/${cep}/json/?callback=?`);
+          if (!("erro" in response)) {
+            setFormData(prev => ({
+              ...prev,
+              logradouro: response.logradouro,
+              bairro: response.bairro,
+              cidade: response.localidade,
+              complemento: response.complemento,
+              estado: response.uf,
+            }));
+          } else {
+            // CEP pesquisado não foi encontrado.
+            limpa_formulario_cep_state();
+            alert("CEP não encontrado.");
           }
-      } //end if.
-      else {
-          //cep sem valor, limpa formulário.
-          limpa_formulário_cep();
+        } catch (error) {
+          console.error("Erro ao buscar CEP:", error);
+          limpa_formulario_cep_state();
+          alert("Erro ao buscar CEP. Tente novamente.");
+        }
+      } else if (cep !== "") { // Se o CEP foi digitado mas é inválido
+        limpa_formulario_cep_state();
+        alert("Formato de CEP inválido.");
+      } else { // CEP sem valor
+        limpa_formulario_cep_state();
       }
-    });
-  });
+    };
+
+    // Remove o evento blur direto do jQuery e usa a função do React para buscar
+    // Para chamar a busca pelo botão, usaremos um onClick direto no botão.
+    // Se quiser manter a busca no blur do campo, você precisará adicionar um onBlur ao CFormInput e chamar buscarCep.
+    // No exemplo abaixo, manteremos a busca apenas no clique do botão.
+
+  }, [formData.cep, step]); // Dependência adicionada para re-aplicar máscaras e lógica se o CEP mudar ou o passo mudar
+
 
   const steps = [
     {
@@ -201,7 +193,6 @@ export default function CadastrarEmpresa() {
         <>
           <CCol md={4}>
             <CFormLabel>CNPJ</CFormLabel>
-
             <CFormInput
               name="cnpj"
               className="cnpj"
@@ -226,7 +217,6 @@ export default function CadastrarEmpresa() {
           </CCol>
           <CCol md={4}>
             <CFormLabel>Tipo de Empresa</CFormLabel>
-
             <CFormSelect name="tipo" value={formData.tipo} onChange={handleChange} required>
               <option value="">Selecione...</option>
               <option value="PUBLICA">Pública</option>
@@ -241,13 +231,84 @@ export default function CadastrarEmpresa() {
       content: (
         <>
           <CCol md={4}>
-            <CFormLabel className='d-flex align-items-center justify-content-between'> 
-              CEP
-              <CButton id='buscar' color="primary">
+            <CFormLabel>CEP</CFormLabel>
+            <div className="d-flex align-items-center"> {/* Container flex para input e botão */}
+              <CFormInput
+                id='cep'
+                name="cep"
+                className='cep me-2' // Margem à direita para espaçar do botão
+                value={formData.cep}
+                onChange={handleChange}
+                placeholder='00000-000'
+                required
+              />
+              <CButton
+                id='buscar'
+                color="primary"
+                onClick={async () => {
+                  const cepValue = formData.cep.replace(/\D/g, '');
+                  if (cepValue !== "" && /^[0-9]{8}$/.test(cepValue)) {
+                    setFormData(prev => ({
+                      ...prev,
+                      logradouro: "...",
+                      bairro: "...",
+                      cidade: "...",
+                      complemento: "...",
+                      estado: "...",
+                    }));
+                    try {
+                      const response = await $.getJSON(`https://viacep.com.br/ws/${cepValue}/json/?callback=?`);
+                      if (!("erro" in response)) {
+                        setFormData(prev => ({
+                          ...prev,
+                          logradouro: response.logradouro,
+                          bairro: response.bairro,
+                          cidade: response.localidade,
+                          complemento: response.complemento,
+                          estado: response.uf,
+                        }));
+                      } else {
+                        setFormData(prev => ({
+                          ...prev,
+                          cep: "", // Limpa o CEP no estado
+                          logradouro: "",
+                          bairro: "",
+                          cidade: "",
+                          complemento: "",
+                          estado: "",
+                        }));
+                        alert("CEP não encontrado.");
+                      }
+                    } catch (error) {
+                      console.error("Erro ao buscar CEP:", error);
+                      setFormData(prev => ({
+                        ...prev,
+                        cep: "", // Limpa o CEP no estado
+                        logradouro: "",
+                        bairro: "",
+                        cidade: "",
+                        complemento: "",
+                        estado: "",
+                      }));
+                      alert("Erro ao buscar CEP. Tente novamente.");
+                    }
+                  } else if (cepValue !== "") {
+                    setFormData(prev => ({
+                      ...prev,
+                      cep: "", // Limpa o CEP no estado
+                      logradouro: "",
+                      bairro: "",
+                      cidade: "",
+                      complemento: "",
+                      estado: "",
+                    }));
+                    alert("Formato de CEP inválido.");
+                  }
+                }}
+              >
                 Buscar
               </CButton>
-            </CFormLabel>
-            <CFormInput id='cep' name="cep" className='cep' value={formData.cep} onChange={handleChange} placeholder='00000-000' required />
+            </div>
           </CCol>
           <CCol md={4}>
             <CFormLabel>Logradouro</CFormLabel>
@@ -266,7 +327,6 @@ export default function CadastrarEmpresa() {
             <CFormInput id='cidade' name="cidade" value={formData.cidade} onChange={handleChange} required />
           </CCol>
           <CCol md={3}>
-
             <CFormLabel>Estado</CFormLabel>
             <CFormSelect id='uf' name="estado" value={formData.estado} onChange={handleChange} required>
               <option value="">Selecione...</option>
@@ -288,7 +348,6 @@ export default function CadastrarEmpresa() {
         <>
           <CCol md={6}>
             <CFormLabel>Email</CFormLabel>
-
             <CFormInput
               type="email"
               className="email"
@@ -335,7 +394,6 @@ export default function CadastrarEmpresa() {
         </>
       ),
     },
-
   ];
 
   return (
@@ -344,9 +402,9 @@ export default function CadastrarEmpresa() {
         <CCardTitle className="h4 mb-3">Cadastro de Empresa</CCardTitle>
         {!finish ? (
           <>
-            <div className="d-flex justify-content-between mb-4">
+            {/* Indicadores de Passo */}
+            <div className="d-flex justify-content-between mb-4 position-relative">
               {steps.map((s, index) => (
-
                 <div key={index} className="text-center flex-fill px-2 position-relative" style={{ zIndex: 1 }}>
                   <div
                     className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
@@ -363,7 +421,6 @@ export default function CadastrarEmpresa() {
                   <small
                     className={`d-block ${
                       index === step
-
                         ? "fw-bold text-primary"
                         : index < step
                         ? "text-success"
@@ -372,14 +429,16 @@ export default function CadastrarEmpresa() {
                   >
                     {s.title}
                   </small>
-
                 </div>
               ))}
+              
             </div>
 
+            {/* Conteúdo do Passo Atual */}
             <h5>{steps[step].title}</h5>
             <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
 
+            {/* Botões de Navegação */}
             <div className="mt-4 d-flex justify-content-between">
               {step > 0 && (
                 <CButton color="secondary" onClick={handleBack}>
@@ -387,12 +446,12 @@ export default function CadastrarEmpresa() {
                 </CButton>
               )}
               {step < steps.length - 1 && (
-                <CButton color="primary" onClick={handleNext}>
+                <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto no primeiro passo se não houver botão "Voltar" */}
                   Próximo
                 </CButton>
               )}
               {step === steps.length - 1 && (
-                <CButton color="success" onClick={handleFinish}>
+                <CButton color="success" onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto se for o único botão */}
                   Finalizar
                 </CButton>
               )}
@@ -400,6 +459,7 @@ export default function CadastrarEmpresa() {
           </>
         ) : (
           <>
+            {/* Tela de Sucesso */}
             <CCardText className="text-success mt-3">
               Empresa cadastrada com sucesso!
             </CCardText>
@@ -410,6 +470,5 @@ export default function CadastrarEmpresa() {
         )}
       </CCardBody>
     </CCard>
-
   );
 }
