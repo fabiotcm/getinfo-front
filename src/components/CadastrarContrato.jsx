@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react' // Importe useEffect
 import {
   CForm,
   CFormInput,
@@ -16,6 +16,7 @@ import {
 import { Link } from 'react-router-dom'
 import $ from 'jquery';
 import 'jquery-mask-plugin'
+import { color } from 'chart.js/helpers';
 
 // Simulando CNPJs já cadastrados
 const cnpjsCadastrados = ['12345678000190', '98765432000100', '11223344000155']
@@ -24,6 +25,7 @@ export default function CadastrarContratoStepper() {
   const [step, setStep] = useState(0)
   const [finish, setFinish] = useState(false)
   const [cnpjInvalido, setCnpjInvalido] = useState(false)
+  const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false); // Novo estado para validação de data
 
   const [formData, setFormData] = useState({
     cnpj: '',
@@ -51,22 +53,34 @@ export default function CadastrarContratoStepper() {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }))
     }
+    // Limpa estados de validação ao digitar novamente
     if (name === 'cnpj') {
       setCnpjInvalido(false)
     }
+    if (name === 'dataInicio' || name === 'dataEntrega') {
+      setDataEntregaInvalida(false);
+    }
   }
+
+  // UseEffect para aplicar as máscaras jQuery
+  useEffect(() => {
+    $('.cnpj').mask('00.000.000/0000-00');
+  }, []); // Array de dependências vazio para rodar apenas uma vez
 
   const isStepValid = () => {
     const requiredFields = requiredFieldsPerStep[step]
+    // Verifica se todos os campos obrigatórios da etapa estão preenchidos
     return requiredFields.every((field) => formData[field] && formData[field].trim() !== '')
   }
 
   const handleNext = () => {
+    // 1. Validação de campos obrigatórios
     if (!isStepValid()) {
       alert('Preencha todos os campos obrigatórios desta etapa.')
       return
     }
 
+    // 2. Validação específica para o CNPJ (passo 0)
     if (step === 0) {
       const cnpjLimpo = formData.cnpj.replace(/\D/g, '')
       if (!cnpjsCadastrados.includes(cnpjLimpo)) {
@@ -75,6 +89,25 @@ export default function CadastrarContratoStepper() {
       }
     }
 
+    // 3. Validação específica para as datas (passo 2)
+    if (step === 2) {
+      if (formData.dataInicio && formData.dataEntrega) {
+        const dataInicio = new Date(formData.dataInicio);
+        const dataEntrega = new Date(formData.dataEntrega);
+
+        // Ajusta para comparar apenas as datas, ignorando a hora, caso contrário pode dar erro devido ao fuso horário
+        dataInicio.setHours(0, 0, 0, 0);
+        dataEntrega.setHours(0, 0, 0, 0);
+
+        if (dataEntrega < dataInicio) {
+          setDataEntregaInvalida(true);
+          alert('A Data de Entrega não pode ser anterior à Data de Início.');
+          return;
+        }
+      }
+    }
+
+    // Se todas as validações passarem, avança para o próximo passo
     setStep((prev) => prev + 1)
   }
 
@@ -87,6 +120,21 @@ export default function CadastrarContratoStepper() {
       alert('Preencha todos os campos obrigatórios desta etapa.')
       return
     }
+    // Repete a validação de data para o caso do usuário ir e voltar no formulário
+    if (formData.dataInicio && formData.dataEntrega) {
+        const dataInicio = new Date(formData.dataInicio);
+        const dataEntrega = new Date(formData.dataEntrega);
+
+        dataInicio.setHours(0, 0, 0, 0);
+        dataEntrega.setHours(0, 0, 0, 0);
+
+        if (dataEntrega < dataInicio) {
+          setDataEntregaInvalida(true);
+          alert('A Data de Entrega não pode ser anterior à Data de Início.');
+          return;
+        }
+    }
+
     console.log('Dados do contrato:', formData)
     alert('Contrato cadastrado com sucesso!')
     setFinish(true)
@@ -107,12 +155,8 @@ export default function CadastrarContratoStepper() {
     setStep(0)
     setFinish(false)
     setCnpjInvalido(false)
+    setDataEntregaInvalida(false); // Reseta o estado de validação de data
   }
-
-  $(document).ready(function () {
-    // Máscara para CNPJ
-    $('.cnpj').mask('00.000.000/0000-00')
-  })
 
   const steps = [
     {
@@ -190,6 +234,7 @@ export default function CadastrarContratoStepper() {
               value={formData.dataInicio}
               onChange={handleChange}
               required
+              invalid={dataEntregaInvalida} // Adiciona estilo de inválido se a data de entrega for anterior
             />
           </CCol>
           <CCol md={6}>
@@ -200,13 +245,19 @@ export default function CadastrarContratoStepper() {
               value={formData.dataEntrega}
               onChange={handleChange}
               required
+              invalid={dataEntregaInvalida} // Adiciona estilo de inválido se a data de entrega for anterior
             />
+            {dataEntregaInvalida && ( // Exibe mensagem de erro se a data for inválida
+              <div className="text-danger mt-2">
+                A Data de Entrega não pode ser anterior à Data de Início.
+              </div>
+            )}
           </CCol>
         </>
       ),
     },
     {
-      title: 'Descrição e Entregáveis',
+      title: 'Descrição e Anexos', // Renomeado o título para refletir o anexo
       content: (
         <>
           <CCol md={12}>
@@ -249,7 +300,7 @@ export default function CadastrarContratoStepper() {
         <CCardTitle className="h4 mb-3">Cadastro de Contrato</CCardTitle>
         {!finish ? (
           <>
-            <div className="d-flex justify-content-between mb-4">
+            <div className="d-flex justify-content-between mb-4 position-relative">
               {steps.map((s, index) => (
                 <div key={index} className="text-center flex-fill px-2 position-relative" style={{ zIndex: 1 }}>
                   <div
@@ -281,6 +332,7 @@ export default function CadastrarContratoStepper() {
                   </small>
                 </div>
               ))}
+            
             </div>
 
             <h5>{steps[step].title}</h5>
@@ -288,8 +340,16 @@ export default function CadastrarContratoStepper() {
 
             <div className="mt-4 d-flex justify-content-between">
               {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
-              {step < steps.length - 1 && <CButton color="primary" onClick={handleNext}>Próximo</CButton>}
-              {step === steps.length - 1 && <CButton color="success" className='text-white' onClick={handleFinish}>Finalizar</CButton>}
+              {step < steps.length - 1 && (
+                <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}>
+                  Próximo
+                </CButton>
+              )}
+              {step === steps.length - 1 && (
+                <CButton color="success" style={{color: '#FFFFFF'}} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
+                  Finalizar
+                </CButton>
+              )}
             </div>
           </>
         ) : (
@@ -298,6 +358,9 @@ export default function CadastrarContratoStepper() {
             <CButton color="success" className="mt-3 text-white" onClick={handleReset}>
               Cadastrar Novo Contrato
             </CButton>
+            <Link to="/contrato" className="btn btn-secondary mt-3 ms-2">
+              Ver Contratos
+            </Link>
           </>
         )}
       </CCardBody>
