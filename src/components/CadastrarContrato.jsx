@@ -30,7 +30,6 @@ export default function CadastrarContratoStepper() {
     tipoContrato: '',
     valorContrato: '',
     funcionarioResponsavel: '',
-    prazo: '',
     dataInicio: '',
     dataEntrega: '',
     descricao: '',
@@ -40,7 +39,7 @@ export default function CadastrarContratoStepper() {
 
   const requiredFieldsPerStep = [
     ['cnpj'],
-    ['tipoContrato', 'valorContrato', 'prazo', 'funcionarioResponsavel'],
+    ['tipoContrato', 'valorContrato', 'funcionarioResponsavel'],
     ['dataInicio', 'dataEntrega'],
     ['descricao', 'entregaveis'],
   ]
@@ -99,7 +98,6 @@ export default function CadastrarContratoStepper() {
       tipoContrato: '',
       valorContrato: '',
       funcionarioResponsavel: '',
-      prazo: '',
       dataInicio: '',
       dataEntrega: '',
       descricao: '',
@@ -148,7 +146,7 @@ export default function CadastrarContratoStepper() {
       title: 'Detalhes do Contrato',
       content: (
         <>
-          <CCol md={3}>
+          <CCol md={4}>
             <CFormLabel>Tipo de Contrato</CFormLabel>
             <CFormSelect name="tipoContrato" value={formData.tipoContrato} onChange={handleChange} required>
               <option value="">Selecione</option>
@@ -158,7 +156,7 @@ export default function CadastrarContratoStepper() {
               <option value="desenvolvimento">Desenvolvimento</option>
             </CFormSelect>
           </CCol>
-          <CCol md={3}>
+          <CCol md={4}>
             <CFormLabel>Valor</CFormLabel>
             <CFormInput
               type="number"
@@ -168,11 +166,7 @@ export default function CadastrarContratoStepper() {
               required
             />
           </CCol>
-          <CCol md={3}>
-            <CFormLabel>Prazo</CFormLabel>
-            <CFormInput name="prazo" value={formData.prazo} onChange={handleChange} required />
-          </CCol>
-          <CCol md={3}>
+          <CCol md={4}>
             <CFormLabel>Responsável</CFormLabel>
             <CFormInput
               name="funcionarioResponsavel"
@@ -295,13 +289,13 @@ export default function CadastrarContratoStepper() {
             <div className="mt-4 d-flex justify-content-between">
               {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
               {step < steps.length - 1 && <CButton color="primary" onClick={handleNext}>Próximo</CButton>}
-              {step === steps.length - 1 && <CButton color="success" onClick={handleFinish}>Finalizar</CButton>}
+              {step === steps.length - 1 && <CButton color="success" className='text-white' onClick={handleFinish}>Finalizar</CButton>}
             </div>
           </>
         ) : (
           <>
             <CCardText className="text-success mt-3">Contrato cadastrado com sucesso!</CCardText>
-            <CButton color="danger" className="mt-3" onClick={handleReset}>
+            <CButton color="success" className="mt-3 text-white" onClick={handleReset}>
               Cadastrar Novo Contrato
             </CButton>
           </>
