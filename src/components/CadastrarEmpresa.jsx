@@ -15,11 +15,15 @@ import {
 } from "@coreui/react";
 import { createEmpresa } from "../services/empresaService";
 import $ from 'jquery';
-import 'jquery-mask-plugin'
+import 'jquery-mask-plugin';
+import {cpf, cnpj} from 'cpf-cnpj-validator'; // Importa as funções de validação
 
 export default function CadastrarEmpresa() {
   const [step, setStep] = useState(0);
   const [finish, setFinish] = useState(false);
+
+  const [cnpjInvalido, setCnpjInvalido] = useState(false);
+  const [cpfResponsavelInvalido, setCpfResponsavelInvalido] = useState(false);
 
   const [formData, setFormData] = useState({
     cnpj: "",
@@ -63,6 +67,28 @@ export default function CadastrarEmpresa() {
       alert("Preencha todos os campos obrigatórios desta etapa.");
       return;
     }
+
+    // Validação de CNPJ e CPF  
+    if (step === 0) {
+      const cnpjValue = formData.cnpj.replace(/\D/g, ''); // Remove caracteres não numéricos
+      if (!cnpj.isValid(cnpjValue)) {
+        setCnpjInvalido(true);
+        alert("CNPJ inválido.");
+        return;
+      } else {
+        setCnpjInvalido(false);
+      }
+    }
+    if (step === 3) {
+      const cpfResponsavelValue = formData.cpfResponsavel.replace(/\D/g, ''); // Remove caracteres não numéricos
+      if (!cpf.isValid(cpfResponsavelValue)) {
+        setCpfResponsavelInvalido(true);
+        alert("CPF do responsável inválido.");
+        return;
+      } else {
+        setCpfResponsavelInvalido(false);
+      }
+    }
     setStep((prev) => prev + 1);
   };
 
@@ -73,6 +99,14 @@ export default function CadastrarEmpresa() {
   const handleFinish = async () => {
     if (!isStepValid()) {
       alert("Preencha todos os campos obrigatórios desta etapa.");
+      return;
+    }
+
+    // Validação de CPF
+    const cpfValue = formData.cpfResponsavel.replace(/\D/g, ''); // Remove caracteres não numéricos
+    if (!cpf.isValid(cpfValue)) {
+      setCpfResponsavelInvalido(true);
+      alert("CPF do responsável inválido.");
       return;
     }
     try {
@@ -112,6 +146,8 @@ export default function CadastrarEmpresa() {
     });
     setFinish(false);
     setStep(0);
+    setCnpjInvalido(false);
+    setCpfResponsavelInvalido(false);
   };
 
   // useEffect para aplicar máscaras e lógica do CEP após a renderização
@@ -200,7 +236,13 @@ export default function CadastrarEmpresa() {
               onChange={handleChange}
               required
               placeholder="00.000.000/0000-00"
+              invalid={cnpjInvalido}
             />
+            {cnpjInvalido && (
+              <CFormFeedback invalid>
+                CNPJ inválido.
+              </CFormFeedback>
+            )}
           </CCol>
           <CCol md={4}>
             <CFormLabel>Razão Social</CFormLabel>
@@ -389,7 +431,14 @@ export default function CadastrarEmpresa() {
               value={formData.cpfResponsavel}
               onChange={handleChange}
               required
+              invalid={cpfResponsavelInvalido}
+              placeholder="000.000.000-00"
             />
+            {cpfResponsavelInvalido && (
+              <CFormFeedback invalid>
+                CPF inválido.
+              </CFormFeedback>
+            )}
           </CCol>
         </>
       ),
@@ -451,7 +500,7 @@ export default function CadastrarEmpresa() {
                 </CButton>
               )}
               {step === steps.length - 1 && (
-                <CButton color="success" onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto se for o único botão */}
+                <CButton style={{color: '#FFFFFF'}} color="success" onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto se for o único botão */}
                   Finalizar
                 </CButton>
               )}
