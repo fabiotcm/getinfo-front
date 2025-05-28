@@ -55,14 +55,14 @@ export default function CardClientes() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Tem certeza que deseja excluir esta empresa?")) {
+    if (window.confirm("Tem certeza que deseja arquivar esta empresa?")) {
       try {
         await deleteEmpresa(id);
         setClientes((prev) => prev.filter((cliente) => cliente.id !== id));
-        alert("Empresa excluída com sucesso!"); // Feedback de sucesso
+        alert("Empresa arquivada com sucesso!"); // Feedback de sucesso
       } catch (error) {
-        console.error("Erro ao excluir empresa:", error);
-        alert("Erro ao excluir empresa. Verifique se ela possui contratos ativos ou se ela existe.");
+        console.error("Erro ao arquivar empresa:", error);
+        alert("Erro ao arquivar empresa. Verifique se ela possui contratos ativos ou se ela existe.");
       }
     }
   };
@@ -139,7 +139,7 @@ export default function CardClientes() {
                           <CIcon icon={cilPencil} />
                         </CButton>
                       </CTooltip>
-                      <CTooltip content="Excluir Empresa" placement="top">
+                      <CTooltip content="Arquivar Empresa" placement="top">
                         <CButton
                           color="danger"
                           variant="outline"

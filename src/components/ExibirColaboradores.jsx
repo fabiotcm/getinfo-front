@@ -52,14 +52,14 @@ export default function ExibirColaboradores() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Tem certeza que deseja excluir este colaborador?")) return;
+    if (!window.confirm("Tem certeza que deseja arquivar este colaborador?")) return;
     try {
       await deleteColaborador(id);
       setColaboradores(prev => prev.filter(colab => colab.id !== id));
-      alert("Colaborador excluído com sucesso!"); // Feedback de sucesso
+      alert("Colaborador arquivado com sucesso!"); // Feedback de sucesso
     } catch (error) {
-      console.error("Erro ao excluir colaborador:", error);
-      alert("Erro ao excluir colaborador. Verifique se ele está vinculado a contratos ou se ele existe.");
+      console.error("Erro ao arquivar colaborador:", error);
+      alert("Erro ao arquivar colaborador. Verifique se ele está vinculado a contratos ou se ele existe.");
     }
   };
 
@@ -134,7 +134,7 @@ export default function ExibirColaboradores() {
                           <CIcon icon={cilPencil} />
                         </CButton>
                       </CTooltip>
-                      <CTooltip content="Excluir Colaborador" placement="top">
+                      <CTooltip content="Arquivar Colaborador" placement="top">
                         <CButton
                           color="danger"
                           variant="outline"
