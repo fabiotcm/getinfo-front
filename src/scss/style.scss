@@ -133,6 +133,10 @@ body {
   min-height: 6rem;
 }
 
+.progress-thin {
+  height: 0.8rem;
+}
+
 @include color-mode(dark) {
   body {
     background-color: var(--cui-dark-bg-subtle);

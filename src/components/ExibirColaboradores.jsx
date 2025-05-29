@@ -16,7 +16,7 @@ import {
   CAlert, // Adicionado CAlert para mensagens de erro/sucesso
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { cilPencil, cilTrash, cilPlus } from "@coreui/icons";
+import { cilPencil, cilTrash, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
 import { getColaboradores, deleteColaborador } from "../services/colaboradorService";
 import { useNavigate } from "react-router-dom";
 
@@ -25,6 +25,7 @@ export default function ExibirColaboradores() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true); // Estado de carregamento
   const [error, setError] = useState(null);     // Estado de erro
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,9 +37,7 @@ export default function ExibirColaboradores() {
 
         // Verifica se a resposta é um array ou se precisa extrair de uma chave
         const data = Array.isArray(response.data) ? response.data : [];
-        // Filtra por status "ATIVO"
-        const data_filtered = data.filter((colaborador) => colaborador.status === "ATIVO");
-        setColaboradores(data_filtered);
+        setColaboradores(data);
       } catch (error) {
         console.error("Erro ao buscar colaboradores:", error);
         setError("Não foi possível carregar os colaboradores. Tente novamente mais tarde.");
@@ -73,14 +72,43 @@ export default function ExibirColaboradores() {
     const fullName = `${colab.nome || ''} ${colab.sobrenome || ''}`.toLowerCase();
     const cargo = (colab.cargo || '').toLowerCase(); // Garante que cargo existe
     const email = (colab.email || '').toLowerCase(); // Garante que email existe
+    const status = (colab.status || '').toLowerCase(); // Garante que status existe
     const termo = searchTerm.toLowerCase();
 
     return (
       fullName.includes(termo) ||
       cargo.includes(termo) ||
-      email.includes(termo)
+      email.includes(termo) ||
+      status.includes(termo)
     );
   });
+
+  const sortedColaboradores = [...filteredColaboradores].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    const aValue = (a[sortConfig.key] || '').toString().toLowerCase();
+    const bValue = (b[sortConfig.key] || '').toString().toLowerCase();
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return null;
+    return (
+      <CIcon
+        icon={sortConfig.direction === 'asc' ? cilArrowTop : cilArrowBottom}
+        className="ms-1"
+      />
+    );
+  };
 
   return (
     <div className="p-4"> {/* Removido position-relative do div pai */}
@@ -110,18 +138,28 @@ export default function ExibirColaboradores() {
             <CTable hover responsive>
               <CTableHead color="light">
                 <CTableRow>
-                  <CTableHeaderCell>Nome Completo</CTableHeaderCell>
-                  <CTableHeaderCell>Cargo</CTableHeaderCell>
-                  <CTableHeaderCell>Email</CTableHeaderCell>
-                  <CTableHeaderCell className="text-center">Ações</CTableHeaderCell> {/* Centralizado */}
+                  <CTableHeaderCell onClick={() => handleSort('nome')} style={{ cursor: 'pointer' }}>
+                    Nome Completo {getSortIcon('nome')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('cargo')} style={{ cursor: 'pointer' }}>
+                    Cargo {getSortIcon('cargo')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('email')} style={{ cursor: 'pointer' }}>
+                    Email {getSortIcon('email')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('status')} style={{ cursor: 'pointer' }}>
+                    Status {getSortIcon('status')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="text-center">Ações</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {filteredColaboradores.map((colab) => (
+                {sortedColaboradores.map((colab) => (
                   <CTableRow key={colab.id}>
                     <CTableDataCell onClick={(e) => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>{colab.nome} {colab.sobrenome}</CTableDataCell>
                     <CTableDataCell onClick={(e) => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>{colab.cargo}</CTableDataCell>
                     <CTableDataCell onClick={(e) => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>{colab.email}</CTableDataCell>
+                    <CTableDataCell onClick={(e) => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>{colab.status}</CTableDataCell>
                     <CTableDataCell className="text-center"> {/* Centralizado */}
                       <CTooltip content="Editar Colaborador" placement="top">
                         <CButton
