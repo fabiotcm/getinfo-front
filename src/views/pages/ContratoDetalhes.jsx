@@ -140,7 +140,7 @@ export default function ContratoDetalhes() {
             </CRow>
             <CCard className="mb-4">
               <CCardBody>
-                <CCardTitle className="h5">Colaboradores</CCardTitle>
+                <CCardTitle className="h5">Agregados</CCardTitle>
                 {contrato.colaboradores.length === 0 ? (
                   <p>Nenhum colaborador registrado.</p>
                 ) : (
