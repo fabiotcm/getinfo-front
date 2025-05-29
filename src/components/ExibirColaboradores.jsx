@@ -16,7 +16,7 @@ import {
   CAlert, // Adicionado CAlert para mensagens de erro/sucesso
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { cilPencil, cilTrash, cilPlus } from "@coreui/icons";
+import { cilPencil, cilTrash, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
 import { getColaboradores, deleteColaborador } from "../services/colaboradorService";
 import { useNavigate } from "react-router-dom";
 
@@ -100,6 +100,16 @@ export default function ExibirColaboradores() {
     }));
   };
 
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return null;
+    return (
+      <CIcon
+        icon={sortConfig.direction === 'asc' ? cilArrowTop : cilArrowBottom}
+        className="ms-1"
+      />
+    );
+  };
+
   return (
     <div className="p-4"> {/* Removido position-relative do div pai */}
       <CCard className="mb-4"> {/* Envolvendo o conteúdo em um CCard */}
@@ -129,16 +139,16 @@ export default function ExibirColaboradores() {
               <CTableHead color="light">
                 <CTableRow>
                   <CTableHeaderCell onClick={() => handleSort('nome')} style={{ cursor: 'pointer' }}>
-                    Nome Completo
+                    Nome Completo {getSortIcon('nome')}
                   </CTableHeaderCell>
                   <CTableHeaderCell onClick={() => handleSort('cargo')} style={{ cursor: 'pointer' }}>
-                    Cargo
+                    Cargo {getSortIcon('cargo')}
                   </CTableHeaderCell>
                   <CTableHeaderCell onClick={() => handleSort('email')} style={{ cursor: 'pointer' }}>
-                    Email
+                    Email {getSortIcon('email')}
                   </CTableHeaderCell>
                   <CTableHeaderCell onClick={() => handleSort('status')} style={{ cursor: 'pointer' }}>
-                    Status
+                    Status {getSortIcon('status')}
                   </CTableHeaderCell>
                   <CTableHeaderCell className="text-center">Ações</CTableHeaderCell>
                 </CTableRow>
