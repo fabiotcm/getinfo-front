@@ -17,15 +17,17 @@ import { Link } from 'react-router-dom'
 import $ from 'jquery';
 import 'jquery-mask-plugin'
 import { color } from 'chart.js/helpers';
+import { criarContrato, uploadAnexo } from '../services/contratoService' // Importa o serviço de criação de contrato
+import { getEmpresas } from '../services/empresaService' // ajuste o caminho conforme necessário
 
-// Simulando CNPJs já cadastrados
-const cnpjsCadastrados = ['12345678000190', '98765432000100', '11223344000155']
 
 export default function CadastrarContratoStepper() {
   const [step, setStep] = useState(0)
   const [finish, setFinish] = useState(false)
   const [cnpjInvalido, setCnpjInvalido] = useState(false)
   const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false); // Novo estado para validação de data
+  const [cnpjsValidos, setCnpjsValidos] = useState([])
+
 
   const [formData, setFormData] = useState({
     cnpj: '',
@@ -67,6 +69,21 @@ export default function CadastrarContratoStepper() {
     $('.cnpj').mask('00.000.000/0000-00');
   }, []); // Array de dependências vazio para rodar apenas uma vez
 
+  // Carrega os CNPJs válidos da API
+  const carregarEmpresas = async () => {
+    try {
+      const response = await getEmpresas()
+      const empresas = response.data
+      const cnpjs = empresas.map(emp => emp.cnpj.replace(/\D/g, '')) // remove a máscara, igual ao input limpo
+      setCnpjsValidos(cnpjs)
+    } catch (error) {
+      console.error('Erro ao carregar empresas:', error)
+    }
+  }
+
+  carregarEmpresas()
+
+
   const isStepValid = () => {
     const requiredFields = requiredFieldsPerStep[step]
     // Verifica se todos os campos obrigatórios da etapa estão preenchidos
@@ -83,7 +100,7 @@ export default function CadastrarContratoStepper() {
     // 2. Validação específica para o CNPJ (passo 0)
     if (step === 0) {
       const cnpjLimpo = formData.cnpj.replace(/\D/g, '')
-      if (!cnpjsCadastrados.includes(cnpjLimpo)) {
+      if (!cnpjsValidos.includes(cnpjLimpo)) {
         setCnpjInvalido(true)
         return
       }
@@ -115,7 +132,7 @@ export default function CadastrarContratoStepper() {
     setStep((prev) => prev - 1)
   }
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (!isStepValid()) {
       alert('Preencha todos os campos obrigatórios desta etapa.')
       return
@@ -135,9 +152,34 @@ export default function CadastrarContratoStepper() {
         }
     }
 
-    console.log('Dados do contrato:', formData)
+
+    try {
+    const contratoDTO = {
+      cnpj: formData.cnpj.replace(/\D/g, ''),
+      valor: parseFloat(formData.valorContrato),
+      descricao: formData.descricao,
+      tipo: formData.tipoContrato.toUpperCase(),
+      dataInicio: formData.dataInicio,
+      dataFim: formData.dataEntrega,
+      nomeResponsavel: formData.funcionarioResponsavel,
+    }
+
+    // Cria o contrato
+    const response = await criarContrato(contratoDTO)
+    const contratoId = response.data.id
+
+    // Se houver anexo, faz o upload
+    if (formData.anexo && contratoId) {
+      await uploadAnexo(contratoId, formData.anexo)
+    }
+
     alert('Contrato cadastrado com sucesso!')
+    console.log('Contrato cadastrado:', response.data)
     setFinish(true)
+  } catch (error) {
+    console.error('Erro ao cadastrar contrato:', error)
+    alert('Ocorreu um erro ao cadastrar o contrato.')
+    } 
   }
 
   const handleReset = () => {
