@@ -17,6 +17,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
+  cilActionUndo,
   cilBell,
   cilContrast,
   cilEnvelopeOpen,
@@ -72,9 +73,11 @@ const AppHeader = () => {
           onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}
           style={{ marginInlineStart: '-14px' }}
         >
-          <CIcon icon={cilMenu} size="lg" />
+          <CIcon icon={cilMenu}size="lg" />
         </CHeaderToggler>
-        <CButton color="primary" onClick={handleBack}>Voltar</CButton>
+        <CButton color="primary" onClick={handleBack}>
+          <CIcon icon={cilActionUndo} style={{ transform: 'rotate(90deg)' }} />
+        </CButton>
         <CHeaderNav className="ms-auto">
           <CNavItem>
             <CNavLink href="#">
