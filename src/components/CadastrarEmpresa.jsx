@@ -45,6 +45,8 @@ export default function CadastrarEmpresa() {
     cpfResponsavel: "",
   });
 
+  const [cidades, setCidades] = useState([]);
+
   const requiredFieldsPerStep = [
     ["cnpj", "razaoSocial", "nomeFantasia", "tipo"],
     ["cep", "logradouro", "bairro", "numero", "cidade", "estado"],
@@ -221,6 +223,25 @@ export default function CadastrarEmpresa() {
 
   }, [formData.cep, step]); // Dependência adicionada para re-aplicar máscaras e lógica se o CEP mudar ou o passo mudar
 
+  useEffect(() => {
+  const carregarCidades = async () => {
+    if (formData.estado) {
+      try {
+        const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${formData.estado}/municipios`);
+        const data = await response.json();
+        const nomesCidades = data.map(cidade => cidade.nome);
+        setCidades(nomesCidades);
+      } catch (error) {
+        console.error("Erro ao carregar cidades:", error);
+        setCidades([]);
+      }
+    } else {
+      setCidades([]);
+    }
+  };
+
+  carregarCidades();
+}, [formData.estado]);
 
   const steps = [
     {
@@ -365,15 +386,20 @@ export default function CadastrarEmpresa() {
             <CFormInput id='numero' name="numero" value={formData.numero} onChange={handleChange} required />
           </CCol>
           <CCol md={3}>
-            <CFormLabel>Cidade</CFormLabel>
-            <CFormInput id='cidade' name="cidade" value={formData.cidade} onChange={handleChange} required />
-          </CCol>
-          <CCol md={3}>
             <CFormLabel>Estado</CFormLabel>
             <CFormSelect id='uf' name="estado" value={formData.estado} onChange={handleChange} required>
               <option value="">Selecione...</option>
               {["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"].map(uf => (
                 <option key={uf} value={uf}>{uf}</option>
+              ))}
+            </CFormSelect>
+          </CCol>
+          <CCol md={3}>
+            <CFormLabel>Cidade</CFormLabel>
+            <CFormSelect id='cidade' name="cidade" value={formData.cidade} onChange={handleChange} required>
+              <option value="">Selecione...</option>
+              {cidades.map((cidade, index) => (
+                <option key={index} value={cidade}>{cidade}</option>
               ))}
             </CFormSelect>
           </CCol>

@@ -3,44 +3,26 @@ import contratos from '../data/contratos_detalhados.json'
 import { listarContratos } from '../services/contratoService'
 import { useNavigate } from 'react-router-dom'
 import {
-  CTable,
-  CTableHead,
-  CTableRow,
-  CTableHeaderCell,
-  CTableBody,
-  CTableDataCell,
-  CButton,
-  CFormInput,
-  CTooltip,
-  CBadge,
-  CCard, // Adicionado CCard para envolver a tabela
-  CCardBody, // Adicionado CCardBody
-  CCardTitle, // Adicionado CCardTitle
+  CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell,
+  CButton, CFormInput, CTooltip, CBadge, CCard, CCardBody, CCardTitle
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
+import { cilPencil, cilTrash, cilPlus, cilArrowTop, cilArrowBottom } from '@coreui/icons'
+
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import logo from 'src/assets/brand/logo.png';
 
 export default function ContratoCard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [contratos,setContratos] = useState([])
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
 
-  const handleRowClick = (id) => {
-    navigate(`/contrato/${id}`)
-  }
-
-  const handleEdit = (id) => {
-    navigate(`/contrato/${id}/editar`)
-  }
-
-  const handleArchive = (id) => {
-    // Implementar lógica de arquivamento (ex: chamar API, remover da lista local)
-    alert(`Contrato ${id} arquivado`)
-  }
-
-  const handleAdd = () => {
-    navigate('/cadastrar-contrato')
-  }
+  const handleRowClick = (id) => navigate(`/contrato/${id}`)
+  const handleEdit = (id) => navigate(`/contrato/${id}/editar`)
+  const handleArchive = (id) => alert(`Contrato ${id} arquivado`)
+  const handleAdd = () => navigate('/cadastrar-contrato')
 
   const getStatusBadgeColor = (status) => {
     const desc = status?.descricao?.toLowerCase()
@@ -62,7 +44,6 @@ export default function ContratoCard() {
 })
 
 
-  // Função para formatar data (opcional, se não estiver globalmente disponível)
   const formatarData = (dataISO) => {
     if (!dataISO) return '';
     const data = new Date(dataISO);
@@ -82,13 +63,87 @@ export default function ContratoCard() {
     fetchContratos()
   }
   , [])
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }))
+  }
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return null
+    return (
+      <CIcon
+        icon={sortConfig.direction === 'asc' ? cilArrowTop : cilArrowBottom}
+        className="ms-1"
+      />
+    )
+  }
+
+  const sortedContratos = [...filteredContratos].sort((a, b) => {
+    if (!sortConfig.key) return 0
+    const getValue = (obj) => {
+      switch (sortConfig.key) {
+        case 'id_contrato':
+          return obj.id_contrato
+        case 'empresa':
+          return obj.empresa?.nome_fantasia || ''
+        case 'valor':
+          return Number(obj.valor)
+        case 'data':
+          return new Date(obj.data_inicio).getTime()
+        case 'status':
+          return obj.status?.descricao || ''
+        default:
+          return ''
+      }
+    }
+
+    const aValue = getValue(a)
+    const bValue = getValue(b)
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+    return 0
+  })
+
+  const exportToPDF = () => {
+    const doc = new jsPDF()
+    const tableColumn = ["ID", "Empresa", "Valor", "Início - Fim", "Status"]
+    const tableRows = sortedContratos.map(c => [
+      c.id_contrato,
+      c.empresa?.nome_fantasia || '',
+      `R$ ${Number(c.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      `${formatarData(c.data_inicio)} - ${formatarData(c.data_final)}`,
+      c.status?.descricao || ''
+    ])
+
+    doc.addImage(logo, 'PNG', 14, 10, 30, 25)
+    doc.setFontSize(14)
+    doc.text("Lista de Contratos", 50, 30)
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      styles: { fontSize: 10 },
+      headStyles: {
+        fillColor: [33, 38, 49],
+        textColor: [255, 255, 255],
+        halign: 'left'
+      }
+    })
+
+    doc.save("contratos.pdf")
+  }
 
   return (
-    <div className="p-4"> {/* Removido position-relative aqui, pois o botão será fixo na viewport */}
-      <CCard className="mb-4"> {/* Envolvendo o conteúdo em um CCard */}
+    <div className="p-4">
+      <CCard className="mb-4">
         <CCardBody>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <CCardTitle className="h4 mb-0">Contratos</CCardTitle> {/* Usando CCardTitle */}
+            <CCardTitle className="h4 mb-0">Contratos</CCardTitle>
+            <CButton color="secondary" onClick={exportToPDF}>Exportar PDF</CButton>
             <CFormInput
               type="search"
               placeholder="Buscar..."
@@ -101,30 +156,43 @@ export default function ContratoCard() {
           <CTable hover responsive>
             <CTableHead color="light">
               <CTableRow>
-                <CTableHeaderCell>N° do Contrato</CTableHeaderCell>
-                <CTableHeaderCell>Empresa</CTableHeaderCell>
-                <CTableHeaderCell>Valor</CTableHeaderCell>
-                <CTableHeaderCell>Período</CTableHeaderCell>
-                <CTableHeaderCell>Status</CTableHeaderCell>
-                <CTableHeaderCell className="text-center">Ações</CTableHeaderCell> {/* Centralizado as ações */}
+                <CTableHeaderCell onClick={() => handleSort('id_contrato')} style={{ cursor: 'pointer' }}>
+                  N° do Contrato {getSortIcon('id_contrato')}
+                </CTableHeaderCell>
+                <CTableHeaderCell onClick={() => handleSort('empresa')} style={{ cursor: 'pointer' }}>
+                  Empresa {getSortIcon('empresa')}
+                </CTableHeaderCell>
+                <CTableHeaderCell onClick={() => handleSort('valor')} style={{ cursor: 'pointer' }}>
+                  Valor {getSortIcon('valor')}
+                </CTableHeaderCell>
+                <CTableHeaderCell onClick={() => handleSort('data')} style={{ cursor: 'pointer' }}>
+                  Período {getSortIcon('data')}
+                </CTableHeaderCell>
+                <CTableHeaderCell onClick={() => handleSort('status')} style={{ cursor: 'pointer' }}>
+                  Status {getSortIcon('status')}
+                </CTableHeaderCell>
+                <CTableHeaderCell className="text-center">Ações</CTableHeaderCell>
               </CTableRow>
             </CTableHead>
+            
             <CTableBody>
-              {filteredContratos.map((contrato) => (
-                <CTableRow key={contrato.id}>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>{contrato.id}</CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
-                    {contrato.nomeFantasia || 'Empresa não encontrada'}
+              {sortedContratos.map((contrato) => (
+                <CTableRow key={contrato.id_contrato}>
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
+                    {contrato.id_contrato}
                   </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
+                    {contrato.empresa?.nome_fantasia || 'Empresa não encontrada'}
+                  </CTableDataCell>
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
                     R$ {Number(contrato.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
-                    {formatarData(contrato.dataInicio)} → {formatarData(contrato.dataFim)}
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
+                    {formatarData(contrato.data_inicio)} → {formatarData(contrato.data_final)}
                   </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
-                    <CBadge color={getStatusBadgeColor(contrato.statusContrato)}>
-                      {contrato.statusContrato || 'Desconhecido'}
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
+                    <CBadge color={getStatusBadgeColor(contrato.status)}>
+                      {contrato.status?.descricao || 'Desconhecido'}
                     </CBadge>
                   </CTableDataCell>
                   <CTableDataCell className="text-center">
@@ -134,7 +202,7 @@ export default function ContratoCard() {
                         variant="outline"
                         size="sm"
                         className="me-2"
-                        onClick={(e) => { e.stopPropagation(); handleEdit(contrato.id); }}
+                        onClick={(e) => { e.stopPropagation(); handleEdit(contrato.id_contrato); }}
                       >
                         <CIcon icon={cilPencil} />
                       </CButton>
@@ -144,34 +212,29 @@ export default function ContratoCard() {
                         color="danger"
                         variant="outline"
                         size="sm"
-                        onClick={(e) => { e.stopPropagation(); handleArchive(contrato.id); }}
+                        onClick={(e) => { e.stopPropagation(); handleArchive(contrato.id_contrato); }}
                       >
                         <CIcon icon={cilTrash} />
                       </CButton>
                     </CTooltip>
                   </CTableDataCell>
                 </CTableRow>
-
               ))}
             </CTableBody>
           </CTable>
         </CCardBody>
       </CCard>
 
-      {/* Botão de Adicionar - Garante visibilidade com z-index alto */}
-      <div
-        className="position-fixed bottom-0 end-0 p-4" // Use p-4 para padding
-        style={{ zIndex: 1050 }} // Z-index alto para ficar acima de outros elementos
-      >
+      <div className="position-fixed bottom-0 end-0 p-4" style={{ zIndex: 1050 }}>
         <CTooltip content="Adicionar novo contrato" placement="top">
           <CButton
             color="success"
             shape="rounded-pill"
-            style={{ borderRadius: '50%', width: '56px', height: '56px' }} // 50% para um círculo perfeito
+            style={{ borderRadius: '50%', width: '56px', height: '56px' }}
             onClick={handleAdd}
-            className='d-flex align-items-center justify-content-center' // Centraliza o ícone
+            className='d-flex align-items-center justify-content-center'
           >
-            <CIcon icon={cilPlus} size="xl" className='text-white' /> {/* Ícone maior */}
+            <CIcon icon={cilPlus} size="xl" className='text-white' />
           </CButton>
         </CTooltip>
       </div>

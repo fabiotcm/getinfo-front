@@ -16,15 +16,20 @@ import {
   CAlert, // Adicionado CAlert para mensagens de erro/sucesso
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { cilPencil, cilTrash, cilPlus } from "@coreui/icons";
+import { cilPencil, cilTrash, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
 import { getColaboradores, deleteColaborador } from "../services/colaboradorService";
 import { useNavigate } from "react-router-dom";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import logo from 'src/assets/brand/logo.png';
+
 
 export default function ExibirColaboradores() {
   const [colaboradores, setColaboradores] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true); // Estado de carregamento
   const [error, setError] = useState(null);     // Estado de erro
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,21 +78,87 @@ export default function ExibirColaboradores() {
     const fullName = `${colab.nome || ''} ${colab.sobrenome || ''}`.toLowerCase();
     const cargo = (colab.cargo || '').toLowerCase(); // Garante que cargo existe
     const email = (colab.email || '').toLowerCase(); // Garante que email existe
+    const status = (colab.status || '').toLowerCase(); // Garante que status existe
     const termo = searchTerm.toLowerCase();
 
     return (
       fullName.includes(termo) ||
       cargo.includes(termo) ||
-      email.includes(termo)
+      email.includes(termo) ||
+      status.includes(termo)
     );
   });
 
+  const sortedColaboradores = [...filteredColaboradores].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    const aValue = (a[sortConfig.key] || '').toString().toLowerCase();
+    const bValue = (b[sortConfig.key] || '').toString().toLowerCase();
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return null;
+    return (
+      <CIcon
+        icon={sortConfig.direction === 'asc' ? cilArrowTop : cilArrowBottom}
+        className="ms-1"
+      />
+    );
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+
+    const tableColumn = ["Nome", "Cargo", "Email", "Status"];
+    const tableRows = sortedColaboradores.map(colab => [
+      `${colab.nome} ${colab.sobrenome}`,
+      colab.cargo,
+      colab.email,
+      colab.status,
+    ]);
+
+    // Insere logo (x, y, width, height)
+    doc.addImage(logo, 'PNG', 14, 10, 30, 25);
+
+    // Título após a logo
+    doc.setFontSize(14);
+    doc.text("Lista de Colaboradores", 50, 30);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      styles: { fontSize: 10 },
+      headStyles: {
+        fillColor: [33, 38, 49],
+        textColor: [255, 255, 255],
+        halign: 'left'
+      },
+      margin: { top: 10 }
+    });
+
+    doc.save("colaboradores.pdf");
+  };
+
   return (
-    <div className="p-4"> {/* Removido position-relative do div pai */}
-      <CCard className="mb-4"> {/* Envolvendo o conteúdo em um CCard */}
+    <div className="p-4">
+      <CCard className="mb-4">
         <CCardBody>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <CCardTitle className="h4 mb-0">Colaboradores</CCardTitle> {/* Usando CCardTitle */}
+            <CCardTitle className="h4 mb-0">Colaboradores</CCardTitle>
+            <CButton color="secondary" onClick={exportToPDF}>
+              Exportar PDF
+            </CButton>
             <CFormInput
               type="search"
               placeholder="Buscar..."
@@ -110,22 +181,32 @@ export default function ExibirColaboradores() {
             <CTable hover responsive>
               <CTableHead color="light">
                 <CTableRow>
-                  <CTableHeaderCell>Nome Completo</CTableHeaderCell>
-                  <CTableHeaderCell>Cargo</CTableHeaderCell>
-                  <CTableHeaderCell>Email</CTableHeaderCell>
-                  <CTableHeaderCell className="text-center">Ações</CTableHeaderCell> {/* Centralizado */}
+                  <CTableHeaderCell onClick={() => handleSort('nome')} style={{ cursor: 'pointer' }}>
+                    Nome Completo {getSortIcon('nome')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('cargo')} style={{ cursor: 'pointer' }}>
+                    Cargo {getSortIcon('cargo')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('email')} style={{ cursor: 'pointer' }}>
+                    Email {getSortIcon('email')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('status')} style={{ cursor: 'pointer' }}>
+                    Status {getSortIcon('status')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="text-center">Ações</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
               <CTableBody>
-                {filteredColaboradores.map((colab) => (
+                {sortedColaboradores.map((colab) => (
                   <CTableRow key={colab.id}>
                     <CTableDataCell onClick={(e) => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>{colab.nome} {colab.sobrenome}</CTableDataCell>
                     <CTableDataCell onClick={(e) => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>{colab.cargo}</CTableDataCell>
                     <CTableDataCell onClick={(e) => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>{colab.email}</CTableDataCell>
+                    <CTableDataCell onClick={(e) => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>{colab.status}</CTableDataCell>
                     <CTableDataCell className="text-center"> {/* Centralizado */}
                       <CTooltip content="Editar Colaborador" placement="top">
                         <CButton
-                          color="primary" // Alterado para primary
+                          color="primary"
                           variant="outline"
                           size="sm"
                           className="me-2"
@@ -153,7 +234,6 @@ export default function ExibirColaboradores() {
         </CCardBody>
       </CCard>
 
-      {/* Botão flutuante para adicionar novo colaborador */}
       <div
         className="position-fixed bottom-0 end-0 p-4" // p-4 para padding
         style={{ zIndex: 1050 }} // Z-index alto para ficar acima de outros elementos
