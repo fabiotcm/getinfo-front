@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import contratos from '../data/contratos_detalhados.json'
+import { listarContratos } from '../services/contratoService'
 import { useNavigate } from 'react-router-dom'
 import {
   CTable,
@@ -22,6 +23,7 @@ import { cilPencil, cilTrash, cilPlus } from '@coreui/icons'
 export default function ContratoCard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [contratos,setContratos] = useState([])
 
   const handleRowClick = (id) => {
     navigate(`/contrato/${id}`)
@@ -50,16 +52,15 @@ export default function ContratoCard() {
   }
 
   const filteredContratos = contratos.filter((contrato) => {
-    const nomeFantasia = contrato.empresa?.nome_fantasia?.toLowerCase() || ''
-    const razaoSocial = contrato.empresa?.razao_social?.toLowerCase() || ''
+    const nomeFantasia = contrato.nomeFantasia?.toLowerCase() || ''
     const search = searchTerm.toLowerCase()
     return (
-      contrato.descricao.toLowerCase().includes(search) ||
+      contrato.descricao?.toLowerCase().includes(search) ||
       nomeFantasia.includes(search) ||
-      razaoSocial.includes(search) ||
-      contrato.valor.toString().includes(search)
+      contrato.valor?.toString().includes(search)
     )
-  })
+})
+
 
   // Função para formatar data (opcional, se não estiver globalmente disponível)
   const formatarData = (dataISO) => {
@@ -68,6 +69,19 @@ export default function ContratoCard() {
     return new Intl.DateTimeFormat('pt-BR').format(data);
   };
 
+  useEffect(() => {
+    const fetchContratos = async () => {
+      try {
+        const response = await listarContratos()
+        setContratos(response.data)
+      } catch (error) {
+        console.error('Erro ao buscar contratos:', error)
+      }
+    }
+
+    fetchContratos()
+  }
+  , [])
 
   return (
     <div className="p-4"> {/* Removido position-relative aqui, pois o botão será fixo na viewport */}
@@ -97,30 +111,30 @@ export default function ContratoCard() {
             </CTableHead>
             <CTableBody>
               {filteredContratos.map((contrato) => (
-                <CTableRow key={contrato.id_contrato}>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>{contrato.id_contrato}</CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
-                    {contrato.empresa?.nome_fantasia || 'Empresa não encontrada'}
+                <CTableRow key={contrato.id}>
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>{contrato.id}</CTableDataCell>
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
+                    {contrato.nomeFantasia || 'Empresa não encontrada'}
                   </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
                     R$ {Number(contrato.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
-                    {formatarData(contrato.data_inicio)} → {formatarData(contrato.data_final)}
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
+                    {formatarData(contrato.dataInicio)} → {formatarData(contrato.dataFim)}
                   </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
-                    <CBadge color={getStatusBadgeColor(contrato.status)}>
-                      {contrato.status?.descricao || 'Desconhecido'}
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
+                    <CBadge color={getStatusBadgeColor(contrato.statusContrato)}>
+                      {contrato.statusContrato || 'Desconhecido'}
                     </CBadge>
                   </CTableDataCell>
-                  <CTableDataCell className="text-center"> {/* Centralizado as ações */}
+                  <CTableDataCell className="text-center">
                     <CTooltip content="Editar Contrato" placement="top">
                       <CButton
-                        color="primary" // Alterado para primary
+                        color="primary"
                         variant="outline"
                         size="sm"
                         className="me-2"
-                        onClick={(e) => { e.stopPropagation(); handleEdit(contrato.id_contrato); }} // StopPropagation para evitar clique na linha
+                        onClick={(e) => { e.stopPropagation(); handleEdit(contrato.id); }}
                       >
                         <CIcon icon={cilPencil} />
                       </CButton>
@@ -130,13 +144,14 @@ export default function ContratoCard() {
                         color="danger"
                         variant="outline"
                         size="sm"
-                        onClick={(e) => { e.stopPropagation(); handleArchive(contrato.id_contrato); }} // StopPropagation
+                        onClick={(e) => { e.stopPropagation(); handleArchive(contrato.id); }}
                       >
                         <CIcon icon={cilTrash} />
                       </CButton>
                     </CTooltip>
                   </CTableDataCell>
                 </CTableRow>
+
               ))}
             </CTableBody>
           </CTable>
