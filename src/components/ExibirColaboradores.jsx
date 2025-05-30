@@ -19,6 +19,10 @@ import CIcon from "@coreui/icons-react";
 import { cilPencil, cilTrash, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
 import { getColaboradores, deleteColaborador } from "../services/colaboradorService";
 import { useNavigate } from "react-router-dom";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import logo from 'src/assets/brand/logo.png';
+
 
 export default function ExibirColaboradores() {
   const [colaboradores, setColaboradores] = useState([]);
@@ -112,12 +116,49 @@ export default function ExibirColaboradores() {
     );
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+
+    const tableColumn = ["Nome", "Cargo", "Email", "Status"];
+    const tableRows = sortedColaboradores.map(colab => [
+      `${colab.nome} ${colab.sobrenome}`,
+      colab.cargo,
+      colab.email,
+      colab.status,
+    ]);
+
+    // Insere logo (x, y, width, height)
+    doc.addImage(logo, 'PNG', 14, 10, 30, 25);
+
+    // Título após a logo
+    doc.setFontSize(14);
+    doc.text("Lista de Colaboradores", 50, 30);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 40,
+      styles: { fontSize: 10 },
+      headStyles: {
+        fillColor: [33, 38, 49], // #212631 em RGB
+        textColor: [255, 255, 255],
+        halign: 'left'
+      },
+      margin: { top: 10 }
+    });
+
+    doc.save("colaboradores.pdf");
+  };
+
   return (
-    <div className="p-4"> {/* Removido position-relative do div pai */}
-      <CCard className="mb-4"> {/* Envolvendo o conteúdo em um CCard */}
+    <div className="p-4">
+      <CCard className="mb-4">
         <CCardBody>
           <div className="d-flex justify-content-between align-items-center mb-4">
-            <CCardTitle className="h4 mb-0">Colaboradores</CCardTitle> {/* Usando CCardTitle */}
+            <CCardTitle className="h4 mb-0">Colaboradores</CCardTitle>
+            <CButton color="secondary" onClick={exportToPDF}>
+              Exportar PDF
+            </CButton>
             <CFormInput
               type="search"
               placeholder="Buscar..."
@@ -165,7 +206,7 @@ export default function ExibirColaboradores() {
                     <CTableDataCell className="text-center"> {/* Centralizado */}
                       <CTooltip content="Editar Colaborador" placement="top">
                         <CButton
-                          color="primary" // Alterado para primary
+                          color="primary"
                           variant="outline"
                           size="sm"
                           className="me-2"
@@ -193,7 +234,6 @@ export default function ExibirColaboradores() {
         </CCardBody>
       </CCard>
 
-      {/* Botão flutuante para adicionar novo colaborador */}
       <div
         className="position-fixed bottom-0 end-0 p-4" // p-4 para padding
         style={{ zIndex: 1050 }} // Z-index alto para ficar acima de outros elementos
