@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
+  CButton,
   CContainer,
   CDropdown,
   CDropdownItem,
@@ -16,6 +17,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import {
+  cilActionUndo,
   cilBell,
   cilContrast,
   cilEnvelopeOpen,
@@ -34,6 +36,8 @@ const AppHeader = () => {
 
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     document.addEventListener('scroll', () => {
@@ -42,6 +46,26 @@ const AppHeader = () => {
     })
   }, [])
 
+  useEffect(() => {
+    const history = JSON.parse(sessionStorage.getItem('pageHistory') || '[]')
+    if (history[history.length - 1] !== location.pathname) {
+      history.push(location.pathname)
+      sessionStorage.setItem('pageHistory', JSON.stringify(history))
+    }
+  }, [location])
+
+  const handleBack = () => {
+    const history = JSON.parse(sessionStorage.getItem('pageHistory') || '[]')
+    if (history.length > 1) {
+      history.pop()
+      const previous = history.pop()
+      sessionStorage.setItem('pageHistory', JSON.stringify(history))
+      navigate(previous)
+    } else {
+      navigate('/')
+    }
+  }
+
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
       <CContainer className="border-bottom px-4" fluid>
@@ -49,8 +73,11 @@ const AppHeader = () => {
           onClick={() => dispatch({ type: 'set', sidebarShow: !sidebarShow })}
           style={{ marginInlineStart: '-14px' }}
         >
-          <CIcon icon={cilMenu} size="lg" />
+          <CIcon icon={cilMenu}size="lg" />
         </CHeaderToggler>
+        <CButton color="primary" onClick={handleBack}>
+          <CIcon icon={cilActionUndo} style={{ transform: 'rotate(90deg)' }} />
+        </CButton>
         <CHeaderNav className="ms-auto">
           <CNavItem>
             <CNavLink href="#">
