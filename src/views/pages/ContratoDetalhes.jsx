@@ -117,23 +117,11 @@ export default function ContratoDetalhes() {
                 <CCard className="mb-4">
                   <CCardBody>
                     <CCardTitle className="h5">Responsável pelo Contrato</CCardTitle>
-                    <CListGroup flush>
-                      <CListGroupItem><strong>Nome:</strong> {contrato.responsavel.nome} {contrato.responsavel.sobrenome}</CListGroupItem>
-                      <CListGroupItem><strong>Email:</strong> {contrato.responsavel.email}</CListGroupItem>
-                      <CListGroupItem><strong>Telefone:</strong> {contrato.responsavel.telefone}</CListGroupItem>
-                    </CListGroup>
-                  </CCardBody>
-                </CCard>
-              </CCol>
-              <CCol>
-                <CCard className="mb-4">
-                  <CCardBody>
-                    <CCardTitle className="h5">Colaborador Responsável</CCardTitle>
-                    <CListGroup flush>
-                      <CListGroupItem><strong>Nome:</strong> {contrato.funcionarioResponsavel.nome}</CListGroupItem>
-                      <CListGroupItem><strong>Contato:</strong> {contrato.funcionarioResponsavel.contato}</CListGroupItem>
-                      <CListGroupItem><strong>Cargo:</strong> {contrato.funcionarioResponsavel.cargo.descricao}</CListGroupItem>
-                    </CListGroup>
+                      <CListGroup flush>
+                        <CListGroupItem><strong>Nome:</strong> {contrato.funcionarioResponsavel?.nome}</CListGroupItem>
+                        <CListGroupItem><strong>Contato:</strong> {contrato.funcionarioResponsavel?.contato}</CListGroupItem>
+                        <CListGroupItem><strong>Cargo:</strong> {contrato.funcionarioResponsavel?.cargo?.descricao}</CListGroupItem>
+                      </CListGroup>
                   </CCardBody>
                 </CCard>
               </CCol>
