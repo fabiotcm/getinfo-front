@@ -17,15 +17,31 @@ import { Link } from 'react-router-dom'
 import $ from 'jquery';
 import 'jquery-mask-plugin'
 import { color } from 'chart.js/helpers';
-
-// Simulando CNPJs já cadastrados
-const cnpjsCadastrados = ['12345678000190', '98765432000100', '11223344000155']
+import { criarContrato, uploadAnexo } from '../services/contratoService' // Importa o serviço de criação de contrato
+import { getEmpresas } from '../services/empresaService' // ajuste o caminho conforme necessário
+import { getColaboradores } from '../services/colaboradorService' // Importa o serviço de colaboradores
+import { criarEntregavel } from '../services/entregavelService' // Importa o serviço de entregáveis
 
 export default function CadastrarContratoStepper() {
   const [step, setStep] = useState(0)
   const [finish, setFinish] = useState(false)
   const [cnpjInvalido, setCnpjInvalido] = useState(false)
   const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false); // Novo estado para validação de data
+  const [cnpjsValidos, setCnpjsValidos] = useState([])
+  const [colaboradores, setColaboradores] = useState([])
+
+const carregarColaboradores = async () => {
+  try {
+    const response = await getColaboradores()
+    // Supondo que você quer apenas os ativos (verifique se sua API já filtra ou use um filtro aqui)
+    const ativos = response.data.filter(colab => colab.status !== 'INATIVO')
+    setColaboradores(ativos)
+  } catch (error) {
+    console.error('Erro ao carregar colaboradores:', error)
+  }
+}
+
+
 
   const [formData, setFormData] = useState({
     cnpj: '',
@@ -35,7 +51,9 @@ export default function CadastrarContratoStepper() {
     dataInicio: '',
     dataEntrega: '',
     descricao: '',
-    entregaveis: '',
+    entregaveis: [
+      { descricao: '', observacao: '', dataFinal: '' },
+    ],
     anexo: null,
   })
 
@@ -62,16 +80,64 @@ export default function CadastrarContratoStepper() {
     }
   }
 
+  const handleEntregavelChange = (index, e) => {
+  const { name, value } = e.target
+  const novosEntregaveis = [...formData.entregaveis]
+  novosEntregaveis[index][name] = value
+  setFormData(prev => ({ ...prev, entregaveis: novosEntregaveis }))
+}
+
+const adicionarEntregavel = () => {
+  setFormData(prev => ({
+    ...prev,
+    entregaveis: [...prev.entregaveis, { descricao: '', observacao: '', dataFinal: '' }],
+  }))
+}
+
+const removerEntregavel = (index) => {
+  if (formData.entregaveis.length === 1) return
+  const novosEntregaveis = formData.entregaveis.filter((_, i) => i !== index)
+  setFormData(prev => ({ ...prev, entregaveis: novosEntregaveis }))
+}
+
+
   // UseEffect para aplicar as máscaras jQuery
   useEffect(() => {
     $('.cnpj').mask('00.000.000/0000-00');
+
+    // Carrega os CNPJs válidos da API
+  const carregarEmpresas = async () => {
+    try {
+      const response = await getEmpresas()
+      const empresas = response.data
+      const cnpjs = empresas.map(emp => emp.cnpj.replace(/\D/g, '')) // remove a máscara, igual ao input limpo
+      setCnpjsValidos(cnpjs)
+    } catch (error) {
+      console.error('Erro ao carregar empresas:', error)
+    }
+  }
+
+  carregarEmpresas()
+  carregarColaboradores()
   }, []); // Array de dependências vazio para rodar apenas uma vez
 
+  
+
+
   const isStepValid = () => {
-    const requiredFields = requiredFieldsPerStep[step]
-    // Verifica se todos os campos obrigatórios da etapa estão preenchidos
-    return requiredFields.every((field) => formData[field] && formData[field].trim() !== '')
+  const requiredFields = requiredFieldsPerStep[step]
+  return requiredFields.every((field) => {
+    const value = formData[field]
+    if (typeof value === 'string') {
+      return value.trim() !== ''
+    } else if (Array.isArray(value)) {
+      // No caso de entregaveis, verifique se todos os entregáveis têm descrição e dataFinal preenchidos
+      return value.every((ent) => ent.descricao.trim() !== '' && ent.dataFinal.trim() !== '')
+    }
+    return !!value // fallback para campos como arquivos (anexo) ou outros tipos
+  })
   }
+
 
   const handleNext = () => {
     // 1. Validação de campos obrigatórios
@@ -83,7 +149,7 @@ export default function CadastrarContratoStepper() {
     // 2. Validação específica para o CNPJ (passo 0)
     if (step === 0) {
       const cnpjLimpo = formData.cnpj.replace(/\D/g, '')
-      if (!cnpjsCadastrados.includes(cnpjLimpo)) {
+      if (!cnpjsValidos.includes(cnpjLimpo)) {
         setCnpjInvalido(true)
         return
       }
@@ -115,7 +181,7 @@ export default function CadastrarContratoStepper() {
     setStep((prev) => prev - 1)
   }
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (!isStepValid()) {
       alert('Preencha todos os campos obrigatórios desta etapa.')
       return
@@ -135,9 +201,47 @@ export default function CadastrarContratoStepper() {
         }
     }
 
-    console.log('Dados do contrato:', formData)
+
+    try {
+    const contratoDTO = {
+      cnpj: formData.cnpj.replace(/\D/g, ''),
+      valor: parseFloat(formData.valorContrato),
+      descricao: formData.descricao,
+      tipo: formData.tipoContrato.toUpperCase(),
+      dataInicio: formData.dataInicio,
+      dataFim: formData.dataEntrega,
+      nomeResponsavel: formData.funcionarioResponsavel,
+    }
+
+    // Cria o contrato
+    const response = await criarContrato(contratoDTO)
+    const contratoId = response.data.id
+    console.log('Contrato criado com ID:', contratoId)
+    // Se houver anexo, faz o upload
+    if (formData.anexo && contratoId) {
+      await uploadAnexo(contratoId, formData.anexo)
+    }
+
+    if (formData.entregaveis.length > 0 && contratoId) {
+      for (const ent of formData.entregaveis) {
+        console.log('Criando entregável:', ent)
+        // Cria cada entregável associado ao contrato 
+        await criarEntregavel({
+          contratoId,
+          descricao: ent.descricao,
+          observacao: ent.observacao,
+          dataFinal: ent.dataFinal,
+        })
+      }
+    }
+
     alert('Contrato cadastrado com sucesso!')
+    console.log('Contrato cadastrado:', response.data)
     setFinish(true)
+  } catch (error) {
+    console.error('Erro ao cadastrar contrato:', error)
+    alert('Ocorreu um erro ao cadastrar o contrato.')
+    } 
   }
 
   const handleReset = () => {
@@ -212,12 +316,19 @@ export default function CadastrarContratoStepper() {
           </CCol>
           <CCol md={4}>
             <CFormLabel>Responsável</CFormLabel>
-            <CFormInput
+            <CFormSelect
               name="funcionarioResponsavel"
               value={formData.funcionarioResponsavel}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="">Selecione um colaborador</option>
+              {colaboradores.map((colab) => (
+                <option key={colab.id} value={colab.nome + ' ' + colab.sobrenome}>
+                  {colab.nome + ' ' + colab.sobrenome}
+                </option>
+              ))}
+            </CFormSelect>
           </CCol>
         </>
       ),
@@ -261,7 +372,7 @@ export default function CadastrarContratoStepper() {
       content: (
         <>
           <CCol md={12}>
-            <CFormLabel>Descrição</CFormLabel>
+            <CFormLabel>Descrição do Contrato</CFormLabel>
             <CFormTextarea
               name="descricao"
               value={formData.descricao}
@@ -272,14 +383,53 @@ export default function CadastrarContratoStepper() {
           </CCol>
           <CCol md={12}>
             <CFormLabel>Entregáveis</CFormLabel>
-            <CFormTextarea
-              name="entregaveis"
-              value={formData.entregaveis}
-              onChange={handleChange}
-              rows={3}
-              required
-            />
-          </CCol>
+            {formData.entregaveis.map((entregavel, index) => (
+              <div key={index} className="border p-3 mb-3 rounded">
+                <CRow className="mb-2">
+                  <CCol md={6}>
+                    <CFormLabel>Descrição do Entregável</CFormLabel>
+                    <CFormInput
+                      type="text"
+                      name="descricao"
+                      value={entregavel.descricao}
+                      onChange={(e) => handleEntregavelChange(index, e)}
+                      required
+                    />
+                  </CCol>
+                  <CCol md={4}>
+                    <CFormLabel>Data Final do Entregável</CFormLabel>
+                    <CFormInput
+                      type="date"
+                      name="dataFinal"
+                      value={entregavel.dataFinal}
+                      onChange={(e) => handleEntregavelChange(index, e)}
+                      required
+                    />
+                  </CCol>
+                  <CCol md={2} className="d-flex align-items-end">
+                    {formData.entregaveis.length > 1 && (
+                      <CButton className="text-white" color="danger" onClick={() => removerEntregavel(index)}>Remover</CButton>
+                    )}
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol md={12}>
+                    <CFormLabel>Observações</CFormLabel>
+                    <CFormTextarea
+                      name="observacao"
+                      value={entregavel.observacao}
+                      onChange={(e) => handleEntregavelChange(index, e)}
+                      rows={2}
+                    />
+                  </CCol>
+                </CRow>
+              </div>
+            ))}
+            <CButton color="secondary" onClick={adicionarEntregavel}>
+              Adicionar Entregável
+            </CButton>
+      </CCol>
+
           <CCol md={12}>
             <CFormLabel>Anexo</CFormLabel>
             <CFormInput

@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import contratos from '../data/contratos_detalhados.json'
+import { listarContratos } from '../services/contratoService'
 import { useNavigate } from 'react-router-dom'
 import {
   CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell,
@@ -15,6 +16,7 @@ import logo from 'src/assets/brand/logo.png';
 export default function ContratoCard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [contratos,setContratos] = useState([])
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
 
   const handleRowClick = (id) => navigate(`/contrato/${id}`)
@@ -32,16 +34,15 @@ export default function ContratoCard() {
   }
 
   const filteredContratos = contratos.filter((contrato) => {
-    const nomeFantasia = contrato.empresa?.nome_fantasia?.toLowerCase() || ''
-    const razaoSocial = contrato.empresa?.razao_social?.toLowerCase() || ''
+    const nomeFantasia = contrato.nomeFantasia?.toLowerCase() || ''
     const search = searchTerm.toLowerCase()
     return (
-      contrato.descricao.toLowerCase().includes(search) ||
+      contrato.descricao?.toLowerCase().includes(search) ||
       nomeFantasia.includes(search) ||
-      razaoSocial.includes(search) ||
-      contrato.valor.toString().includes(search)
+      contrato.valor?.toString().includes(search)
     )
-  })
+})
+
 
   const formatarData = (dataISO) => {
     if (!dataISO) return '';
@@ -49,6 +50,19 @@ export default function ContratoCard() {
     return new Intl.DateTimeFormat('pt-BR').format(data);
   };
 
+  useEffect(() => {
+    const fetchContratos = async () => {
+      try {
+        const response = await listarContratos()
+        setContratos(response.data)
+      } catch (error) {
+        console.error('Erro ao buscar contratos:', error)
+      }
+    }
+
+    fetchContratos()
+  }
+  , [])
   const handleSort = (key) => {
     setSortConfig((prev) => ({
       key,
@@ -164,7 +178,9 @@ export default function ContratoCard() {
             <CTableBody>
               {sortedContratos.map((contrato) => (
                 <CTableRow key={contrato.id_contrato}>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>{contrato.id_contrato}</CTableDataCell>
+                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
+                    {contrato.id_contrato}
+                  </CTableDataCell>
                   <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
                     {contrato.empresa?.nome_fantasia || 'Empresa não encontrada'}
                   </CTableDataCell>
