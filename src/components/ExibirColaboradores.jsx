@@ -140,7 +140,7 @@ export default function ExibirColaboradores() {
       startY: 40,
       styles: { fontSize: 10 },
       headStyles: {
-        fillColor: [33, 38, 49], // #212631 em RGB
+        fillColor: [33, 38, 49],
         textColor: [255, 255, 255],
         halign: 'left'
       },
