@@ -37,7 +37,9 @@ export default function ExibirColaboradores() {
 
         // Verifica se a resposta é um array ou se precisa extrair de uma chave
         const data = Array.isArray(response.data) ? response.data : [];
-        setColaboradores(data);
+        // Filtra por status "ATIVO"
+        const data_filtered = data.filter((colaborador) => colaborador.status === "ATIVO");
+        setColaboradores(data_filtered);
       } catch (error) {
         console.error("Erro ao buscar colaboradores:", error);
         setError("Não foi possível carregar os colaboradores. Tente novamente mais tarde.");
