@@ -7,20 +7,22 @@ import {
   CCol,
   CRow,
   CFormLabel,
-  CFormFeedback, // Mantido, embora não esteja sendo usado com as validações atuais
+  CFormFeedback, 
   CCard,
   CCardBody,
   CCardTitle,
   CCardText,
 } from "@coreui/react";
-import { createEmpresa } from "../services/empresaService";
+import { createEmpresa, getEmpresas } from "../services/empresaService";
 import $ from 'jquery';
 import 'jquery-mask-plugin';
 import {cpf, cnpj} from 'cpf-cnpj-validator'; // Importa as funções de validação
 
+
 export default function CadastrarEmpresa() {
   const [step, setStep] = useState(0);
   const [finish, setFinish] = useState(false);
+  const [empresas, setEmpresas] = useState([]);
 
   const [cnpjInvalido, setCnpjInvalido] = useState(false);
   const [cpfResponsavelInvalido, setCpfResponsavelInvalido] = useState(false);
@@ -64,7 +66,7 @@ export default function CadastrarEmpresa() {
     return requiredFields.every((field) => formData[field] && formData[field].trim() !== "");
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!isStepValid()) {
       alert("Preencha todos os campos obrigatórios desta etapa.");
       return;
@@ -79,6 +81,22 @@ export default function CadastrarEmpresa() {
         return;
       } else {
         setCnpjInvalido(false);
+      }
+
+      try {
+      const existe = await getEmpresas();
+      const cnpjExistente = existe.data.some((empresa) => empresa.cnpj === cnpjValue);
+      if (cnpjExistente) {
+        setCnpjInvalido(true);
+        alert("CNPJ já cadastrado.");
+        return;
+      } else {
+        setCnpjInvalido(false);
+      }
+    } catch (error) {
+      console.error("Erro ao verificar CNPJ:", error);
+      alert("Erro ao verificar se o CNPJ já está cadastrado.");
+      return;
       }
     }
     if (step === 3) {
