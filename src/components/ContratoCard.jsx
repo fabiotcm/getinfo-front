@@ -176,49 +176,55 @@ export default function ContratoCard() {
             </CTableHead>
             
             <CTableBody>
-              {sortedContratos.map((contrato) => (
-                <CTableRow key={contrato.id_contrato}>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
-                    {contrato.id_contrato}
-                  </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
-                    {contrato.empresa?.nome_fantasia || 'Empresa não encontrada'}
-                  </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
-                    R$ {Number(contrato.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
-                    {formatarData(contrato.data_inicio)} → {formatarData(contrato.data_final)}
-                  </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id_contrato)} style={{ cursor: 'pointer' }}>
-                    <CBadge color={getStatusBadgeColor(contrato.status)}>
-                      {contrato.status?.descricao || 'Desconhecido'}
-                    </CBadge>
-                  </CTableDataCell>
-                  <CTableDataCell className="text-center">
-                    <CTooltip content="Editar Contrato" placement="top">
-                      <CButton
-                        color="primary"
-                        variant="outline"
-                        size="sm"
-                        className="me-2"
-                        onClick={(e) => { e.stopPropagation(); handleEdit(contrato.id_contrato); }}
-                      >
-                        <CIcon icon={cilPencil} />
-                      </CButton>
-                    </CTooltip>
-                    <CTooltip content="Arquivar Contrato" placement="top">
-                      <CButton
-                        color="danger"
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); handleArchive(contrato.id_contrato); }}
-                      >
-                        <CIcon icon={cilTrash} />
-                      </CButton>
-                    </CTooltip>
-                  </CTableDataCell>
-                </CTableRow>
+              {filteredContratos.map((contrato) => (
+                <CTableRow key={contrato.id}>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
+                      {contrato.id}
+                    </CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
+                      {contrato.nomeFantasia || 'Empresa não encontrada'}
+                    </CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
+                      R$ {Number(contrato.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
+                      {formatarData(contrato.dataInicio)} → {formatarData(contrato.dataFim)}
+                    </CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
+                      <CBadge color={getStatusBadgeColor(contrato.statusContrato)}>
+                        {contrato.statusContrato || 'Desconhecido'}
+                      </CBadge>
+                    </CTableDataCell>
+                    <CTableDataCell className="text-center">
+                      <CTooltip content="Editar Contrato" placement="top">
+                        <CButton
+                          color="primary"
+                          variant="outline"
+                          size="sm"
+                          className="me-2"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEdit(contrato.id)
+                          }}
+                        >
+                          <CIcon icon={cilPencil} />
+                        </CButton>
+                      </CTooltip>
+                      <CTooltip content="Arquivar Contrato" placement="top">
+                        <CButton
+                          color="danger"
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleArchive(contrato.id)
+                          }}
+                        >
+                          <CIcon icon={cilTrash} />
+                        </CButton>
+                      </CTooltip>
+                    </CTableDataCell>
+                  </CTableRow>
               ))}
             </CTableBody>
           </CTable>
