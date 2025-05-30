@@ -16,7 +16,7 @@ import {
   CAlert, // Adicionado CAlert para mensagens de erro/sucesso
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { cilPencil, cilTrash, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
+import { cilPencil, cilInbox, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
 import { getColaboradores, deleteColaborador } from "../services/colaboradorService";
 import { useNavigate } from "react-router-dom";
 import jsPDF from 'jspdf';
@@ -222,7 +222,7 @@ export default function ExibirColaboradores() {
                           size="sm"
                           onClick={(e) => { e.stopPropagation(); handleDelete(colab.id); }} // StopPropagation
                         >
-                          <CIcon icon={cilTrash} />
+                          <CIcon icon={cilInbox} />
                         </CButton>
                       </CTooltip>
                     </CTableDataCell>

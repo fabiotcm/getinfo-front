@@ -19,7 +19,7 @@ import {
   CAlert,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { cilPencil, cilTrash, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
+import { cilPencil, cilInbox, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import logo from 'src/assets/brand/logo.png';
@@ -203,7 +203,7 @@ export default function CardClientes() {
                           size="sm"
                           onClick={(e) => { e.stopPropagation(); handleDelete(cliente.id); }}
                         >
-                          <CIcon icon={cilTrash} />
+                          <CIcon icon={cilInbox} />
                         </CButton>
                       </CTooltip>
                     </CTableDataCell>
