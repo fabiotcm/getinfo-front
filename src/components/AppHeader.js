@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
+  CButton,
   CContainer,
   CDropdown,
   CDropdownItem,
@@ -34,6 +35,8 @@ const AppHeader = () => {
 
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     document.addEventListener('scroll', () => {
@@ -41,6 +44,26 @@ const AppHeader = () => {
         headerRef.current.classList.toggle('shadow-sm', document.documentElement.scrollTop > 0)
     })
   }, [])
+
+  useEffect(() => {
+    const history = JSON.parse(sessionStorage.getItem('pageHistory') || '[]')
+    if (history[history.length - 1] !== location.pathname) {
+      history.push(location.pathname)
+      sessionStorage.setItem('pageHistory', JSON.stringify(history))
+    }
+  }, [location])
+
+  const handleBack = () => {
+    const history = JSON.parse(sessionStorage.getItem('pageHistory') || '[]')
+    if (history.length > 1) {
+      history.pop()
+      const previous = history.pop()
+      sessionStorage.setItem('pageHistory', JSON.stringify(history))
+      navigate(previous)
+    } else {
+      navigate('/')
+    }
+  }
 
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
@@ -51,6 +74,7 @@ const AppHeader = () => {
         >
           <CIcon icon={cilMenu} size="lg" />
         </CHeaderToggler>
+        <CButton color="primary" onClick={handleBack}>Voltar</CButton>
         <CHeaderNav className="ms-auto">
           <CNavItem>
             <CNavLink href="#">
