@@ -19,7 +19,7 @@ import 'jquery-mask-plugin'
 import { color } from 'chart.js/helpers';
 import { criarContrato, uploadAnexo } from '../services/contratoService' // Importa o serviço de criação de contrato
 import { getEmpresas } from '../services/empresaService' // ajuste o caminho conforme necessário
-
+import { getColaboradores } from '../services/colaboradorService' // Importa o serviço de colaboradores
 
 export default function CadastrarContratoStepper() {
   const [step, setStep] = useState(0)
@@ -27,6 +27,19 @@ export default function CadastrarContratoStepper() {
   const [cnpjInvalido, setCnpjInvalido] = useState(false)
   const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false); // Novo estado para validação de data
   const [cnpjsValidos, setCnpjsValidos] = useState([])
+  const [colaboradores, setColaboradores] = useState([])
+
+const carregarColaboradores = async () => {
+  try {
+    const response = await getColaboradores()
+    // Supondo que você quer apenas os ativos (verifique se sua API já filtra ou use um filtro aqui)
+    const ativos = response.data.filter(colab => colab.status !== 'INATIVO')
+    setColaboradores(ativos)
+  } catch (error) {
+    console.error('Erro ao carregar colaboradores:', error)
+  }
+}
+
 
 
   const [formData, setFormData] = useState({
@@ -67,9 +80,8 @@ export default function CadastrarContratoStepper() {
   // UseEffect para aplicar as máscaras jQuery
   useEffect(() => {
     $('.cnpj').mask('00.000.000/0000-00');
-  }, []); // Array de dependências vazio para rodar apenas uma vez
 
-  // Carrega os CNPJs válidos da API
+    // Carrega os CNPJs válidos da API
   const carregarEmpresas = async () => {
     try {
       const response = await getEmpresas()
@@ -82,6 +94,10 @@ export default function CadastrarContratoStepper() {
   }
 
   carregarEmpresas()
+  carregarColaboradores()
+  }, []); // Array de dependências vazio para rodar apenas uma vez
+
+  
 
 
   const isStepValid = () => {
@@ -254,12 +270,19 @@ export default function CadastrarContratoStepper() {
           </CCol>
           <CCol md={4}>
             <CFormLabel>Responsável</CFormLabel>
-            <CFormInput
+            <CFormSelect
               name="funcionarioResponsavel"
               value={formData.funcionarioResponsavel}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="">Selecione um colaborador</option>
+              {colaboradores.map((colab) => (
+                <option key={colab.id} value={colab.nome + ' ' + colab.sobrenome}>
+                  {colab.nome + ' ' + colab.sobrenome}
+                </option>
+              ))}
+            </CFormSelect>
           </CCol>
         </>
       ),
