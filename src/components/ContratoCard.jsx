@@ -26,10 +26,10 @@ export default function ContratoCard() {
 
   const getStatusBadgeColor = (status) => {
     const desc = status?.descricao?.toLowerCase()
-    if (desc === 'ativo') return 'success'
-    if (desc === 'encerrado') return 'secondary'
-    if (desc === 'cancelado') return 'danger'
-    if (desc === 'em andamento') return 'info'
+    if (desc === 'ATIVO') return 'success'
+    if (desc === 'ENCERRADO') return 'secondary'
+    if (desc === 'CANCELADO') return 'danger'
+    if (desc === 'EM ANDAMENTO') return 'info'
     return 'dark'
   }
 
