@@ -21,7 +21,8 @@ import {
 
 export default function EditarContrato() {
   const { id } = useParams()
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     nomeFantasia: '',
     cnpj: '',
@@ -64,18 +65,33 @@ export default function EditarContrato() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Limpa alerts e erros ao começar a digitar/alterar
     setShowSuccessAlert(false)
-    setError(null)
+    setError(null);
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Contrato atualizado:', formData)
-    setShowSuccessAlert(true)
-    setTimeout(() => {
-      setShowSuccessAlert(false)
-    }, 3000)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setShowSuccessAlert(false);
+    setError(null);
+
+    try {
+      await ativarContrato(id);
+      setShowSuccessAlert(true);
+
+      // Não redireciona imediatamente, espera o alert desaparecer
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+        navigate("/colaboradores");
+      }, 3000); // Exibe o alert por 3 segundos
+    } catch (error) {
+      console.error("Erro ao atualizar colaborador:", error);
+      setError("Erro ao atualizar colaborador. Verifique os campos.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   if (loading) {
@@ -113,7 +129,7 @@ export default function EditarContrato() {
               name="nomeFantasia"
               value={formData.nomeFantasia}
               onChange={handleChange}
-              required
+              disabled
             />
           </CCol>
 
@@ -124,7 +140,7 @@ export default function EditarContrato() {
               name="cnpj"
               value={formData.cnpj}
               onChange={handleChange}
-              required
+              disabled
             />
           </CCol>
 
@@ -149,10 +165,9 @@ export default function EditarContrato() {
             <CFormInput
               id="valor"
               name="valor"
-              type="number"
-              value={formData.valor}
+              value={`R$ ${Number(formData.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
               onChange={handleChange}
-              required
+              disabled
             />
           </CCol>
 
@@ -180,8 +195,7 @@ export default function EditarContrato() {
               name="dataInicio"
               type="date"
               value={formData.dataInicio}
-              onChange={handleChange}
-              required
+              disabled
             />
           </CCol>
 
@@ -192,8 +206,7 @@ export default function EditarContrato() {
               name="dataFim"
               type="date"
               value={formData.dataFim}
-              onChange={handleChange}
-              required
+              disabled
             />
           </CCol>
 
