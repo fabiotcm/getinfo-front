@@ -1,22 +1,30 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
-  CButton,
-  CCard,
-  CCardBody,
-  CCardGroup,
-  CCol,
-  CContainer,
-  CForm,
-  CFormInput,
-  CInputGroup,
-  CInputGroupText,
-  CRow,
+  CButton, CCard, CCardBody, CCardGroup, CCol,
+  CContainer, CForm, CFormInput, CInputGroup,
+  CInputGroupText, CRow,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
+import { login } from '../../../services/authService'
 
 const Login = () => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [erro, setErro] = useState('')
+  const navigate = useNavigate()
+
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    try {
+      await login({ username, password })
+      navigate('/home')
+    } catch (err) {
+      setErro('Usuário ou senha inválidos')
+    }
+  }
+
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -25,14 +33,20 @@ const Login = () => {
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
-                  <CForm>
+                  <CForm onSubmit={handleLogin}>
                     <h1>Login</h1>
                     <p className="text-body-secondary">Login com sua conta</p>
+                    {erro && <p className="text-danger">{erro}</p>}
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Usuário" autoComplete="username" />
+                      <CFormInput
+                        placeholder="Usuário"
+                        autoComplete="username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                      />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
@@ -42,17 +56,14 @@ const Login = () => {
                         type="password"
                         placeholder="Senha"
                         autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton href='/home' color="primary" className="px-4">
+                        <CButton type="submit" color="primary" className="px-4">
                           Login
-                        </CButton>
-                      </CCol>
-                      <CCol xs={6} className="text-right">
-                        <CButton color="link" className="px-0">
-                          Esqueceu a senha?
                         </CButton>
                       </CCol>
                     </CRow>
@@ -63,14 +74,10 @@ const Login = () => {
                 <CCardBody className="text-center">
                   <div>
                     <h2>Não possui uma conta?</h2>
-                    <p>
-                      Registre -se e tenha acesso a todas as funcionalidades do sistema.
-                    </p>
-                    <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>
-                        Registrar agora!
-                      </CButton>
-                    </Link>
+                    <p>Registre-se e tenha acesso a todas as funcionalidades do sistema.</p>
+                    <CButton color="light" className="mt-3" onClick={() => navigate('/register')}>
+                      Registrar agora!
+                    </CButton>
                   </div>
                 </CCardBody>
               </CCard>

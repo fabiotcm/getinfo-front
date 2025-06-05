@@ -17,10 +17,11 @@ import { Link } from 'react-router-dom'
 import $ from 'jquery';
 import 'jquery-mask-plugin'
 import { color } from 'chart.js/helpers';
-import { criarContrato, uploadAnexo } from '../services/contratoService' // Importa o serviço de criação de contrato
+import { criarContrato, uploadAnexo, adicionarColaboradores } from '../services/contratoService' // Importa o serviço de criação de contrato
 import { getEmpresas } from '../services/empresaService' // ajuste o caminho conforme necessário
 import { getColaboradores } from '../services/colaboradorService' // Importa o serviço de colaboradores
 import { criarEntregavel } from '../services/entregavelService' // Importa o serviço de entregáveis
+
 
 export default function CadastrarContratoStepper() {
   const [step, setStep] = useState(0)
@@ -29,6 +30,43 @@ export default function CadastrarContratoStepper() {
   const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false); // Novo estado para validação de data
   const [cnpjsValidos, setCnpjsValidos] = useState([])
   const [colaboradores, setColaboradores] = useState([])
+  const [agregados, setAgregados] = useState([]);
+
+const adicionarAgregado = () => {
+  const novoId = Date.now(); // ID único baseado no timestamp
+  const select = $('<select>')
+    .addClass('form-select mb-2')
+    .attr('name', `colaborador-${novoId}`)
+    .append('<option value="">Selecione um colaborador</option>');
+
+  colaboradores.forEach(colab => {
+    select.append(`<option value="${colab.id}">${colab.nome} ${colab.sobrenome}</option>`);
+  });
+
+  const inputFuncao = $('<input>')
+    .addClass('form-control mb-2')
+    .attr('name', `funcao-${novoId}`)
+    .attr('placeholder', 'Função no contrato');
+
+  const removeBtn = $('<button>')
+    .addClass('btn btn-sm btn-danger mb-3 text-white')
+    .attr('type', 'button')
+    .text('Remover')
+    .on('click', function () {
+      divAgregado.remove();
+    });
+
+  const divAgregado = $('<div>').addClass('border rounded p-3 mb-2').append(
+    $('<label>').text('Colaborador'),
+    select,
+    $('<label>').text('Função'),
+    inputFuncao,
+    removeBtn
+  );
+
+  $('#agregados-container').append(divAgregado);
+};
+
 
 const carregarColaboradores = async () => {
   try {
@@ -215,6 +253,27 @@ const removerEntregavel = (index) => {
 
     // Cria o contrato
     const response = await criarContrato(contratoDTO)
+    // Captura agregados do DOM
+    const agregados = [];
+    $('#agregados-container').children('div').each(function () {
+      const colaboradorId = $(this).find('select').val();
+      const funcao = $(this).find('input').val();
+
+      if (colaboradorId && funcao) {
+        agregados.push({
+          colaboradorId: parseInt(colaboradorId),
+          funcao: funcao.trim()
+        });
+      }
+    });
+
+    // Envia os colaboradores agregados com função
+    if (agregados.length > 0) {
+      await adicionarColaboradores(contratoId, agregados);
+      console.log('Colaboradores agregados:', agregados);
+    }
+
+
     const contratoId = response.data.id
     console.log('Contrato criado com ID:', contratoId)
     // Se houver anexo, faz o upload
@@ -304,6 +363,7 @@ const removerEntregavel = (index) => {
               <option value="desenvolvimento">Desenvolvimento</option>
             </CFormSelect>
           </CCol>
+
           <CCol md={4}>
             <CFormLabel>Valor</CFormLabel>
             <CFormInput
@@ -314,8 +374,9 @@ const removerEntregavel = (index) => {
               required
             />
           </CCol>
+
           <CCol md={4}>
-            <CFormLabel>Responsável</CFormLabel>
+            <CFormLabel>Responsável pelo Contrato</CFormLabel>
             <CFormSelect
               name="funcionarioResponsavel"
               value={formData.funcionarioResponsavel}
@@ -329,6 +390,14 @@ const removerEntregavel = (index) => {
                 </option>
               ))}
             </CFormSelect>
+          </CCol>
+
+          <CCol md={12} className="mt-4">
+            <CFormLabel>Agregados do Contrato</CFormLabel>
+            <div id="agregados-container"></div>
+            <CButton color="success" className="mt-2 text-white" onClick={adicionarAgregado}>
+              + Adicionar Agregado
+            </CButton>
           </CCol>
         </>
       ),
@@ -489,17 +558,26 @@ const removerEntregavel = (index) => {
             <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
 
             <div className="mt-4 d-flex justify-content-between">
-              {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
-              {step < steps.length - 1 && (
-                <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}>
-                  Próximo
-                </CButton>
-              )}
-              {step === steps.length - 1 && (
-                <CButton color="success" style={{color: '#FFFFFF'}} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
-                  Finalizar
-                </CButton>
-              )}
+              <div className='d-flex gap-2'>
+                {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
+              </div>
+              <div className='d-flex gap-2'>
+                {step >= 0 && (
+                  <CButton color="secondary" href='/contrato'>
+                    Cancelar
+                  </CButton>
+                )}
+                {step < steps.length - 1 && (
+                  <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}>
+                    Próximo
+                  </CButton>
+                )}
+                {step === steps.length - 1 && (
+                  <CButton color="success" style={{color: '#FFFFFF'}} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
+                    Finalizar
+                  </CButton>
+                )}
+              </div>
             </div>
           </>
         ) : (

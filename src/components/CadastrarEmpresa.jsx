@@ -533,9 +533,17 @@ export default function CadastrarEmpresa() {
 
             {/* Botões de Navegação */}
             <div className="mt-4 d-flex justify-content-between">
+              <div className="d-flex gap-2"> {/* Flex para alinhar os botões à esquerda */}
               {step > 0 && (
                 <CButton color="secondary" onClick={handleBack}>
                   Voltar
+                </CButton>
+              )}
+              </div>
+              <div className="d-flex gap-2 end-0"> {/* Flex para alinhar os botões à direita */}
+              {step >= 0 && (
+                <CButton color='secondary' href='/clientes'> 
+                  Cancelar
                 </CButton>
               )}
               {step < steps.length - 1 && (
@@ -548,6 +556,7 @@ export default function CadastrarEmpresa() {
                   Finalizar
                 </CButton>
               )}
+              </div>
             </div>
           </>
         ) : (

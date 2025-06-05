@@ -155,6 +155,9 @@ export default function CadastrarColaborador() {
         </CRow>
 
         <div className="flex justify-end mt-4">
+          <CButton type="reset" color="secondary" className="me-2" href="/colaboradores">
+            Cancelar
+          </CButton>
           <CButton type="submit" color="primary">
             Salvar Colaborador
           </CButton>

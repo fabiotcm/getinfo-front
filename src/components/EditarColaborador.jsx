@@ -153,7 +153,7 @@ export default function EditarColaborador() {
               options={[
                 { label: "Selecione...", value: "" },
                 { label: "Ativo", value: "ATIVO" },
-                { label: "Desligado", value: "DESLIGADO" },
+                { label: "Inativo", value: "INATIVO" },
               ]}
               required
             />
