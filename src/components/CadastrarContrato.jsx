@@ -29,6 +29,43 @@ export default function CadastrarContratoStepper() {
   const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false); // Novo estado para validação de data
   const [cnpjsValidos, setCnpjsValidos] = useState([])
   const [colaboradores, setColaboradores] = useState([])
+  const [agregados, setAgregados] = useState([]);
+
+const adicionarAgregado = () => {
+  const novoId = Date.now(); // ID único baseado no timestamp
+  const select = $('<select>')
+    .addClass('form-select mb-2')
+    .attr('name', `colaborador-${novoId}`)
+    .append('<option value="">Selecione um colaborador</option>');
+
+  colaboradores.forEach(colab => {
+    select.append(`<option value="${colab.id}">${colab.nome} ${colab.sobrenome}</option>`);
+  });
+
+  const inputFuncao = $('<input>')
+    .addClass('form-control mb-2')
+    .attr('name', `funcao-${novoId}`)
+    .attr('placeholder', 'Função no contrato');
+
+  const removeBtn = $('<button>')
+    .addClass('btn btn-sm btn-danger mb-3 text-white')
+    .attr('type', 'button')
+    .text('Remover')
+    .on('click', function () {
+      divAgregado.remove();
+    });
+
+  const divAgregado = $('<div>').addClass('border rounded p-3 mb-2').append(
+    $('<label>').text('Colaborador'),
+    select,
+    $('<label>').text('Função'),
+    inputFuncao,
+    removeBtn
+  );
+
+  $('#agregados-container').append(divAgregado);
+};
+
 
 const carregarColaboradores = async () => {
   try {
@@ -215,6 +252,23 @@ const removerEntregavel = (index) => {
 
     // Cria o contrato
     const response = await criarContrato(contratoDTO)
+    // Captura agregados do DOM
+const agregados = [];
+$('#agregados-container').children('div').each(function () {
+  const colaboradorId = $(this).find('select').val();
+  const funcao = $(this).find('input').val();
+
+  if (colaboradorId && funcao) {
+    agregados.push({ colaboradorId: parseInt(colaboradorId), funcao });
+  }
+});
+
+// Envia os IDs dos colaboradores agregados para o contrato
+if (agregados.length > 0) {
+  const idsColaboradores = agregados.map(ag => ag.colaboradorId);
+  await contratoService.adicionarColaboradores(contratoId, idsColaboradores);
+}
+
     const contratoId = response.data.id
     console.log('Contrato criado com ID:', contratoId)
     // Se houver anexo, faz o upload
@@ -304,6 +358,7 @@ const removerEntregavel = (index) => {
               <option value="desenvolvimento">Desenvolvimento</option>
             </CFormSelect>
           </CCol>
+
           <CCol md={4}>
             <CFormLabel>Valor</CFormLabel>
             <CFormInput
@@ -314,8 +369,9 @@ const removerEntregavel = (index) => {
               required
             />
           </CCol>
+
           <CCol md={4}>
-            <CFormLabel>Responsável</CFormLabel>
+            <CFormLabel>Responsável pelo Contrato</CFormLabel>
             <CFormSelect
               name="funcionarioResponsavel"
               value={formData.funcionarioResponsavel}
@@ -329,6 +385,14 @@ const removerEntregavel = (index) => {
                 </option>
               ))}
             </CFormSelect>
+          </CCol>
+
+          <CCol md={12} className="mt-4">
+            <CFormLabel>Agregados do Contrato</CFormLabel>
+            <div id="agregados-container"></div>
+            <CButton color="success" className="mt-2 text-white" onClick={adicionarAgregado}>
+              + Adicionar Agregado
+            </CButton>
           </CCol>
         </>
       ),
