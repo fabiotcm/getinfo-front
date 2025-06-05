@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate  } from 'react-router-dom'
 import {
   buscarContratoPorId,
   ativarContrato,
@@ -20,7 +20,8 @@ import {
 } from '@coreui/react'
 
 export default function EditarContrato() {
-  const { id } = useParams()
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -92,7 +93,11 @@ export default function EditarContrato() {
     } finally {
       setIsSaving(false);
     }
-  }
+  };
+
+  const handleCancel = () => {
+    navigate("/contrato");
+  };
 
   if (loading) {
     return (
@@ -234,8 +239,18 @@ export default function EditarContrato() {
           </CCol>
 
           <CCol xs={12} className="mt-4 text-end">
-            <CButton type="submit" color="success" className="text-white">
-              Salvar Alterações
+            <CButton color="secondary" onClick={handleCancel} className="me-2">
+              Cancelar
+            </CButton>
+            <CButton type="submit" color="success" disabled={isSaving} className="text-white">
+              {isSaving ? (
+                <>
+                  <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar Alterações"
+              )}
             </CButton>
           </CCol>
         </CForm>
