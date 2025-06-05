@@ -489,17 +489,26 @@ const removerEntregavel = (index) => {
             <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
 
             <div className="mt-4 d-flex justify-content-between">
-              {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
-              {step < steps.length - 1 && (
-                <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}>
-                  Próximo
-                </CButton>
-              )}
-              {step === steps.length - 1 && (
-                <CButton color="success" style={{color: '#FFFFFF'}} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
-                  Finalizar
-                </CButton>
-              )}
+              <div className='d-flex gap-2'>
+                {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
+              </div>
+              <div className='d-flex gap-2'>
+                {step >= 0 && (
+                  <CButton color="secondary" href='/contrato'>
+                    Cancelar
+                  </CButton>
+                )}
+                {step < steps.length - 1 && (
+                  <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}>
+                    Próximo
+                  </CButton>
+                )}
+                {step === steps.length - 1 && (
+                  <CButton color="success" style={{color: '#FFFFFF'}} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
+                    Finalizar
+                  </CButton>
+                )}
+              </div>
             </div>
           </>
         ) : (
