@@ -17,10 +17,11 @@ import { Link } from 'react-router-dom'
 import $ from 'jquery';
 import 'jquery-mask-plugin'
 import { color } from 'chart.js/helpers';
-import { criarContrato, uploadAnexo } from '../services/contratoService' // Importa o serviço de criação de contrato
+import { criarContrato, uploadAnexo, adicionarColaboradores } from '../services/contratoService' // Importa o serviço de criação de contrato
 import { getEmpresas } from '../services/empresaService' // ajuste o caminho conforme necessário
 import { getColaboradores } from '../services/colaboradorService' // Importa o serviço de colaboradores
 import { criarEntregavel } from '../services/entregavelService' // Importa o serviço de entregáveis
+
 
 export default function CadastrarContratoStepper() {
   const [step, setStep] = useState(0)
@@ -253,21 +254,25 @@ const removerEntregavel = (index) => {
     // Cria o contrato
     const response = await criarContrato(contratoDTO)
     // Captura agregados do DOM
-const agregados = [];
-$('#agregados-container').children('div').each(function () {
-  const colaboradorId = $(this).find('select').val();
-  const funcao = $(this).find('input').val();
+    const agregados = [];
+    $('#agregados-container').children('div').each(function () {
+      const colaboradorId = $(this).find('select').val();
+      const funcao = $(this).find('input').val();
 
-  if (colaboradorId && funcao) {
-    agregados.push({ colaboradorId: parseInt(colaboradorId), funcao });
-  }
-});
+      if (colaboradorId && funcao) {
+        agregados.push({
+          colaboradorId: parseInt(colaboradorId),
+          funcao: funcao.trim()
+        });
+      }
+    });
 
-// Envia os IDs dos colaboradores agregados para o contrato
-if (agregados.length > 0) {
-  const idsColaboradores = agregados.map(ag => ag.colaboradorId);
-  await contratoService.adicionarColaboradores(contratoId, idsColaboradores);
-}
+    // Envia os colaboradores agregados com função
+    if (agregados.length > 0) {
+      await adicionarColaboradores(contratoId, agregados);
+      console.log('Colaboradores agregados:', agregados);
+    }
+
 
     const contratoId = response.data.id
     console.log('Contrato criado com ID:', contratoId)
