@@ -78,6 +78,10 @@ export default function EditarContrato() {
     setShowSuccessAlert(false);
     setError(null);
 
+    // Apagar essas 3 linhas após criação do endpoint
+    setError("Erro ao atualizar contrato. Criação do endpoint em progresso.");
+    setIsSaving(false);
+    return;
     try {
       await ativarContrato(id);
       setShowSuccessAlert(true);
@@ -85,11 +89,11 @@ export default function EditarContrato() {
       // Não redireciona imediatamente, espera o alert desaparecer
       setTimeout(() => {
         setShowSuccessAlert(false);
-        navigate("/colaboradores");
+        navigate("/contrato");
       }, 3000); // Exibe o alert por 3 segundos
     } catch (error) {
-      console.error("Erro ao atualizar colaborador:", error);
-      setError("Erro ao atualizar colaborador. Verifique os campos.");
+      console.error("Erro ao atualizar contrato:", error);
+      setError("Erro ao atualizar contrato. Verifique os campos.");
     } finally {
       setIsSaving(false);
     }
