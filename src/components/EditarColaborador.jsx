@@ -79,7 +79,7 @@ export default function EditarColaborador() {
       setTimeout(() => {
         setShowSuccessAlert(false);
         navigate("/colaboradores");
-      }, 3000); // Exibe o alert por 3 segundos
+      }, 1000); // Exibe o alert por 1 segundos
     } catch (error) {
       console.error("Erro ao atualizar colaborador:", error);
       setError("Erro ao atualizar colaborador. Verifique os campos.");
@@ -142,23 +142,6 @@ export default function EditarColaborador() {
             />
           </CCol>
 
-          {/* Status */}
-          <CCol md={6}> {/* Usando CCol para layout responsivo */}
-            <CFormLabel htmlFor="status">Status</CFormLabel>
-            <CFormSelect
-              id="status"
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              options={[
-                { label: "Selecione...", value: "" },
-                { label: "Ativo", value: "ATIVO" },
-                { label: "Inativo", value: "INATIVO" },
-              ]}
-              required
-            />
-          </CCol>
-
           {/* Email */}
           <CCol md={6}>
             <CFormLabel htmlFor="email">Email</CFormLabel>
@@ -192,6 +175,23 @@ export default function EditarColaborador() {
               name="cargo"
               value={formData.cargo}
               onChange={handleChange}
+              required
+            />
+          </CCol>
+
+          {/* Status */}
+          <CCol md={6}> {/* Usando CCol para layout responsivo */}
+            <CFormLabel htmlFor="status">Status</CFormLabel>
+            <CFormSelect
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              options={[
+                { label: "Selecione...", value: "" },
+                { label: "Ativo", value: "ATIVO" },
+                { label: "Inativo", value: "INATIVO" },
+              ]}
               required
             />
           </CCol>
