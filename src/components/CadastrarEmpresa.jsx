@@ -103,6 +103,7 @@ export default function CadastrarEmpresa() {
           }, 3000);
         }
       });
+      return
     }
 
     // Validação de CNPJ e CPF
