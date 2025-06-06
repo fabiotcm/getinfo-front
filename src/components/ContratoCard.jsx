@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { listarContratos } from '../services/contratoService'
+import { listarContratos, arquivarContrato } from '../services/contratoService'
 import { useNavigate } from 'react-router-dom'
 import {
   CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell,
   CButton, CFormInput, CTooltip, CBadge, CCard, CCardBody, CCardTitle,
-  CSpinner
+  CSpinner, CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilPencil, cilInbox, cilPlus, cilArrowTop, cilArrowBottom } from '@coreui/icons'
@@ -22,7 +22,15 @@ export default function ContratoCard() {
 
   const handleRowClick = (id) => navigate(`/contrato/${id}`)
   const handleEdit = (id) => navigate(`/contrato/${id}/editar`)
-  const handleArchive = (id) => alert(`Contrato ${id} arquivado`)
+  const handleArchive = async (id) => arquivarContrato(id)
+    .then(() => {
+      setContratos((prev) => prev.filter((contrato) => contrato.id !== id))
+      alert('Contrato arquivado com sucesso!')
+    })
+    .catch((err) => {
+      console.error('Erro ao arquivar contrato:', err)
+      alert('Não foi possível arquivar o contrato. Tente novamente mais tarde.')
+    })
   const handleAdd = () => navigate('/cadastrar-contrato')
 
   const getStatusBadgeColor = (status) => {
@@ -56,7 +64,11 @@ export default function ContratoCard() {
     const fetchContratos = async () => {
       try {
         const response = await listarContratos()
-        setContratos(response.data)
+        // Filtra contratos que não estão arquivados
+        const contratosAtivos = response.data.filter(
+          contrato => contrato.statusContrato?.toUpperCase() !== 'ARQUIVADO'
+        )
+        setContratos(contratosAtivos)
       } catch (err) {
         console.error('Erro ao buscar contratos:', err)
         setError('Não foi possível carregar os contratos. Tente novamente mais tarde.')
