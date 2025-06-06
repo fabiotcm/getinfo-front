@@ -7,7 +7,7 @@ import {
   CCol,
   CRow,
   CFormLabel,
-  CFormFeedback, 
+  CFormFeedback,
   CCard,
   CCardBody,
   CCardTitle,
@@ -16,7 +16,7 @@ import {
 import { createEmpresa, getEmpresas } from "../services/empresaService";
 import $ from 'jquery';
 import 'jquery-mask-plugin';
-import {cpf, cnpj} from 'cpf-cnpj-validator'; // Importa as funções de validação
+import { cpf, cnpj } from 'cpf-cnpj-validator'; // Importa as funções de validação
 
 
 export default function CadastrarEmpresa() {
@@ -26,6 +26,11 @@ export default function CadastrarEmpresa() {
 
   const [cnpjInvalido, setCnpjInvalido] = useState(false);
   const [cpfResponsavelInvalido, setCpfResponsavelInvalido] = useState(false);
+  const [emailInvalido, setEmailInvalido] = useState(false);
+  const [telefoneInvalido, setTelefoneInvalido] = useState(false);
+  const [emailResponsavelInvalido, setEmailResponsavelInvalido] = useState(false);
+  const [telefoneResponsavelInvalido, setTelefoneResponsavelInvalido] = useState(false);
+
 
   const [formData, setFormData] = useState({
     cnpj: "",
@@ -59,6 +64,14 @@ export default function CadastrarEmpresa() {
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+
+    // Resetar validações ao digitar
+    if (name === "cnpj") setCnpjInvalido(false);
+    if (name === "cpfResponsavel") setCpfResponsavelInvalido(false);
+    if (name === "email") setEmailInvalido(false);
+    if (name === "telefone") setTelefoneInvalido(false);
+    if (name === "emailResponsavel") setEmailResponsavelInvalido(false);
+    if (name === "telefoneResponsavel") setTelefoneResponsavelInvalido(false);
   }
 
   const isStepValid = () => {
@@ -66,47 +79,87 @@ export default function CadastrarEmpresa() {
     return requiredFields.every((field) => formData[field] && formData[field].trim() !== "");
   };
 
+  // Função de validação de e-mail
+  const validateEmail = (email) => {
+    return /\S+@\S+\.\S+/.test(email);
+  };
+
+  // Função de validação de telefone (considerando o formato (XX) XXXXX-XXXX)
+  const validatePhone = (phone) => {
+    const cleanedPhone = phone.replace(/\D/g, ''); // Remove caracteres não numéricos
+    return cleanedPhone.length === 10 || cleanedPhone.length === 11; // 10 ou 11 dígitos para telefone/celular
+  };
+
+
   const handleNext = async () => {
     if (!isStepValid()) {
-      alert("Preencha todos os campos obrigatórios desta etapa.");
+      alert("Preencha todos os campos desta etapa.");
       return;
     }
 
-    // Validação de CNPJ e CPF  
+    // Validação de CNPJ e CPF
     if (step === 0) {
       const cnpjValue = formData.cnpj.replace(/\D/g, ''); // Remove caracteres não numéricos
       if (!cnpj.isValid(cnpjValue)) {
         setCnpjInvalido(true);
-        alert("CNPJ inválido.");
         return;
       } else {
         setCnpjInvalido(false);
       }
 
       try {
-      const existe = await getEmpresas();
-      const cnpjExistente = existe.data.some((empresa) => empresa.cnpj === cnpjValue);
-      if (cnpjExistente) {
-        setCnpjInvalido(true);
-        alert("CNPJ já cadastrado.");
+        const existe = await getEmpresas();
+        const cnpjExistente = existe.data.some((empresa) => empresa.cnpj === cnpjValue);
+        if (cnpjExistente) {
+          setCnpjInvalido(true);
+          alert("CNPJ já cadastrado.");
+          return;
+        } else {
+          setCnpjInvalido(false);
+        }
+      } catch (error) {
+        console.error("Erro ao verificar CNPJ:", error);
+        alert("Erro ao verificar se o CNPJ já está cadastrado.");
         return;
-      } else {
-        setCnpjInvalido(false);
-      }
-    } catch (error) {
-      console.error("Erro ao verificar CNPJ:", error);
-      alert("Erro ao verificar se o CNPJ já está cadastrado.");
-      return;
       }
     }
+
+    // Validação de e-mail e telefone da empresa
+    if (step === 2) {
+      if (!validateEmail(formData.email)) {
+        setEmailInvalido(true);
+        return;
+      } else {
+        setEmailInvalido(false);
+      }
+      if (!validatePhone(formData.telefone)) {
+        setTelefoneInvalido(true);
+        return;
+      } else {
+        setTelefoneInvalido(false);
+      }
+    }
+
+    // Validação de CPF e e-mail/telefone do responsável
     if (step === 3) {
       const cpfResponsavelValue = formData.cpfResponsavel.replace(/\D/g, ''); // Remove caracteres não numéricos
       if (!cpf.isValid(cpfResponsavelValue)) {
         setCpfResponsavelInvalido(true);
-        alert("CPF do responsável inválido.");
         return;
       } else {
         setCpfResponsavelInvalido(false);
+      }
+      if (!validateEmail(formData.emailResponsavel)) {
+        setEmailResponsavelInvalido(true);
+        return;
+      } else {
+        setEmailResponsavelInvalido(false);
+      }
+      if (!validatePhone(formData.telefoneResponsavel)) {
+        setTelefoneResponsavelInvalido(true);
+        return;
+      } else {
+        setTelefoneResponsavelInvalido(false);
       }
     }
     setStep((prev) => prev + 1);
@@ -118,17 +171,29 @@ export default function CadastrarEmpresa() {
 
   const handleFinish = async () => {
     if (!isStepValid()) {
-      alert("Preencha todos os campos obrigatórios desta etapa.");
+      alert("Preencha todos os campos desta etapa.");
       return;
     }
 
-    // Validação de CPF
+    // Validação de CPF final antes de enviar
     const cpfValue = formData.cpfResponsavel.replace(/\D/g, ''); // Remove caracteres não numéricos
     if (!cpf.isValid(cpfValue)) {
       setCpfResponsavelInvalido(true);
-      alert("CPF do responsável inválido.");
+      
       return;
     }
+    // Validação de e-mail e telefone do responsável antes de enviar
+    if (!validateEmail(formData.emailResponsavel)) {
+      setEmailResponsavelInvalido(true);
+      
+      return;
+    }
+    if (!validatePhone(formData.telefoneResponsavel)) {
+      setTelefoneResponsavelInvalido(true);
+      
+      return;
+    }
+
     try {
       await createEmpresa(formData);
       alert("Empresa cadastrada com sucesso!");
@@ -138,7 +203,7 @@ export default function CadastrarEmpresa() {
       console.error("Detalhes do backend:", error.response?.data);
       alert(
         "Erro ao cadastrar: " +
-          (error.response?.data?.message || "Verifique os campos")
+        (error.response?.data?.message || "Verifique os campos")
       );
     }
   };
@@ -152,7 +217,7 @@ export default function CadastrarEmpresa() {
       cep: "",
       logradouro: "",
       bairro: "",
-      tag: "", // Você não tinha 'tag' no formData inicial
+      // tag: "", // 'tag' não estava no formData inicial e pode causar problemas se não for usada
       numero: "",
       cidade: "",
       estado: "",
@@ -168,6 +233,10 @@ export default function CadastrarEmpresa() {
     setStep(0);
     setCnpjInvalido(false);
     setCpfResponsavelInvalido(false);
+    setEmailInvalido(false);
+    setTelefoneInvalido(false);
+    setEmailResponsavelInvalido(false);
+    setTelefoneResponsavelInvalido(false);
   };
 
   // useEffect para aplicar máscaras e lógica do CEP após a renderização
@@ -175,7 +244,7 @@ export default function CadastrarEmpresa() {
     // Máscaras (aplicadas no carregamento do componente)
     $('.cnpj').mask('00.000.000/0000-00');
     $('.cep').mask('00000-000');
-    $('.email').unmask(); // Se necessário
+    $('.email').unmask(); // Descomente se o email tiver máscara que precisa ser removida
     $('.tel').mask('(00) 00000-0000');
     $('.cpfResponsavel').mask('000.000.000-00');
 
@@ -188,78 +257,33 @@ export default function CadastrarEmpresa() {
         cidade: "",
         complemento: "",
         estado: "", // Limpa o estado também
-        cep: "", // Limpa o próprio campo CEP no estado
+        // cep: "", // Não limpa o próprio campo CEP no estado, para o usuário poder corrigir
       }));
     }
 
-    // Função para buscar CEP
-    const buscarCep = async () => {
-      const cep = formData.cep.replace(/\D/g, ''); // Pega o CEP do estado
-      if (cep !== "" && /^[0-9]{8}$/.test(cep)) {
-        setFormData(prev => ({ // Preenche com "..." no estado
-          ...prev,
-          logradouro: "...",
-          bairro: "...",
-          cidade: "...",
-          complemento: "...",
-          estado: "...",
-        }));
-
-        try {
-          const response = await $.getJSON(`https://viacep.com.br/ws/${cep}/json/?callback=?`);
-          if (!("erro" in response)) {
-            setFormData(prev => ({
-              ...prev,
-              logradouro: response.logradouro,
-              bairro: response.bairro,
-              cidade: response.localidade,
-              complemento: response.complemento,
-              estado: response.uf,
-            }));
-          } else {
-            // CEP pesquisado não foi encontrado.
-            limpa_formulario_cep_state();
-            alert("CEP não encontrado.");
-          }
-        } catch (error) {
-          console.error("Erro ao buscar CEP:", error);
-          limpa_formulario_cep_state();
-          alert("Erro ao buscar CEP. Tente novamente.");
-        }
-      } else if (cep !== "") { // Se o CEP foi digitado mas é inválido
-        limpa_formulario_cep_state();
-        alert("Formato de CEP inválido.");
-      } else { // CEP sem valor
-        limpa_formulario_cep_state();
-      }
-    };
-
-    // Remove o evento blur direto do jQuery e usa a função do React para buscar
-    // Para chamar a busca pelo botão, usaremos um onClick direto no botão.
-    // Se quiser manter a busca no blur do campo, você precisará adicionar um onBlur ao CFormInput e chamar buscarCep.
-    // No exemplo abaixo, manteremos a busca apenas no clique do botão.
-
+    // Removendo a função buscarCep que estava global dentro do useEffect e duplicada
+    // A lógica de busca de CEP será chamada diretamente no onClick do botão "Buscar"
   }, [formData.cep, step]); // Dependência adicionada para re-aplicar máscaras e lógica se o CEP mudar ou o passo mudar
 
   useEffect(() => {
-  const carregarCidades = async () => {
-    if (formData.estado) {
-      try {
-        const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${formData.estado}/municipios`);
-        const data = await response.json();
-        const nomesCidades = data.map(cidade => cidade.nome);
-        setCidades(nomesCidades);
-      } catch (error) {
-        console.error("Erro ao carregar cidades:", error);
+    const carregarCidades = async () => {
+      if (formData.estado) {
+        try {
+          const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${formData.estado}/municipios`);
+          const data = await response.json();
+          const nomesCidades = data.map(cidade => cidade.nome);
+          setCidades(nomesCidades);
+        } catch (error) {
+          console.error("Erro ao carregar cidades:", error);
+          setCidades([]);
+        }
+      } else {
         setCidades([]);
       }
-    } else {
-      setCidades([]);
-    }
-  };
+    };
 
-  carregarCidades();
-}, [formData.estado]);
+    carregarCidades();
+  }, [formData.estado]);
 
   const steps = [
     {
@@ -279,7 +303,7 @@ export default function CadastrarEmpresa() {
             />
             {cnpjInvalido && (
               <CFormFeedback invalid>
-                CNPJ inválido.
+                CNPJ inválido ou já cadastrado.
               </CFormFeedback>
             )}
           </CCol>
@@ -442,11 +466,31 @@ export default function CadastrarEmpresa() {
               onChange={handleChange}
               required
               placeholder="seu@email.com"
+              invalid={emailInvalido}
             />
+            {emailInvalido && (
+              <CFormFeedback invalid>
+                Email inválido.
+              </CFormFeedback>
+            )}
           </CCol>
           <CCol md={6}>
             <CFormLabel>Telefone</CFormLabel>
-            <CFormInput type="tel" className="tel" name="telefone" value={formData.telefone} onChange={handleChange} required placeholder='(00) 00000-0000' />
+            <CFormInput
+              type="tel"
+              className="tel"
+              name="telefone"
+              value={formData.telefone}
+              onChange={handleChange}
+              required
+              placeholder='(00) 00000-0000'
+              invalid={telefoneInvalido}
+            />
+            {telefoneInvalido && (
+              <CFormFeedback invalid>
+                Telefone inválido.
+              </CFormFeedback>
+            )}
           </CCol>
         </>
       ),
@@ -461,11 +505,39 @@ export default function CadastrarEmpresa() {
           </CCol>
           <CCol md={6}>
             <CFormLabel>Email</CFormLabel>
-            <CFormInput type="email" className='email' name="emailResponsavel" value={formData.emailResponsavel} onChange={handleChange} required placeholder="seu@email.com" />
+            <CFormInput
+              type="email"
+              className='email'
+              name="emailResponsavel"
+              value={formData.emailResponsavel}
+              onChange={handleChange}
+              required
+              placeholder="seu@email.com"
+              invalid={emailResponsavelInvalido}
+            />
+            {emailResponsavelInvalido && (
+              <CFormFeedback invalid>
+                Email do responsável inválido.
+              </CFormFeedback>
+            )}
           </CCol>
           <CCol md={6}>
             <CFormLabel>Telefone</CFormLabel>
-            <CFormInput type="tel" className='tel' name="telefoneResponsavel" value={formData.telefoneResponsavel} onChange={handleChange} required placeholder='(00) 00000-0000' />
+            <CFormInput
+              type="tel"
+              className='tel'
+              name="telefoneResponsavel"
+              value={formData.telefoneResponsavel}
+              onChange={handleChange}
+              required
+              placeholder='(00) 00000-0000'
+              invalid={telefoneResponsavelInvalido}
+            />
+            {telefoneResponsavelInvalido && (
+              <CFormFeedback invalid>
+                Telefone do responsável inválido.
+              </CFormFeedback>
+            )}
           </CCol>
           <CCol md={6}>
             <CFormLabel>CPF</CFormLabel>
@@ -504,9 +576,9 @@ export default function CadastrarEmpresa() {
                       index === step
                         ? "bg-primary text-white"
                         : index < step
-                        ? "bg-success text-white"
-                        : "bg-light text-muted"
-                    }`}
+                          ? "bg-success text-white"
+                          : "bg-light text-muted"
+                      }`}
                     style={{ width: "40px", height: "40px", border: "2px solid #ccc" }}
                   >
                     {index + 1}
@@ -516,15 +588,15 @@ export default function CadastrarEmpresa() {
                       index === step
                         ? "fw-bold text-primary"
                         : index < step
-                        ? "text-success"
-                        : "text-muted"
-                    }`}
+                          ? "text-success"
+                          : "text-muted"
+                      }`}
                   >
                     {s.title}
                   </small>
                 </div>
               ))}
-              
+
             </div>
 
             {/* Conteúdo do Passo Atual */}
@@ -534,28 +606,28 @@ export default function CadastrarEmpresa() {
             {/* Botões de Navegação */}
             <div className="mt-4 d-flex justify-content-between">
               <div className="d-flex gap-2"> {/* Flex para alinhar os botões à esquerda */}
-              {step > 0 && (
-                <CButton color="secondary" onClick={handleBack}>
-                  Voltar
-                </CButton>
-              )}
+                {step > 0 && (
+                  <CButton color="secondary" onClick={handleBack}>
+                    Voltar
+                  </CButton>
+                )}
               </div>
               <div className="d-flex gap-2 end-0"> {/* Flex para alinhar os botões à direita */}
-              {step >= 0 && (
-                <CButton color='secondary' href='/clientes'> 
-                  Cancelar
-                </CButton>
-              )}
-              {step < steps.length - 1 && (
-                <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto no primeiro passo se não houver botão "Voltar" */}
-                  Próximo
-                </CButton>
-              )}
-              {step === steps.length - 1 && (
-                <CButton style={{color: '#FFFFFF'}} color="success" onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto se for o único botão */}
-                  Finalizar
-                </CButton>
-              )}
+                {step >= 0 && (
+                  <CButton color='secondary' href='/clientes'>
+                    Cancelar
+                  </CButton>
+                )}
+                {step < steps.length - 1 && (
+                  <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto no primeiro passo se não houver botão "Voltar" */}
+                    Próximo
+                  </CButton>
+                )}
+                {step === steps.length - 1 && (
+                  <CButton style={{ color: '#FFFFFF' }} color="success" onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto se for o único botão */}
+                    Finalizar
+                  </CButton>
+                )}
               </div>
             </div>
           </>
