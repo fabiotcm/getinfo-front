@@ -395,9 +395,12 @@ export default function CadastrarContratoStepper() {
                 </CButton>
               </div>
             ))}
-            <CButton color="success" className="mt-2 text-white" onClick={adicionarAgregado}>
-              + Adicionar Agregado
+            <div>
+            <CButton color="success" className="mt-1 text-white" onClick={adicionarAgregado}>
+              + Novo Agregado
             </CButton>
+              
+            </div>
           </CCol>
         </>
       ),
