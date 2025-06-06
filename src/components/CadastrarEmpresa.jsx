@@ -17,6 +17,7 @@ import { createEmpresa, getEmpresas } from "../services/empresaService";
 import $ from 'jquery';
 import 'jquery-mask-plugin';
 import { cpf, cnpj } from 'cpf-cnpj-validator'; // Importa as funções de validação
+import { func } from 'prop-types';
 
 
 export default function CadastrarEmpresa() {
@@ -93,8 +94,15 @@ export default function CadastrarEmpresa() {
 
   const handleNext = async () => {
     if (!isStepValid()) {
-      alert("Preencha todos os campos desta etapa.");
-      return;
+      const requiredFields = requiredFieldsPerStep[step];
+      requiredFields.map((field) => {
+        if (!formData[field]) {
+          document.getElementsByName(field)[0].style.borderColor = "red"; // Destaca o campo não preenchido
+          setTimeout(function () {
+            document.getElementsByName(field)[0].style.borderColor = ""; // Remove o destaque após 3 segundos
+          }, 3000);
+        }
+      });
     }
 
     // Validação de CNPJ e CPF
@@ -329,7 +337,6 @@ export default function CadastrarEmpresa() {
             <CFormSelect name="tipo"
               value={formData.tipo}
               onChange={handleChange}
-              required
             >
               <option value="">Selecione...</option>
               <option value="PUBLICA">Pública</option>
