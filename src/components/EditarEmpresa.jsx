@@ -83,20 +83,22 @@ export default function EditarEmpresa() {
               name="cnpj"
               value={formData.cnpj}
               onChange={handleChange}
+              disabled
             />
           </CCol>
 
           <CCol md={4}>
-            <CFormLabel>Razão Social</CFormLabel>
+            <CFormLabel>Razão Social (*)</CFormLabel>
             <CFormInput
               name="razaoSocial"
               value={formData.razaoSocial}
               onChange={handleChange}
+              disabled
             />
           </CCol>
 
           <CCol md={4}>
-            <CFormLabel>Nome Fantasia</CFormLabel>
+            <CFormLabel>Nome Fantasia (*)</CFormLabel>
             <CFormInput
               name="nomeFantasia"
               value={formData.nomeFantasia}
@@ -105,7 +107,7 @@ export default function EditarEmpresa() {
           </CCol>
 
           <CCol md={4}>
-            <CFormLabel>Tipo de Empresa</CFormLabel>
+            <CFormLabel>Tipo de Empresa (*)</CFormLabel>
             <CFormSelect
               name="tipo"
               value={formData.tipo}
@@ -123,27 +125,27 @@ export default function EditarEmpresa() {
           </CCol>
 
           <CCol md={4}>
-            <CFormLabel>CEP</CFormLabel>
-            <CFormInput name="cep" value={formData.cep} onChange={handleChange} />
+            <CFormLabel>CEP (*)</CFormLabel>
+            <CFormInput name="cep" value={formData.cep} onChange={handleChange} required />
           </CCol>
           <CCol md={4}>
-            <CFormLabel>Logradouro</CFormLabel>
-            <CFormInput name="logradouro" value={formData.logradouro} onChange={handleChange} />
+            <CFormLabel>Logradouro (*)</CFormLabel>
+            <CFormInput name="logradouro" value={formData.logradouro} onChange={handleChange} required />
           </CCol>
           <CCol md={4}>
-            <CFormLabel>Bairro</CFormLabel>
-            <CFormInput name="bairro" value={formData.bairro} onChange={handleChange} />
+            <CFormLabel>Bairro (*)</CFormLabel>
+            <CFormInput name="bairro" value={formData.bairro} onChange={handleChange} required />
           </CCol>
           <CCol md={2}>
-            <CFormLabel>Número</CFormLabel>
-            <CFormInput name="numero" value={formData.numero} onChange={handleChange} />
+            <CFormLabel>Número (*)</CFormLabel>
+            <CFormInput name="numero" value={formData.numero} onChange={handleChange} required />
           </CCol>
           <CCol md={3}>
-            <CFormLabel>Cidade</CFormLabel>
-            <CFormInput name="cidade" value={formData.cidade} onChange={handleChange} />
+            <CFormLabel>Cidade (*)</CFormLabel>
+            <CFormInput name="cidade" value={formData.cidade} onChange={handleChange} required />
           </CCol>
           <CCol md={3}>
-            <CFormLabel>Estado</CFormLabel>
+            <CFormLabel>Estado (*)</CFormLabel>
             <CFormSelect name="estado" value={formData.estado} onChange={handleChange}>
               <option value="">Selecione...</option>
               {[
@@ -166,12 +168,12 @@ export default function EditarEmpresa() {
           </CCol>
 
           <CCol md={6}>
-            <CFormLabel>Email</CFormLabel>
-            <CFormInput name="email" value={formData.email} onChange={handleChange} />
+            <CFormLabel>Email (*)</CFormLabel>
+            <CFormInput name="email" value={formData.email} onChange={handleChange} required />
           </CCol>
           <CCol md={6}>
-            <CFormLabel>Telefone</CFormLabel>
-            <CFormInput name="telefone" value={formData.telefone} onChange={handleChange} />
+            <CFormLabel>Telefone (*)</CFormLabel>
+            <CFormInput name="telefone" value={formData.telefone} onChange={handleChange} required />
           </CCol>
 
           {/* Responsável */}
@@ -180,20 +182,20 @@ export default function EditarEmpresa() {
           </CCol>
 
           <CCol md={6}>
-            <CFormLabel>Nome</CFormLabel>
-            <CFormInput name="nomeResponsavel" value={formData.nomeResponsavel} onChange={handleChange} />
+            <CFormLabel>Nome (*)</CFormLabel>
+            <CFormInput name="nomeResponsavel" value={formData.nomeResponsavel} onChange={handleChange} required />
           </CCol>
           <CCol md={6}>
-            <CFormLabel>Email</CFormLabel>
-            <CFormInput name="emailResponsavel" value={formData.emailResponsavel} onChange={handleChange} />
+            <CFormLabel>Email (*)</CFormLabel>
+            <CFormInput name="emailResponsavel" value={formData.emailResponsavel} onChange={handleChange} required />
           </CCol>
           <CCol md={6}>
-            <CFormLabel>Telefone</CFormLabel>
-            <CFormInput name="telefoneResponsavel" value={formData.telefoneResponsavel} onChange={handleChange} />
+            <CFormLabel>Telefone (*)</CFormLabel>
+            <CFormInput name="telefoneResponsavel" value={formData.telefoneResponsavel} onChange={handleChange} required />
           </CCol>
           <CCol md={6}>
-            <CFormLabel>CPF</CFormLabel>
-            <CFormInput name="cpfResponsavel" value={formData.cpfResponsavel} onChange={handleChange} />
+            <CFormLabel>CPF (*)</CFormLabel>
+            <CFormInput name="cpfResponsavel" value={formData.cpfResponsavel} onChange={handleChange} required />
           </CCol>
 
           <CCol xs={12} className="mt-4 text-end">

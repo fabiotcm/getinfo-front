@@ -291,7 +291,7 @@ export default function CadastrarEmpresa() {
       content: (
         <>
           <CCol md={4}>
-            <CFormLabel>CNPJ</CFormLabel>
+            <CFormLabel>CNPJ (*)</CFormLabel>
             <CFormInput
               name="cnpj"
               className="cnpj"
@@ -308,7 +308,7 @@ export default function CadastrarEmpresa() {
             )}
           </CCol>
           <CCol md={4}>
-            <CFormLabel>Razão Social</CFormLabel>
+            <CFormLabel>Razão Social (*)</CFormLabel>
             <CFormInput
               name="razaoSocial"
               value={formData.razaoSocial}
@@ -317,12 +317,20 @@ export default function CadastrarEmpresa() {
             />
           </CCol>
           <CCol md={4}>
-            <CFormLabel>Nome Fantasia</CFormLabel>
-            <CFormInput name="nomeFantasia" value={formData.nomeFantasia} onChange={handleChange} required />
+            <CFormLabel>Nome Fantasia (*)</CFormLabel>
+            <CFormInput name="nomeFantasia"
+              value={formData.nomeFantasia}
+              onChange={handleChange}
+              required
+            />
           </CCol>
           <CCol md={4}>
-            <CFormLabel>Tipo de Empresa</CFormLabel>
-            <CFormSelect name="tipo" value={formData.tipo} onChange={handleChange} required>
+            <CFormLabel>Tipo de Empresa (*)</CFormLabel>
+            <CFormSelect name="tipo"
+              value={formData.tipo}
+              onChange={handleChange}
+              required
+            >
               <option value="">Selecione...</option>
               <option value="PUBLICA">Pública</option>
               <option value="PRIVADA">Privada</option>
@@ -336,7 +344,7 @@ export default function CadastrarEmpresa() {
       content: (
         <>
           <CCol md={4}>
-            <CFormLabel>CEP</CFormLabel>
+            <CFormLabel>CEP (*)</CFormLabel>
             <div className="d-flex align-items-center"> {/* Container flex para input e botão */}
               <CFormInput
                 id='cep'
@@ -416,20 +424,44 @@ export default function CadastrarEmpresa() {
             </div>
           </CCol>
           <CCol md={4}>
-            <CFormLabel>Logradouro</CFormLabel>
-            <CFormInput id='rua' name="logradouro" value={formData.logradouro} onChange={handleChange} required />
+            <CFormLabel>Logradouro (*)</CFormLabel>
+            <CFormInput
+              id='rua'
+              name="logradouro"
+              value={formData.logradouro}
+              onChange={handleChange}
+              required
+            />
           </CCol>
           <CCol md={4}>
-            <CFormLabel>Bairro</CFormLabel>
-            <CFormInput id='bairro' name="bairro" value={formData.bairro} onChange={handleChange} required />
+            <CFormLabel>Bairro (*)</CFormLabel>
+            <CFormInput
+              id='bairro'
+              name="bairro"
+              value={formData.bairro}
+              onChange={handleChange}
+              required
+            />
           </CCol>
           <CCol md={2}>
-            <CFormLabel>Número</CFormLabel>
-            <CFormInput id='numero' name="numero" value={formData.numero} onChange={handleChange} required />
+            <CFormLabel>Número (*)</CFormLabel>
+            <CFormInput
+              id='numero'
+              name="numero"
+              value={formData.numero}
+              onChange={handleChange}
+              required
+            />
           </CCol>
           <CCol md={3}>
-            <CFormLabel>Estado</CFormLabel>
-            <CFormSelect id='uf' name="estado" value={formData.estado} onChange={handleChange} required>
+            <CFormLabel>Estado (*)</CFormLabel>
+            <CFormSelect
+              id='uf'
+              name="estado"
+              value={formData.estado}
+              onChange={handleChange}
+              required
+            >
               <option value="">Selecione...</option>
               {["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"].map(uf => (
                 <option key={uf} value={uf}>{uf}</option>
@@ -437,8 +469,14 @@ export default function CadastrarEmpresa() {
             </CFormSelect>
           </CCol>
           <CCol md={3}>
-            <CFormLabel>Cidade</CFormLabel>
-            <CFormSelect id='cidade' name="cidade" value={formData.cidade} onChange={handleChange} required>
+            <CFormLabel>Cidade (*)</CFormLabel>
+            <CFormSelect
+              id='cidade'
+              name="cidade"
+              value={formData.cidade}
+              onChange={handleChange}
+              required
+            >
               <option value="">Selecione...</option>
               {cidades.map((cidade, index) => (
                 <option key={index} value={cidade}>{cidade}</option>
@@ -447,7 +485,12 @@ export default function CadastrarEmpresa() {
           </CCol>
           <CCol md={3}>
             <CFormLabel>Complemento</CFormLabel>
-            <CFormInput id='complemento' name="complemento" value={formData.complemento} onChange={handleChange} />
+            <CFormInput
+              id='complemento'
+              name="complemento"
+              value={formData.complemento}
+              onChange={handleChange}
+            />
           </CCol>
         </>
       ),
@@ -457,7 +500,7 @@ export default function CadastrarEmpresa() {
       content: (
         <>
           <CCol md={6}>
-            <CFormLabel>Email</CFormLabel>
+            <CFormLabel>Email (*)</CFormLabel>
             <CFormInput
               type="email"
               className="email"
@@ -475,7 +518,7 @@ export default function CadastrarEmpresa() {
             )}
           </CCol>
           <CCol md={6}>
-            <CFormLabel>Telefone</CFormLabel>
+            <CFormLabel>Telefone (*)</CFormLabel>
             <CFormInput
               type="tel"
               className="tel"
@@ -500,11 +543,11 @@ export default function CadastrarEmpresa() {
       content: (
         <>
           <CCol md={6}>
-            <CFormLabel>Nome</CFormLabel>
+            <CFormLabel>Nome (*)</CFormLabel>
             <CFormInput name="nomeResponsavel" value={formData.nomeResponsavel} onChange={handleChange} required />
           </CCol>
           <CCol md={6}>
-            <CFormLabel>Email</CFormLabel>
+            <CFormLabel>Email (*)</CFormLabel>
             <CFormInput
               type="email"
               className='email'
@@ -522,7 +565,7 @@ export default function CadastrarEmpresa() {
             )}
           </CCol>
           <CCol md={6}>
-            <CFormLabel>Telefone</CFormLabel>
+            <CFormLabel>Telefone (*)</CFormLabel>
             <CFormInput
               type="tel"
               className='tel'
@@ -540,7 +583,7 @@ export default function CadastrarEmpresa() {
             )}
           </CCol>
           <CCol md={6}>
-            <CFormLabel>CPF</CFormLabel>
+            <CFormLabel>CPF (*)</CFormLabel>
             <CFormInput
               name="cpfResponsavel"
               className="cpfResponsavel"
