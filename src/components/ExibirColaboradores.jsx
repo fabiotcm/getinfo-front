@@ -168,6 +168,22 @@ export default function ExibirColaboradores() {
             />
           </div>
 
+      <div
+        className="mb-4" // p-4 para padding
+        style={{ zIndex: 1050 }} // Z-index alto para ficar acima de outros elementos
+      >
+        <CTooltip content="Adicionar novo colaborador" placement="top">
+          <CButton
+            color="success"
+            onClick={handleAdd}
+            className='d-flex align-items-center justify-content-center text-white' // Centraliza o ícone
+          >
+            <CIcon icon={cilPlus} size="xl" className='text-white' /> {/* Ícone maior */}
+            Cadastrar Novo Colaborador
+          </CButton>
+        </CTooltip>
+      </div>
+
           {loading ? (
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '150px' }}>
               <CSpinner color="primary" />
@@ -233,23 +249,6 @@ export default function ExibirColaboradores() {
           )}
         </CCardBody>
       </CCard>
-
-      <div
-        className="position-fixed bottom-0 end-0 p-4" // p-4 para padding
-        style={{ zIndex: 1050 }} // Z-index alto para ficar acima de outros elementos
-      >
-        <CTooltip content="Adicionar novo colaborador" placement="top">
-          <CButton
-            color="success"
-            shape="rounded-pill"
-            style={{ borderRadius: '50%', width: '56px', height: '56px' }} // 50% para um círculo perfeito
-            onClick={handleAdd}
-            className='d-flex align-items-center justify-content-center' // Centraliza o ícone
-          >
-            <CIcon icon={cilPlus} size="xl" className='text-white' /> {/* Ícone maior */}
-          </CButton>
-        </CTooltip>
-      </div>
     </div>
   );
 }
