@@ -137,6 +137,10 @@ body {
   height: 0.8rem;
 }
 
+.italic {
+  font-style: italic;
+}
+
 @include color-mode(dark) {
   body {
     background-color: var(--cui-dark-bg-subtle);
