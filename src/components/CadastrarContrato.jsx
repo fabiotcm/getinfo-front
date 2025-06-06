@@ -325,28 +325,47 @@ const removerEntregavel = (index) => {
     {
       title: 'CNPJ',
       content: (
-        <CCol md={6}>
-          <CFormLabel>CNPJ (*)</CFormLabel>
-          <CFormInput
-            name="cnpj"
-            className="cnpj"
-            value={formData.cnpj}
-            onChange={handleChange}
-            required
-            invalid={cnpjInvalido}
-            placeholder='00.000.000/0000-00'
-          />
-          {cnpjInvalido && (
-            <div className="text-danger mt-2">
-              Este CNPJ não está cadastrado no sistema.
-              <div>
-                <Link to="/cadastrar-empresa" className="text-decoration-underline">
-                  Gostaria de cadastrar essa empresa?
-                </Link>
+        <CRow>
+          <CCol md={6}>
+            <CFormLabel>CNPJ (*)</CFormLabel>
+            <CFormInput
+              name="cnpj"
+              className="cnpj"
+              value={formData.cnpj}
+              onChange={handleChange}
+              onBlur={async () => {
+                const response = await getEmpresas()
+                const empresas = response.data
+                const nomeEmpresa = empresas.find(emp => emp.cnpj.replace(/\D/g, '') === formData.cnpj.replace(/\D/g, ''))
+                if (nomeEmpresa) {
+                  document.querySelector('input[name="nomeEmpresa"]').value = nomeEmpresa.nomeFantasia
+                }  
+              }}
+              required
+              invalid={cnpjInvalido}
+              placeholder='00.000.000/0000-00'
+            />
+            {cnpjInvalido && (
+              <div className="text-danger mt-2">
+                Este CNPJ não está cadastrado no sistema.
+                <div>
+                  <Link to="/cadastrar-empresa" className="text-decoration-underline">
+                    Gostaria de cadastrar essa empresa?
+                  </Link>
+                </div>
               </div>
-            </div>
-          )}
-        </CCol>
+            )}
+          </CCol>
+          <CCol md={6}>
+            <CFormLabel>Nome da Empresa</CFormLabel>
+            <CFormInput
+              name="nomeEmpresa"
+              onChange={handleChange}
+              placeholder="Nome da Empresa"
+              disabled
+            />
+          </CCol>
+        </CRow>
       ),
     },
     {
