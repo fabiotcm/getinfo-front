@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react' // Importe useEffect
+import React, { useState, useEffect } from 'react'
 import {
   CForm,
   CFormInput,
@@ -14,72 +14,21 @@ import {
   CCardText,
 } from '@coreui/react'
 import { Link } from 'react-router-dom'
-import $ from 'jquery';
+import $ from 'jquery'
 import 'jquery-mask-plugin'
-import { color } from 'chart.js/helpers';
-import { criarContrato, uploadAnexo, adicionarColaboradores } from '../services/contratoService' // Importa o serviço de criação de contrato
-import { getEmpresas } from '../services/empresaService' // ajuste o caminho conforme necessário
-import { getColaboradores } from '../services/colaboradorService' // Importa o serviço de colaboradores
-import { criarEntregavel } from '../services/entregavelService' // Importa o serviço de entregáveis
-
+// import { color } from 'chart.js/helpers' // 'color' não está sendo usado, pode remover
+import { criarContrato, uploadAnexo, adicionarAgregadoAoContrato } from '../services/contratoService' // ALTEARADO: Importe 'adicionarAgregadoAoContrato'
+import { getEmpresas } from '../services/empresaService'
+import { getColaboradores } from '../services/colaboradorService'
+import { criarEntregavel } from '../services/entregavelService'
 
 export default function CadastrarContratoStepper() {
   const [step, setStep] = useState(0)
   const [finish, setFinish] = useState(false)
   const [cnpjInvalido, setCnpjInvalido] = useState(false)
-  const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false); // Novo estado para validação de data
+  const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false)
   const [cnpjsValidos, setCnpjsValidos] = useState([])
   const [colaboradores, setColaboradores] = useState([])
-  const [agregados, setAgregados] = useState([]);
-
-const adicionarAgregado = () => {
-  const novoId = Date.now(); // ID único baseado no timestamp
-  const select = $('<select>')
-    .addClass('form-select mb-2')
-    .attr('name', `colaborador-${novoId}`)
-    .append('<option value="">Selecione um colaborador</option>');
-
-  colaboradores.forEach(colab => {
-    select.append(`<option value="${colab.id}">${colab.nome} ${colab.sobrenome}</option>`);
-  });
-
-  const inputFuncao = $('<input>')
-    .addClass('form-control mb-2')
-    .attr('name', `funcao-${novoId}`)
-    .attr('placeholder', 'Função no contrato');
-
-  const removeBtn = $('<button>')
-    .addClass('btn btn-sm btn-danger mb-3 text-white')
-    .attr('type', 'button')
-    .text('Remover')
-    .on('click', function () {
-      divAgregado.remove();
-    });
-
-  const divAgregado = $('<div>').addClass('border rounded p-3 mb-2').append(
-    $('<label>').text('Colaborador'),
-    select,
-    $('<label>').text('Função'),
-    inputFuncao,
-    removeBtn
-  );
-
-  $('#agregados-container').append(divAgregado);
-};
-
-
-const carregarColaboradores = async () => {
-  try {
-    const response = await getColaboradores()
-    // Supondo que você quer apenas os ativos (verifique se sua API já filtra ou use um filtro aqui)
-    const ativos = response.data.filter(colab => colab.status !== 'INATIVO')
-    setColaboradores(ativos)
-  } catch (error) {
-    console.error('Erro ao carregar colaboradores:', error)
-  }
-}
-
-
 
   const [formData, setFormData] = useState({
     cnpj: '',
@@ -89,11 +38,42 @@ const carregarColaboradores = async () => {
     dataInicio: '',
     dataEntrega: '',
     descricao: '',
-    entregaveis: [
-      { descricao: '', observacao: '', dataFinal: '' },
-    ],
+    entregaveis: [{ descricao: '', observacao: '', dataFinal: '' }],
     anexo: null,
+    agregados: [], // Adicionado agregados ao formData com um array vazio inicial
   })
+
+  // Função para adicionar um novo agregado ao estado
+  const adicionarAgregado = () => {
+    setFormData((prev) => ({
+      ...prev,
+      agregados: [...prev.agregados, { colaboradorId: '', funcao: '' }], // Mantido 'funcao' aqui para o formulário
+    }))
+  }
+
+  // Função para lidar com a mudança nos campos de um agregado
+  const handleAgregadoChange = (index, e) => {
+    const { name, value } = e.target
+    const novosAgregados = [...formData.agregados]
+    novosAgregados[index][name] = value
+    setFormData((prev) => ({ ...prev, agregados: novosAgregados }))
+  }
+
+  // Função para remover um agregado do estado
+  const removerAgregado = (index) => {
+    const novosAgregados = formData.agregados.filter((_, i) => i !== index)
+    setFormData((prev) => ({ ...prev, agregados: novosAgregados }))
+  }
+
+  const carregarColaboradores = async () => {
+    try {
+      const response = await getColaboradores()
+      const ativos = response.data.filter((colab) => colab.status !== 'INATIVO')
+      setColaboradores(ativos)
+    } catch (error) {
+      console.error('Erro ao carregar colaboradores:', error)
+    }
+  }
 
   const requiredFieldsPerStep = [
     ['cnpj'],
@@ -114,77 +94,75 @@ const carregarColaboradores = async () => {
       setCnpjInvalido(false)
     }
     if (name === 'dataInicio' || name === 'dataEntrega') {
-      setDataEntregaInvalida(false);
+      setDataEntregaInvalida(false)
     }
   }
 
   const handleEntregavelChange = (index, e) => {
-  const { name, value } = e.target
-  const novosEntregaveis = [...formData.entregaveis]
-  novosEntregaveis[index][name] = value
-  setFormData(prev => ({ ...prev, entregaveis: novosEntregaveis }))
-}
-
-const adicionarEntregavel = () => {
-  setFormData(prev => ({
-    ...prev,
-    entregaveis: [...prev.entregaveis, { descricao: '', observacao: '', dataFinal: '' }],
-  }))
-}
-
-const removerEntregavel = (index) => {
-  if (formData.entregaveis.length === 1) return
-  const novosEntregaveis = formData.entregaveis.filter((_, i) => i !== index)
-  setFormData(prev => ({ ...prev, entregaveis: novosEntregaveis }))
-}
-
-
-  // UseEffect para aplicar as máscaras jQuery
-  useEffect(() => {
-    $('.cnpj').mask('00.000.000/0000-00');
-
-    // Carrega os CNPJs válidos da API
-  const carregarEmpresas = async () => {
-    try {
-      const response = await getEmpresas()
-      const empresas = response.data
-      const cnpjs = empresas.map(emp => emp.cnpj.replace(/\D/g, '')) // remove a máscara, igual ao input limpo
-      setCnpjsValidos(cnpjs)
-    } catch (error) {
-      console.error('Erro ao carregar empresas:', error)
-    }
+    const { name, value } = e.target
+    const novosEntregaveis = [...formData.entregaveis]
+    novosEntregaveis[index][name] = value
+    setFormData((prev) => ({ ...prev, entregaveis: novosEntregaveis }))
   }
 
-  carregarEmpresas()
-  carregarColaboradores()
-  }, []); // Array de dependências vazio para rodar apenas uma vez
+  const adicionarEntregavel = () => {
+    setFormData((prev) => ({
+      ...prev,
+      entregaveis: [...prev.entregaveis, { descricao: '', observacao: '', dataFinal: '' }],
+    }))
+  }
 
-  
+  const removerEntregavel = (index) => {
+    if (formData.entregaveis.length === 1) return // Impede remover o último entregável
+    const novosEntregaveis = formData.entregaveis.filter((_, i) => i !== index)
+    setFormData((prev) => ({ ...prev, entregaveis: novosEntregaveis }))
+  }
 
+  // UseEffect para aplicar as máscaras jQuery e carregar dados iniciais
+  useEffect(() => {
+    $('.cnpj').mask('00.000.000/0000-00')
+
+    const carregarEmpresas = async () => {
+      try {
+        const response = await getEmpresas()
+        const empresas = response.data
+        const cnpjs = empresas.map((emp) => emp.cnpj.replace(/\D/g, ''))
+        setCnpjsValidos(cnpjs)
+      } catch (error) {
+        console.error('Erro ao carregar empresas:', error)
+      }
+    }
+
+    carregarEmpresas()
+    carregarColaboradores()
+  }, [])
 
   const isStepValid = () => {
-  const requiredFields = requiredFieldsPerStep[step]
-  return requiredFields.every((field) => {
-    const value = formData[field]
-    if (typeof value === 'string') {
-      return value.trim() !== ''
-    } else if (Array.isArray(value)) {
-      // No caso de entregaveis, verifique se todos os entregáveis têm descrição e dataFinal preenchidos
-      return value.every((ent) => ent.descricao.trim() !== '' && ent.dataFinal.trim() !== '')
-    }
-    return !!value // fallback para campos como arquivos (anexo) ou outros tipos
-  })
+    const requiredFields = requiredFieldsPerStep[step]
+    return requiredFields.every((field) => {
+      const value = formData[field]
+      if (typeof value === 'string') {
+        return value.trim() !== ''
+      } else if (Array.isArray(value)) {
+        // Para entregaveis, verifica se todos os entregáveis têm descrição e dataFinal preenchidos
+        if (field === 'entregaveis') {
+          return value.every((ent) => ent.descricao.trim() !== '' && ent.dataFinal.trim() !== '')
+        }
+        // Para agregados, verifica se todos os agregados têm colaboradorId e funcao preenchidos
+        if (field === 'agregados') {
+          return value.every((ag) => ag.colaboradorId !== '' && ag.funcao.trim() !== '')
+        }
+      }
+      return !!value // fallback para campos como arquivos (anexo) ou outros tipos
+    })
   }
 
-
   const handleNext = () => {
-    // 1. Validação de campos obrigatórios
     if (!isStepValid()) {
       alert('Preencha todos os campos obrigatórios desta etapa.')
       return
     }
 
-    // 2. Validação específica para o CNPJ (passo 0)
     if (step === 0) {
       const cnpjLimpo = formData.cnpj.replace(/\D/g, '')
       if (!cnpjsValidos.includes(cnpjLimpo)) {
@@ -193,25 +171,22 @@ const removerEntregavel = (index) => {
       }
     }
 
-    // 3. Validação específica para as datas (passo 2)
     if (step === 2) {
       if (formData.dataInicio && formData.dataEntrega) {
-        const dataInicio = new Date(formData.dataInicio);
-        const dataEntrega = new Date(formData.dataEntrega);
+        const dataInicio = new Date(formData.dataInicio)
+        const dataEntrega = new Date(formData.dataEntrega)
 
-        // Ajusta para comparar apenas as datas, ignorando a hora, caso contrário pode dar erro devido ao fuso horário
-        dataInicio.setHours(0, 0, 0, 0);
-        dataEntrega.setHours(0, 0, 0, 0);
+        dataInicio.setHours(0, 0, 0, 0)
+        dataEntrega.setHours(0, 0, 0, 0)
 
         if (dataEntrega < dataInicio) {
-          setDataEntregaInvalida(true);
-          alert('A Data de Entrega não pode ser anterior à Data de Início.');
-          return;
+          setDataEntregaInvalida(true)
+          alert('A Data de Entrega não pode ser anterior à Data de Início.')
+          return
         }
       }
     }
 
-    // Se todas as validações passarem, avança para o próximo passo
     setStep((prev) => prev + 1)
   }
 
@@ -226,81 +201,77 @@ const removerEntregavel = (index) => {
     }
     // Repete a validação de data para o caso do usuário ir e voltar no formulário
     if (formData.dataInicio && formData.dataEntrega) {
-        const dataInicio = new Date(formData.dataInicio);
-        const dataEntrega = new Date(formData.dataEntrega);
+      const dataInicio = new Date(formData.dataInicio)
+      const dataEntrega = new Date(formData.dataEntrega)
 
-        dataInicio.setHours(0, 0, 0, 0);
-        dataEntrega.setHours(0, 0, 0, 0);
+      dataInicio.setHours(0, 0, 0, 0)
+      dataEntrega.setHours(0, 0, 0, 0)
 
-        if (dataEntrega < dataInicio) {
-          setDataEntregaInvalida(true);
-          alert('A Data de Entrega não pode ser anterior à Data de Início.');
-          return;
-        }
+      if (dataEntrega < dataInicio) {
+        setDataEntregaInvalida(true)
+        alert('A Data de Entrega não pode ser anterior à Data de Início.')
+        return
+      }
     }
-
 
     try {
-    const contratoDTO = {
-      cnpj: formData.cnpj.replace(/\D/g, ''),
-      valor: parseFloat(formData.valorContrato),
-      descricao: formData.descricao,
-      tipo: formData.tipoContrato.toUpperCase(),
-      dataInicio: formData.dataInicio,
-      dataFim: formData.dataEntrega,
-      nomeResponsavel: formData.funcionarioResponsavel,
-    }
-
-    // Cria o contrato
-    const response = await criarContrato(contratoDTO)
-    // Captura agregados do DOM
-    const agregados = [];
-    $('#agregados-container').children('div').each(function () {
-      const colaboradorId = $(this).find('select').val();
-      const funcao = $(this).find('input').val();
-
-      if (colaboradorId && funcao) {
-        agregados.push({
-          colaboradorId: parseInt(colaboradorId),
-          funcao: funcao.trim()
-        });
+      const contratoDTO = {
+        cnpj: formData.cnpj.replace(/\D/g, ''),
+        valor: parseFloat(formData.valorContrato),
+        descricao: formData.descricao,
+        tipo: formData.tipoContrato.toUpperCase(),
+        dataInicio: formData.dataInicio,
+        dataFim: formData.dataEntrega,
+        nomeResponsavel: formData.funcionarioResponsavel,
       }
-    });
 
-    // Envia os colaboradores agregados com função
-    if (agregados.length > 0) {
-      await adicionarColaboradores(contratoId, agregados);
-      console.log('Colaboradores agregados:', agregados);
-    }
+      // Cria o contrato
+      const response = await criarContrato(contratoDTO)
+      const contratoId = response.data.id
+      console.log('Contrato criado com ID:', contratoId)
 
-
-    const contratoId = response.data.id
-    console.log('Contrato criado com ID:', contratoId)
-    // Se houver anexo, faz o upload
-    if (formData.anexo && contratoId) {
-      await uploadAnexo(contratoId, formData.anexo)
-    }
-
-    if (formData.entregaveis.length > 0 && contratoId) {
-      for (const ent of formData.entregaveis) {
-        console.log('Criando entregável:', ent)
-        // Cria cada entregável associado ao contrato 
-        await criarEntregavel({
-          contratoId,
-          descricao: ent.descricao,
-          observacao: ent.observacao,
-          dataFinal: ent.dataFinal,
-        })
+      // --- ALTERAÇÃO AQUI: ENVIANDO CADA AGREGADO INDIVIDUALMENTE ---
+      if (formData.agregados.length > 0) {
+        for (const agregado of formData.agregados) {
+          const agregadoParaEnviar = {
+            idColaborador: parseInt(agregado.colaboradorId),
+            cargoContrato: agregado.funcao.trim(), // Ajustado para 'cargoContrato' conforme esperado pelo backend
+            idContrato: contratoId, // O backend precisa do contratoId aqui, já que não está na URL
+          };
+          console.log('Enviando agregado:', agregadoParaEnviar);
+          await adicionarAgregadoAoContrato(agregadoParaEnviar); // Chama a nova função do service
+        }
+        console.log('Todos os colaboradores agregados foram enviados.');
       }
-    }
 
-    alert('Contrato cadastrado com sucesso!')
-    console.log('Contrato cadastrado:', response.data)
-    setFinish(true)
-  } catch (error) {
-    console.error('Erro ao cadastrar contrato:', error)
-    alert('Ocorreu um erro ao cadastrar o contrato.')
-    } 
+      // Se houver anexo, faz o upload
+      if (formData.anexo && contratoId) {
+        await uploadAnexo(contratoId, formData.anexo)
+        console.log('Anexo enviado com sucesso.')
+      }
+
+      // Envia os entregáveis
+      if (formData.entregaveis.length > 0 && contratoId) {
+        for (const ent of formData.entregaveis) {
+          console.log('Criando entregável:', ent)
+          await criarEntregavel({
+            contratoId,
+            descricao: ent.descricao,
+            observacao: ent.observacao,
+            dataFinal: ent.dataFinal,
+          })
+        }
+        console.log('Todos os entregáveis foram criados.')
+      }
+
+      alert('Contrato cadastrado com sucesso!')
+      console.log('Contrato cadastrado:', response.data)
+      setFinish(true)
+    } catch (error) {
+      console.error('Erro ao cadastrar contrato:', error)
+      // Melhorar a mensagem de erro para o usuário se possível
+      alert('Ocorreu um erro ao cadastrar o contrato. Verifique o console para mais detalhes.')
+    }
   }
 
   const handleReset = () => {
@@ -312,13 +283,14 @@ const removerEntregavel = (index) => {
       dataInicio: '',
       dataEntrega: '',
       descricao: '',
-      entregaveis: '',
+      entregaveis: [{ descricao: '', observacao: '', dataFinal: '' }],
       anexo: null,
+      agregados: [], // Resetar também os agregados
     })
     setStep(0)
     setFinish(false)
     setCnpjInvalido(false)
-    setDataEntregaInvalida(false); // Reseta o estado de validação de data
+    setDataEntregaInvalida(false)
   }
 
   const steps = [
@@ -334,7 +306,7 @@ const removerEntregavel = (index) => {
             onChange={handleChange}
             required
             invalid={cnpjInvalido}
-            placeholder='00.000.000/0000-00'
+            placeholder="00.000.000/0000-00"
           />
           {cnpjInvalido && (
             <div className="text-danger mt-2">
@@ -394,10 +366,41 @@ const removerEntregavel = (index) => {
 
           <CCol md={12} className="mt-4">
             <CFormLabel>Agregados do Contrato</CFormLabel>
-            <div id="agregados-container"></div>
-            <CButton color="success" className="mt-2 text-white" onClick={adicionarAgregado}>
-              + Adicionar Agregado
+            {formData.agregados.map((agregado, index) => (
+              <div key={index} className="border rounded p-3 mb-2">
+                <CFormLabel>Colaborador</CFormLabel>
+                <CFormSelect
+                  className="mb-2"
+                  name="colaboradorId"
+                  value={agregado.colaboradorId}
+                  onChange={(e) => handleAgregadoChange(index, e)}
+                >
+                  <option value="">Selecione um colaborador</option>
+                  {colaboradores.map((colab) => (
+                    <option key={colab.id} value={colab.id}>
+                      {colab.nome} {colab.sobrenome}
+                    </option>
+                  ))}
+                </CFormSelect>
+                <CFormLabel>Função</CFormLabel>
+                <CFormInput
+                  className="mb-2"
+                  name="funcao" // Mantido 'funcao' no frontend para o estado e formulário
+                  placeholder="Função no contrato"
+                  value={agregado.funcao}
+                  onChange={(e) => handleAgregadoChange(index, e)}
+                />
+                <CButton color="danger" className="btn-sm text-white" onClick={() => removerAgregado(index)}>
+                  Remover
+                </CButton>
+              </div>
+            ))}
+            <div>
+            <CButton color="success" className="mt-1 text-white" onClick={adicionarAgregado}>
+              + Novo Agregado
             </CButton>
+              
+            </div>
           </CCol>
         </>
       ),
@@ -414,7 +417,7 @@ const removerEntregavel = (index) => {
               value={formData.dataInicio}
               onChange={handleChange}
               required
-              invalid={dataEntregaInvalida} // Adiciona estilo de inválido se a data de entrega for anterior
+              invalid={dataEntregaInvalida}
             />
           </CCol>
           <CCol md={6}>
@@ -425,19 +428,17 @@ const removerEntregavel = (index) => {
               value={formData.dataEntrega}
               onChange={handleChange}
               required
-              invalid={dataEntregaInvalida} // Adiciona estilo de inválido se a data de entrega for anterior
+              invalid={dataEntregaInvalida}
             />
-            {dataEntregaInvalida && ( // Exibe mensagem de erro se a data for inválida
-              <div className="text-danger mt-2">
-                A Data de Entrega não pode ser anterior à Data de Início.
-              </div>
+            {dataEntregaInvalida && (
+              <div className="text-danger mt-2">A Data de Entrega não pode ser anterior à Data de Início.</div>
             )}
           </CCol>
         </>
       ),
     },
     {
-      title: 'Descrição e Anexos', // Renomeado o título para refletir o anexo
+      title: 'Descrição e Anexos',
       content: (
         <>
           <CCol md={12}>
@@ -477,7 +478,9 @@ const removerEntregavel = (index) => {
                   </CCol>
                   <CCol md={2} className="d-flex align-items-end">
                     {formData.entregaveis.length > 1 && (
-                      <CButton className="text-white" color="danger" onClick={() => removerEntregavel(index)}>Remover</CButton>
+                      <CButton className="text-white" color="danger" onClick={() => removerEntregavel(index)}>
+                        Remover
+                      </CButton>
                     )}
                   </CCol>
                 </CRow>
@@ -497,7 +500,7 @@ const removerEntregavel = (index) => {
             <CButton color="secondary" onClick={adicionarEntregavel}>
               Novo Entregável
             </CButton>
-      </CCol>
+          </CCol>
 
           <CCol md={12}>
             <CFormLabel>Anexo</CFormLabel>
@@ -551,19 +554,18 @@ const removerEntregavel = (index) => {
                   </small>
                 </div>
               ))}
-            
             </div>
 
             <h5>{steps[step].title}</h5>
             <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
 
             <div className="mt-4 d-flex justify-content-between">
-              <div className='d-flex gap-2'>
+              <div className="d-flex gap-2">
                 {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
               </div>
-              <div className='d-flex gap-2'>
+              <div className="d-flex gap-2">
                 {step >= 0 && (
-                  <CButton color="secondary" href='/contrato'>
+                  <CButton color="secondary" href="/contrato">
                     Cancelar
                   </CButton>
                 )}
@@ -573,7 +575,7 @@ const removerEntregavel = (index) => {
                   </CButton>
                 )}
                 {step === steps.length - 1 && (
-                  <CButton color="success" style={{color: '#FFFFFF'}} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
+                  <CButton color="success" style={{ color: '#FFFFFF' }} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
                     Finalizar
                   </CButton>
                 )}

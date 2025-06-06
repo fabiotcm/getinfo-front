@@ -21,7 +21,7 @@ export const listarContratos = () => api.get('/contratos')
 // Buscar contrato por ID
 export const buscarContratoPorId = (id) => api.get(`/contratos/${id}`)
 
-// Buscar colaboradores agregados a um contrato
+// Buscar colaboradores agregados a um contrato (GET)
 export const buscarAgregados = (id) => api.get(`/contratos/agregados/${id}`)
 
 // Buscar entregáveis de um contrato
@@ -32,9 +32,14 @@ export const downloadAnexo = (id) => api.get(`/contratos/download/${id}`, {
   responseType: 'blob'
 })
 
-// Adicionar colaboradores a um contrato
-export const adicionarColaboradores = (contratoId, idsColaboradores) =>
-  api.post(`/contratos/${contratoId}/colaboradores`, idsColaboradores)
+// --- MODIFICAÇÕES AQUI ---
+
+// Função para adicionar um ÚNICO colaborador agregado a um contrato
+// O backend tem um endpoint POST /contratos/agregados/ que espera um AgregadoCreateDTO.
+// Esse DTO precisa do contratoId dentro dele, além do colaboradorId e funcao.
+// Ajuste o nome da função para refletir que ela adiciona um único agregado, não uma lista.
+export const adicionarAgregadoAoContrato = (agregadoData) =>
+  api.post('/contratos/agregados/', agregadoData)
 
 // Ativar um contrato
 export const ativarContrato = (id) => api.patch(`/contratos/ativar/${id}`)
