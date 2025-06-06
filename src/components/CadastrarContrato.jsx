@@ -29,6 +29,7 @@ export default function CadastrarContratoStepper() {
   const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false)
   const [cnpjsValidos, setCnpjsValidos] = useState([])
   const [colaboradores, setColaboradores] = useState([])
+  const [empresa, setEmpresa] = useState(null) // Estado para armazenar a empresa selecionada
 
   const [formData, setFormData] = useState({
     cnpj: '',
