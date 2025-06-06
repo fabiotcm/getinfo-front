@@ -16,7 +16,7 @@ import {
 import { Link } from 'react-router-dom'
 import $ from 'jquery'
 import 'jquery-mask-plugin'
-// import { color } from 'chart.js/helpers' // 'color' não está sendo usado, pode remover
+import { color, fontString } from 'chart.js/helpers'
 import { criarContrato, uploadAnexo, adicionarAgregadoAoContrato } from '../services/contratoService' // ALTEARADO: Importe 'adicionarAgregadoAoContrato'
 import { getEmpresas } from '../services/empresaService'
 import { getColaboradores } from '../services/colaboradorService'
@@ -29,6 +29,7 @@ export default function CadastrarContratoStepper() {
   const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false)
   const [cnpjsValidos, setCnpjsValidos] = useState([])
   const [colaboradores, setColaboradores] = useState([])
+  const [empresa, setEmpresa] = useState(null) // Estado para armazenar a empresa selecionada
 
   const [formData, setFormData] = useState({
     cnpj: '',
@@ -297,28 +298,48 @@ export default function CadastrarContratoStepper() {
     {
       title: 'CNPJ',
       content: (
-        <CCol md={6}>
-          <CFormLabel>CNPJ (*)</CFormLabel>
-          <CFormInput
-            name="cnpj"
-            className="cnpj"
-            value={formData.cnpj}
-            onChange={handleChange}
-            required
-            invalid={cnpjInvalido}
-            placeholder="00.000.000/0000-00"
-          />
-          {cnpjInvalido && (
-            <div className="text-danger mt-2">
-              Este CNPJ não está cadastrado no sistema.
-              <div>
-                <Link to="/cadastrar-empresa" className="text-decoration-underline">
-                  Gostaria de cadastrar essa empresa?
-                </Link>
+        <CRow>
+          <CCol md={6}>
+            <CFormLabel>CNPJ (*)</CFormLabel>
+            <CFormInput
+              name="cnpj"
+              className="cnpj"
+              value={formData.cnpj}
+              onChange={handleChange}
+              onBlur={async () => {
+                const response = await getEmpresas()
+                const empresas = response.data
+                const empresaSelecionada = empresas.find(emp => emp.cnpj.replace(/\D/g, '') === formData.cnpj.replace(/\D/g, ''))
+                if (empresaSelecionada) {
+                  document.querySelector('input[name="nomeEmpresa"]').value = empresaSelecionada.nomeFantasia;
+                  setEmpresa(empresaSelecionada);
+                }  
+              }}
+              required
+              invalid={cnpjInvalido}
+              placeholder='00.000.000/0000-00'
+            />
+            {cnpjInvalido && (
+              <div className="text-danger mt-2">
+                Este CNPJ não está cadastrado no sistema.
+                <div>
+                  <Link to="/cadastrar-empresa" className="text-decoration-underline">
+                    Gostaria de cadastrar essa empresa?
+                  </Link>
+                </div>
               </div>
-            </div>
-          )}
-        </CCol>
+            )}
+          </CCol>
+          <CCol md={6}>
+            <CFormLabel>Nome da Empresa</CFormLabel>
+            <CFormInput
+              name="nomeEmpresa"
+              onChange={handleChange}
+              placeholder="Nome da Empresa"
+              disabled
+            />
+          </CCol>
+        </CRow>
       ),
     },
     {
@@ -555,6 +576,34 @@ export default function CadastrarContratoStepper() {
                 </div>
               ))}
             </div>
+            {step !== 0 &&
+              <div>
+                <CRow className='mb-3'>
+                  <CCol md={6}>
+                    {/* CNPJ em itálico */}
+                    <CFormLabel className='italic'>CNPJ</CFormLabel>
+                    <CFormInput
+                      name="cnpj-show"
+                      className="cnpj italic"
+                      value={formData.cnpj}
+                      placeholder='00.000.000/0000-00'
+                      disabled
+                    />
+                  </CCol>
+                  <CCol md={6}>
+                    <CFormLabel className='italic'>Nome da Empresa</CFormLabel>
+                    <CFormInput
+                      className='italic'
+                      name="nomeEmpresa-show"
+                      value={empresa ? empresa.nomeFantasia : ''}
+                      onChange={handleChange}
+                      placeholder="Nome da Empresa"
+                      disabled
+                    />
+                  </CCol>
+                </CRow>
+              </div>
+            }
 
             <h5>{steps[step].title}</h5>
             <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
