@@ -3,7 +3,8 @@ import { listarContratos } from '../services/contratoService'
 import { useNavigate } from 'react-router-dom'
 import {
   CTable, CTableHead, CTableRow, CTableHeaderCell, CTableBody, CTableDataCell,
-  CButton, CFormInput, CTooltip, CBadge, CCard, CCardBody, CCardTitle
+  CButton, CFormInput, CTooltip, CBadge, CCard, CCardBody, CCardTitle,
+  CSpinner
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilPencil, cilInbox, cilPlus, cilArrowTop, cilArrowBottom } from '@coreui/icons'
@@ -15,6 +16,8 @@ export default function ContratoCard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [contratos, setContratos] = useState([])
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
 
   const handleRowClick = (id) => navigate(`/contrato/${id}`)
@@ -48,12 +51,17 @@ export default function ContratoCard() {
   }
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     const fetchContratos = async () => {
       try {
         const response = await listarContratos()
         setContratos(response.data)
-      } catch (error) {
-        console.error('Erro ao buscar contratos:', error)
+      } catch (err) {
+        console.error('Erro ao buscar contratos:', err)
+        setError('Não foi possível carregar os contratos. Tente novamente mais tarde.')
+      } finally {
+        setLoading(false)
       }
     }
     fetchContratos()
@@ -147,6 +155,29 @@ export default function ContratoCard() {
             />
           </div>
 
+        <div className="mb-4">
+        <CTooltip content="Adicionar novo contrato" placement="top">
+          <CButton
+            color="success"
+            onClick={handleAdd}
+            className='d-flex align-items-center justify-content-center text-white'
+          >
+            <CIcon icon={cilPlus} size="xl" className='text-white' />
+            Cadastrar Novo Contrato
+          </CButton>
+        </CTooltip>
+      </div>
+
+      {loading ? (
+                  <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '150px' }}>
+                    <CSpinner color="primary" />
+                    <span className="ms-2">Carregando contratos...</span>
+                  </div>
+                ) : error ? (
+                  <CAlert color="danger" className="mb-3">{error}</CAlert>
+                ) : sortedContratos.length === 0 ? (
+                  <CAlert color="info" className="mb-3">Nenhuma contrato encontrado.</CAlert>
+                ) : (
           <CTable hover responsive>
             <CTableHead color="light">
               <CTableRow>
@@ -222,22 +253,11 @@ export default function ContratoCard() {
               ))}
             </CTableBody>
           </CTable>
+        )}
         </CCardBody>
       </CCard>
 
-      <div className="position-fixed bottom-0 end-0 p-4" style={{ zIndex: 1050 }}>
-        <CTooltip content="Adicionar novo contrato" placement="top">
-          <CButton
-            color="success"
-            shape="rounded-pill"
-            style={{ borderRadius: '50%', width: '56px', height: '56px' }}
-            onClick={handleAdd}
-            className='d-flex align-items-center justify-content-center'
-          >
-            <CIcon icon={cilPlus} size="xl" className='text-white' />
-          </CButton>
-        </CTooltip>
-      </div>
+      
     </div>
   )
 }

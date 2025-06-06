@@ -147,6 +147,19 @@ export default function CardClientes() {
             />
           </div>
 
+        <div className="d-flex justify-content-start mb-3">
+        <CTooltip content="Adicionar nova empresa" placement="top">
+          <CButton
+            color="success"
+            onClick={handleAdd}
+            className='d-flex align-items-center justify-content-center text-white'
+          >
+            <CIcon icon={cilPlus} size="xl" className='text-white' />
+            Cadastrar Nova Empresa
+          </CButton>
+        </CTooltip>
+      </div>
+
           {loading ? (
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '150px' }}>
               <CSpinner color="primary" />
@@ -214,20 +227,6 @@ export default function CardClientes() {
           )}
         </CCardBody>
       </CCard>
-
-      <div className="position-fixed bottom-0 end-0 p-4" style={{ zIndex: 1050 }}>
-        <CTooltip content="Adicionar nova empresa" placement="top">
-          <CButton
-            color="success"
-            shape="rounded-pill"
-            style={{ borderRadius: '50%', width: '56px', height: '56px' }}
-            onClick={handleAdd}
-            className='d-flex align-items-center justify-content-center'
-          >
-            <CIcon icon={cilPlus} size="xl" className='text-white' />
-          </CButton>
-        </CTooltip>
-      </div>
     </div>
   );
 }

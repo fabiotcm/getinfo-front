@@ -495,7 +495,7 @@ const removerEntregavel = (index) => {
               </div>
             ))}
             <CButton color="secondary" onClick={adicionarEntregavel}>
-              Adicionar Entregável
+              Novo Entregável
             </CButton>
       </CCol>
 
