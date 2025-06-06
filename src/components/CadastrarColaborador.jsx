@@ -141,7 +141,7 @@ export default function CadastrarColaborador() {
           <CForm onSubmit={handleSubmit} className="row g-3 mt-2">
             <CRow>
               <CCol md={6}>
-                <CFormLabel htmlFor="nome">Nome</CFormLabel>
+                <CFormLabel htmlFor="nome">Nome (*)</CFormLabel>
                 <CFormInput
                   id="nome"
                   name="nome"
@@ -151,7 +151,7 @@ export default function CadastrarColaborador() {
                 />
               </CCol>
               <CCol md={6}>
-                <CFormLabel htmlFor="sobrenome">Sobrenome</CFormLabel>
+                <CFormLabel htmlFor="sobrenome">Sobrenome (*)</CFormLabel>
                 <CFormInput
                   id="sobrenome"
                   name="sobrenome"
@@ -164,7 +164,7 @@ export default function CadastrarColaborador() {
 
             <CRow>
               <CCol md={4}>
-                <CFormLabel htmlFor="cpf">CPF</CFormLabel>
+                <CFormLabel htmlFor="cpf">CPF (*)</CFormLabel>
                 <CFormInput
                   id="cpf"
                   className="cpf"
@@ -182,7 +182,7 @@ export default function CadastrarColaborador() {
                 )}
               </CCol>
               <CCol md={4}>
-                <CFormLabel htmlFor="email">Email</CFormLabel>
+                <CFormLabel htmlFor="email">Email (*)</CFormLabel>
                 <CFormInput
                   type="email"
                   id="email"
@@ -200,7 +200,7 @@ export default function CadastrarColaborador() {
                 )}
               </CCol>
               <CCol md={4}>
-                <CFormLabel htmlFor="telefone">Telefone</CFormLabel>
+                <CFormLabel htmlFor="telefone">Telefone (*)</CFormLabel>
                 <CFormInput
                   type="tel"
                   id="telefone"
@@ -222,7 +222,7 @@ export default function CadastrarColaborador() {
 
             <CRow>
               <CCol md={6}>
-                <CFormLabel htmlFor="cargo">Cargo</CFormLabel>
+                <CFormLabel htmlFor="cargo">Cargo (*)</CFormLabel>
                 <CFormInput
                   id="cargo"
                   name="cargo"

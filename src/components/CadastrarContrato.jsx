@@ -326,7 +326,7 @@ const removerEntregavel = (index) => {
       title: 'CNPJ',
       content: (
         <CCol md={6}>
-          <CFormLabel>CNPJ</CFormLabel>
+          <CFormLabel>CNPJ (*)</CFormLabel>
           <CFormInput
             name="cnpj"
             className="cnpj"
@@ -354,7 +354,7 @@ const removerEntregavel = (index) => {
       content: (
         <>
           <CCol md={4}>
-            <CFormLabel>Tipo de Contrato</CFormLabel>
+            <CFormLabel>Tipo de Contrato (*)</CFormLabel>
             <CFormSelect name="tipoContrato" value={formData.tipoContrato} onChange={handleChange} required>
               <option value="">Selecione</option>
               <option value="servico">Serviço</option>
@@ -365,7 +365,7 @@ const removerEntregavel = (index) => {
           </CCol>
 
           <CCol md={4}>
-            <CFormLabel>Valor</CFormLabel>
+            <CFormLabel>Valor (*)</CFormLabel>
             <CFormInput
               type="number"
               name="valorContrato"
@@ -376,7 +376,7 @@ const removerEntregavel = (index) => {
           </CCol>
 
           <CCol md={4}>
-            <CFormLabel>Responsável pelo Contrato</CFormLabel>
+            <CFormLabel>Responsável pelo Contrato (*)</CFormLabel>
             <CFormSelect
               name="funcionarioResponsavel"
               value={formData.funcionarioResponsavel}
@@ -407,7 +407,7 @@ const removerEntregavel = (index) => {
       content: (
         <>
           <CCol md={6}>
-            <CFormLabel>Data de Início</CFormLabel>
+            <CFormLabel>Data de Início (*)</CFormLabel>
             <CFormInput
               type="date"
               name="dataInicio"
@@ -418,7 +418,7 @@ const removerEntregavel = (index) => {
             />
           </CCol>
           <CCol md={6}>
-            <CFormLabel>Data de Entrega</CFormLabel>
+            <CFormLabel>Data de Entrega (*)</CFormLabel>
             <CFormInput
               type="date"
               name="dataEntrega"
@@ -441,7 +441,7 @@ const removerEntregavel = (index) => {
       content: (
         <>
           <CCol md={12}>
-            <CFormLabel>Descrição do Contrato</CFormLabel>
+            <CFormLabel>Descrição do Contrato (*)</CFormLabel>
             <CFormTextarea
               name="descricao"
               value={formData.descricao}
@@ -456,7 +456,7 @@ const removerEntregavel = (index) => {
               <div key={index} className="border p-3 mb-3 rounded">
                 <CRow className="mb-2">
                   <CCol md={6}>
-                    <CFormLabel>Descrição do Entregável</CFormLabel>
+                    <CFormLabel>Descrição do Entregável (*)</CFormLabel>
                     <CFormInput
                       type="text"
                       name="descricao"
@@ -466,7 +466,7 @@ const removerEntregavel = (index) => {
                     />
                   </CCol>
                   <CCol md={4}>
-                    <CFormLabel>Data Final do Entregável</CFormLabel>
+                    <CFormLabel>Data Final do Entregável (*)</CFormLabel>
                     <CFormInput
                       type="date"
                       name="dataFinal"

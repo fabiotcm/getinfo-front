@@ -154,7 +154,7 @@ export default function EditarContrato() {
           </CCol>
 
           <CCol md={4}>
-            <CFormLabel htmlFor="statusContrato">Status do Contrato</CFormLabel>
+            <CFormLabel htmlFor="statusContrato">Status do Contrato (*)</CFormLabel>
             <CFormSelect
               id="statusContrato"
               name="statusContrato"
@@ -181,7 +181,7 @@ export default function EditarContrato() {
           </CCol>
 
           <CCol md={4}>
-            <CFormLabel htmlFor="tipo">Tipo</CFormLabel>
+            <CFormLabel htmlFor="tipo">Tipo (*)</CFormLabel>
             <CFormSelect
               id="tipo"
               name="tipo"
@@ -222,7 +222,7 @@ export default function EditarContrato() {
           <CCol xs={12}>
             <CFormTextarea
               id="descricao"
-              label="Descrição"
+              label="Descrição (*)"
               name="descricao"
               value={formData.descricao}
               onChange={handleChange}
@@ -232,7 +232,7 @@ export default function EditarContrato() {
           </CCol>
 
           <CCol md={6}>
-            <CFormLabel htmlFor="nomeResponsavel">Nome do Responsável</CFormLabel>
+            <CFormLabel htmlFor="nomeResponsavel">Nome do Responsável (*)</CFormLabel>
             <CFormInput
               id="nomeResponsavel"
               name="nomeResponsavel"

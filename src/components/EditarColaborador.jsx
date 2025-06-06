@@ -120,7 +120,7 @@ export default function EditarColaborador() {
         <CForm onSubmit={handleSubmit} className="row g-3"> {/* row g-3 para espaçamento Bootstrap */}
           {/* Nome */}
           <CCol md={6}>
-            <CFormLabel htmlFor="nome">Nome</CFormLabel>
+            <CFormLabel htmlFor="nome">Nome (*)</CFormLabel>
             <CFormInput
               id="nome"
               name="nome"
@@ -132,7 +132,7 @@ export default function EditarColaborador() {
 
           {/* Sobrenome */}
           <CCol md={6}>
-            <CFormLabel htmlFor="sobrenome">Sobrenome</CFormLabel>
+            <CFormLabel htmlFor="sobrenome">Sobrenome (*)</CFormLabel>
             <CFormInput
               id="sobrenome"
               name="sobrenome"
@@ -144,7 +144,7 @@ export default function EditarColaborador() {
 
           {/* Email */}
           <CCol md={6}>
-            <CFormLabel htmlFor="email">Email</CFormLabel>
+            <CFormLabel htmlFor="email">Email (*)</CFormLabel>
             <CFormInput
               id="email"
               name="email"
@@ -157,7 +157,7 @@ export default function EditarColaborador() {
 
           {/* Telefone */}
           <CCol md={6}>
-            <CFormLabel htmlFor="telefone">Telefone</CFormLabel>
+            <CFormLabel htmlFor="telefone">Telefone (*)</CFormLabel>
             <CFormInput
               id="telefone"
               name="telefone"
@@ -169,7 +169,7 @@ export default function EditarColaborador() {
 
           {/* Cargo */}
           <CCol md={6}>
-            <CFormLabel htmlFor="cargo">Cargo</CFormLabel>
+            <CFormLabel htmlFor="cargo">Cargo (*)</CFormLabel>
             <CFormInput
               id="cargo"
               name="cargo"
@@ -180,8 +180,8 @@ export default function EditarColaborador() {
           </CCol>
 
           {/* Status */}
-          <CCol md={6}> {/* Usando CCol para layout responsivo */}
-            <CFormLabel htmlFor="status">Status</CFormLabel>
+          <CCol md={6}>
+            <CFormLabel htmlFor="status">Status (*)</CFormLabel>
             <CFormSelect
               id="status"
               name="status"
