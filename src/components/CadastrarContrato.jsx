@@ -16,7 +16,7 @@ import {
 import { Link } from 'react-router-dom'
 import $ from 'jquery';
 import 'jquery-mask-plugin'
-import { color } from 'chart.js/helpers';
+import { color, fontString } from 'chart.js/helpers';
 import { criarContrato, uploadAnexo, adicionarColaboradores } from '../services/contratoService' // Importa o serviço de criação de contrato
 import { getEmpresas } from '../services/empresaService' // ajuste o caminho conforme necessário
 import { getColaboradores } from '../services/colaboradorService' // Importa o serviço de colaboradores
@@ -29,7 +29,8 @@ export default function CadastrarContratoStepper() {
   const [cnpjInvalido, setCnpjInvalido] = useState(false)
   const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false); // Novo estado para validação de data
   const [cnpjsValidos, setCnpjsValidos] = useState([])
-  const [colaboradores, setColaboradores] = useState([])
+  const [colaboradores, setColaboradores] = useState([]);
+  const [empresa, setEmpresa] = useState(null);
   const [agregados, setAgregados] = useState([]);
 
 const adicionarAgregado = () => {
@@ -336,9 +337,10 @@ const removerEntregavel = (index) => {
               onBlur={async () => {
                 const response = await getEmpresas()
                 const empresas = response.data
-                const nomeEmpresa = empresas.find(emp => emp.cnpj.replace(/\D/g, '') === formData.cnpj.replace(/\D/g, ''))
-                if (nomeEmpresa) {
-                  document.querySelector('input[name="nomeEmpresa"]').value = nomeEmpresa.nomeFantasia
+                const empresaSelecionada = empresas.find(emp => emp.cnpj.replace(/\D/g, '') === formData.cnpj.replace(/\D/g, ''))
+                if (empresaSelecionada) {
+                  document.querySelector('input[name="nomeEmpresa"]').value = empresaSelecionada.nomeFantasia;
+                  setEmpresa(empresaSelecionada);
                 }  
               }}
               required
@@ -572,6 +574,34 @@ const removerEntregavel = (index) => {
               ))}
             
             </div>
+            {step !== 0 &&
+              <div>
+                <CRow className='mb-3'>
+                  <CCol md={6}>
+                    {/* CNPJ em itálico */}
+                    <CFormLabel className='italic'>CNPJ</CFormLabel>
+                    <CFormInput
+                      name="cnpj-show"
+                      className="cnpj italic"
+                      value={formData.cnpj}
+                      placeholder='00.000.000/0000-00'
+                      disabled
+                    />
+                  </CCol>
+                  <CCol md={6}>
+                    <CFormLabel className='italic'>Nome da Empresa</CFormLabel>
+                    <CFormInput
+                      className='italic'
+                      name="nomeEmpresa-show"
+                      value={empresa ? empresa.nomeFantasia : ''}
+                      onChange={handleChange}
+                      placeholder="Nome da Empresa"
+                      disabled
+                    />
+                  </CCol>
+                </CRow>
+              </div>
+            }
 
             <h5>{steps[step].title}</h5>
             <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
