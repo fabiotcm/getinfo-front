@@ -178,8 +178,8 @@ export default function ExibirColaboradores() {
             onClick={handleAdd}
             className='d-flex align-items-center justify-content-center text-white' // Centraliza o ícone
           >
-            <CIcon icon={cilPlus} size="xl" className='text-white' /> {/* Ícone maior */}
-            Cadastrar Novo Colaborador
+            <CIcon icon={cilPlus} size="xl" className='text-white me-1' />
+            Novo Colaborador
           </CButton>
         </CTooltip>
       </div>

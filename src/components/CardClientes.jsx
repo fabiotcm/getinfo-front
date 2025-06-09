@@ -154,8 +154,8 @@ export default function CardClientes() {
             onClick={handleAdd}
             className='d-flex align-items-center justify-content-center text-white'
           >
-            <CIcon icon={cilPlus} size="xl" className='text-white' />
-            Cadastrar Nova Empresa
+            <CIcon icon={cilPlus} size="xl" className='text-white me-1' />
+            Nova Empresa
           </CButton>
         </CTooltip>
       </div>
