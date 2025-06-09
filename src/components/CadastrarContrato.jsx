@@ -172,7 +172,7 @@ export default function CadastrarContratoStepper() {
       }
     }
 
-    if (step === 2) {
+    if (step === 1) {
       if (formData.dataInicio && formData.dataEntrega) {
         const dataInicio = new Date(formData.dataInicio)
         const dataEntrega = new Date(formData.dataEntrega)
@@ -384,7 +384,38 @@ export default function CadastrarContratoStepper() {
               ))}
             </CFormSelect>
           </CCol>
-
+          <CCol md={6}>
+            <CFormLabel>Data de Início (*)</CFormLabel>
+            <CFormInput
+              type="date"
+              name="dataInicio"
+              value={formData.dataInicio}
+              onChange={handleChange}
+              required
+              invalid={dataEntregaInvalida}
+            />
+          </CCol>
+          <CCol md={6}>
+            <CFormLabel>Data de Entrega (*)</CFormLabel>
+            <CFormInput
+              type="date"
+              name="dataEntrega"
+              value={formData.dataEntrega}
+              onChange={handleChange}
+              required
+              invalid={dataEntregaInvalida}
+            />
+            {dataEntregaInvalida && (
+              <div className="text-danger mt-2">A Data de Entrega não pode ser anterior à Data de Início.</div>
+            )}
+          </CCol>
+        </>
+      ),
+    },
+    {
+      title: 'Agregados',
+      content: (
+        <>
           <CCol md={12} className="mt-4">
             <CFormLabel>Agregados do Contrato</CFormLabel>
             {formData.agregados.map((agregado, index) => (
@@ -422,38 +453,6 @@ export default function CadastrarContratoStepper() {
             </CButton>
               
             </div>
-          </CCol>
-        </>
-      ),
-    },
-    {
-      title: 'Datas',
-      content: (
-        <>
-          <CCol md={6}>
-            <CFormLabel>Data de Início (*)</CFormLabel>
-            <CFormInput
-              type="date"
-              name="dataInicio"
-              value={formData.dataInicio}
-              onChange={handleChange}
-              required
-              invalid={dataEntregaInvalida}
-            />
-          </CCol>
-          <CCol md={6}>
-            <CFormLabel>Data de Entrega (*)</CFormLabel>
-            <CFormInput
-              type="date"
-              name="dataEntrega"
-              value={formData.dataEntrega}
-              onChange={handleChange}
-              required
-              invalid={dataEntregaInvalida}
-            />
-            {dataEntregaInvalida && (
-              <div className="text-danger mt-2">A Data de Entrega não pode ser anterior à Data de Início.</div>
-            )}
           </CCol>
         </>
       ),
