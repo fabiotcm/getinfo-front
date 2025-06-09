@@ -73,7 +73,6 @@ export default function CardClientes() {
       (cliente.razaoSocial?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeFantasia?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeResponsavel?.toLowerCase() || '').includes(termo) ||
-      (cliente.sobrenomeResponsavel?.toLowerCase() || '').includes(termo) ||
       (cliente.ativo?.toLowerCase() || '').includes(termo)
     );
   });
@@ -105,11 +104,11 @@ export default function CardClientes() {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    const tableColumn = ['Razão Social', 'Nome Fantasia', 'Responsável'];
+    const tableColumn = ['Razão Social', 'Nome Fantasia', 'Responsável', 'Status'];
     const tableRows = sortedClientes.map(c => [
       c.razaoSocial,
       c.nomeFantasia,
-      `${c.nomeResponsavel} ${c.sobrenomeResponsavel}`,
+      `${c.nomeResponsavel}`,
       c.ativo ? 'Ativo' : 'Inativo'
     ]);
 
@@ -207,7 +206,7 @@ export default function CardClientes() {
                       {cliente.nomeFantasia}
                     </CTableDataCell>
                     <CTableDataCell onClick={() => handleRowClick(cliente.id)} style={{ cursor: 'pointer' }}>
-                      {cliente.nomeResponsavel} {cliente.sobrenomeResponsavel}
+                      {cliente.nomeResponsavel}
                     </CTableDataCell>
                     <CTableDataCell onClick={() => handleRowClick(cliente.id)} style={{ cursor: 'pointer' }}>
                       <CBadge color={getStatusBadgeColor(cliente.ativo)}>
