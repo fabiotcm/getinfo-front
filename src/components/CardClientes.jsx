@@ -73,7 +73,7 @@ export default function CardClientes() {
       (cliente.razaoSocial?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeFantasia?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeResponsavel?.toLowerCase() || '').includes(termo) ||
-      (cliente.sobrenomeResponsavel?.toLowerCase() || '').includes(termo)
+      (cliente.ativo?.toLowerCase() || '').includes(termo)
     );
   });
 
@@ -104,11 +104,12 @@ export default function CardClientes() {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    const tableColumn = ['Razão Social', 'Nome Fantasia', 'Responsável'];
+    const tableColumn = ['Razão Social', 'Nome Fantasia', 'Responsável', 'Status'];
     const tableRows = sortedClientes.map(c => [
       c.razaoSocial,
       c.nomeFantasia,
-      `${c.nomeResponsavel} ${c.sobrenomeResponsavel}`
+      `${c.nomeResponsavel}`,
+      c.ativo ? 'Ativo' : 'Inativo'
     ]);
 
     // Logo e título
@@ -130,6 +131,13 @@ export default function CardClientes() {
 
     doc.save('clientes.pdf');
   };
+
+  const getStatusBadgeColor = (status) => {
+    const desc = status
+    if (desc === true) return 'success'
+    if (desc === false) return 'danger'
+    return 'dark'
+  }
 
   return (
     <div className="p-4">
@@ -154,8 +162,8 @@ export default function CardClientes() {
             onClick={handleAdd}
             className='d-flex align-items-center justify-content-center text-white'
           >
-            <CIcon icon={cilPlus} size="xl" className='text-white' />
-            Cadastrar Nova Empresa
+            <CIcon icon={cilPlus} size="xl" className='text-white me-1' />
+            Nova Empresa
           </CButton>
         </CTooltip>
       </div>
@@ -182,6 +190,9 @@ export default function CardClientes() {
                   <CTableHeaderCell onClick={() => handleSort('nomeResponsavel')} style={{ cursor: 'pointer' }}>
                     Responsável {getSortIcon('nomeResponsavel')}
                   </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('ativo')} style={{ cursor: 'pointer' }}>
+                    Status {getSortIcon('ativo')}
+                  </CTableHeaderCell>
                   <CTableHeaderCell className="text-center">Ações</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
@@ -195,7 +206,12 @@ export default function CardClientes() {
                       {cliente.nomeFantasia}
                     </CTableDataCell>
                     <CTableDataCell onClick={() => handleRowClick(cliente.id)} style={{ cursor: 'pointer' }}>
-                      {cliente.nomeResponsavel} {cliente.sobrenomeResponsavel}
+                      {cliente.nomeResponsavel}
+                    </CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(cliente.id)} style={{ cursor: 'pointer' }}>
+                      <CBadge color={getStatusBadgeColor(cliente.ativo)}>
+                        {cliente.ativo ? 'ATIVO' : 'INATIVO'}
+                      </CBadge>
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
                       <CTooltip content="Editar Empresa" placement="top">

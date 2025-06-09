@@ -547,12 +547,17 @@ export default function CadastrarEmpresa() {
       ),
     },
     {
-      title: "Responsável",
+      title: "Responsável da Empresa",
       content: (
         <>
           <CCol md={6}>
             <CFormLabel>Nome (*)</CFormLabel>
-            <CFormInput name="nomeResponsavel" value={formData.nomeResponsavel} onChange={handleChange} required />
+            <CFormInput
+              name="nomeResponsavel"
+              value={formData.nomeResponsavel}
+              onChange={handleChange}
+              placeholder='Nome do Responsável'
+              required />
           </CCol>
           <CCol md={6}>
             <CFormLabel>Email (*)</CFormLabel>

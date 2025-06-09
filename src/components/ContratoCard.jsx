@@ -174,8 +174,8 @@ export default function ContratoCard() {
             onClick={handleAdd}
             className='d-flex align-items-center justify-content-center text-white'
           >
-            <CIcon icon={cilPlus} size="xl" className='text-white' />
-            Cadastrar Novo Contrato
+            <CIcon icon={cilPlus} size="xl" className='text-white me-1' />
+            Novo Contrato
           </CButton>
         </CTooltip>
       </div>

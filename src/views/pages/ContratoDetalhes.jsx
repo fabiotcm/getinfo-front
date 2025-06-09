@@ -176,8 +176,8 @@ export default function ContratoDetalhes() {
           
           <div className="d-flex gap-2 mt-3">
             <CButton color="primary" onClick={() => handleNavigate('editar')}>Editar</CButton>
-            <CButton className="text-white" color="danger" onClick={() => handleNavigate('aditivo')}>Inserir Aditivo</CButton>
-            <CButton className="text-white" color="warning" onClick={() => handleNavigate('repactuacao')}>Inserir Repactuação</CButton>
+            <CButton className="text-white" color="danger" onClick={() => handleNavigate('aditivo')}>Aditivo</CButton>
+            <CButton className="text-white" color="warning" onClick={() => handleNavigate('repactuacao')}>Repactuação</CButton>
           </div>
         </div>
         <AppFooter />
