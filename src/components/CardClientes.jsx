@@ -73,7 +73,8 @@ export default function CardClientes() {
       (cliente.razaoSocial?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeFantasia?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeResponsavel?.toLowerCase() || '').includes(termo) ||
-      (cliente.sobrenomeResponsavel?.toLowerCase() || '').includes(termo)
+      (cliente.sobrenomeResponsavel?.toLowerCase() || '').includes(termo) ||
+      (cliente.ativo?.toLowerCase() || '').includes(termo)
     );
   });
 
@@ -108,7 +109,8 @@ export default function CardClientes() {
     const tableRows = sortedClientes.map(c => [
       c.razaoSocial,
       c.nomeFantasia,
-      `${c.nomeResponsavel} ${c.sobrenomeResponsavel}`
+      `${c.nomeResponsavel} ${c.sobrenomeResponsavel}`,
+      c.ativo ? 'Ativo' : 'Inativo'
     ]);
 
     // Logo e título
@@ -130,6 +132,13 @@ export default function CardClientes() {
 
     doc.save('clientes.pdf');
   };
+
+  const getStatusBadgeColor = (status) => {
+    const desc = status
+    if (desc === true) return 'success'
+    if (desc === false) return 'danger'
+    return 'dark'
+  }
 
   return (
     <div className="p-4">
@@ -182,6 +191,9 @@ export default function CardClientes() {
                   <CTableHeaderCell onClick={() => handleSort('nomeResponsavel')} style={{ cursor: 'pointer' }}>
                     Responsável {getSortIcon('nomeResponsavel')}
                   </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('ativo')} style={{ cursor: 'pointer' }}>
+                    Status {getSortIcon('ativo')}
+                  </CTableHeaderCell>
                   <CTableHeaderCell className="text-center">Ações</CTableHeaderCell>
                 </CTableRow>
               </CTableHead>
@@ -196,6 +208,11 @@ export default function CardClientes() {
                     </CTableDataCell>
                     <CTableDataCell onClick={() => handleRowClick(cliente.id)} style={{ cursor: 'pointer' }}>
                       {cliente.nomeResponsavel} {cliente.sobrenomeResponsavel}
+                    </CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(cliente.id)} style={{ cursor: 'pointer' }}>
+                      <CBadge color={getStatusBadgeColor(cliente.ativo)}>
+                        {cliente.ativo ? 'ATIVO' : 'INATIVO'}
+                      </CBadge>
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
                       <CTooltip content="Editar Empresa" placement="top">
