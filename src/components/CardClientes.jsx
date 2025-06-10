@@ -28,21 +28,23 @@ export default function CardClientes() {
   const [clientes, setClientes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [fetchingError, setFetchingError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const navigate = useNavigate();
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchEmpresas() {
       setLoading(true);
-      setError(null);
+      setFetchingError(null);
       try {
         const response = await getEmpresas();
         const data = Array.isArray(response.data) ? response.data : [];
         setClientes(data.filter((empresa) => empresa.ativo));
       } catch (err) {
         console.error("Erro ao buscar empresas:", err);
-        setError("Não foi possível carregar as empresas. Tente novamente mais tarde.");
+        setFetchingError("Não foi possível carregar as empresas. Tente novamente mais tarde.");
       } finally {
         setLoading(false);
       }
@@ -92,10 +94,13 @@ export default function CardClientes() {
       try {
         await deleteEmpresa(id);
         setClientes((prev) => prev.filter((c) => c.id !== id));
-        alert("Empresa arquivada com sucesso!");
+        setShowSuccessAlert(true);
+        setTimeout(() => {
+          setShowSuccessAlert(false);
+        }, 2000);
       } catch (err) {
         console.error("Erro ao arquivar empresa:", err);
-        alert("Erro ao arquivar empresa. Verifique se ela possui contratos ativos ou se ela existe.");
+        setError("Erro ao arquivar empresa. Verifique se ela possui contratos ativos ou se ela existe.");
       }
     }
   };
@@ -154,27 +159,35 @@ export default function CardClientes() {
               style={{ maxWidth: '250px' }}
             />
           </div>
-
-        <div className="d-flex justify-content-start mb-3">
-        <CTooltip content="Adicionar nova empresa" placement="top">
-          <CButton
-            color="success"
-            onClick={handleAdd}
-            className='d-flex align-items-center justify-content-center text-white'
-          >
-            <CIcon icon={cilPlus} size="xl" className='text-white me-1' />
-            Nova Empresa
-          </CButton>
-        </CTooltip>
-      </div>
-
+          <div className="d-flex justify-content-start mb-3">
+            <CTooltip content="Adicionar nova empresa" placement="top">
+              <CButton
+                color="success"
+                onClick={handleAdd}
+                className='d-flex align-items-center justify-content-center text-white'
+              >
+                <CIcon icon={cilPlus} size="xl" className='text-white me-1' />
+                Nova Empresa
+              </CButton>
+            </CTooltip>
+          </div>
+          {showSuccessAlert && (
+            <CAlert color="success" dismissible className="mb-3">
+              Empresa arquivada com sucesso!
+            </CAlert>
+          )}
+          {error && (
+            <CAlert color="danger" dismissible className="mb-3">
+              {error}
+            </CAlert>
+          )}
           {loading ? (
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '150px' }}>
               <CSpinner color="primary" />
               <span className="ms-2">Carregando empresas...</span>
             </div>
-          ) : error ? (
-            <CAlert color="danger" className="mb-3">{error}</CAlert>
+          ) : fetchingError ? (
+            <CAlert color="danger" className="mb-3">{fetchingError}</CAlert>
           ) : sortedClientes.length === 0 ? (
             <CAlert color="info" className="mb-3">Nenhuma empresa encontrada.</CAlert>
           ) : (
