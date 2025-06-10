@@ -67,19 +67,18 @@ export default function EditarColaborador() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSaving(true); // Ativa o estado de salvando
-    setShowSuccessAlert(false); // Esconde alert de sucesso anterior
-    setError(null); // Limpa erro anterior
+    setIsSaving(true);
+    setShowSuccessAlert(false);
+    setError(null);
 
     try {
-      await patchColaborador(id, formData); // Envia formData com nome e sobrenome
+      await patchColaborador(id, formData);
       setShowSuccessAlert(true);
 
-      // Não redireciona imediatamente, espera o alert desaparecer
       setTimeout(() => {
         setShowSuccessAlert(false);
         navigate("/colaboradores");
-      }, 1000); // Exibe o alert por 1 segundos
+      }, 1000);
     } catch (error) {
       console.error("Erro ao atualizar colaborador:", error);
       setError("Erro ao atualizar colaborador. Verifique os campos.");

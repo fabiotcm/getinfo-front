@@ -12,9 +12,11 @@ import {
   CCardBody,
   CCardTitle,
   CCardText,
+  CAlert,
+  CSpinner
 } from '@coreui/react'
-import { Link } from 'react-router-dom'
-import $ from 'jquery'
+import { Link, useNavigate } from 'react-router-dom'
+import $, { data } from 'jquery'
 import 'jquery-mask-plugin'
 import { color, fontString } from 'chart.js/helpers'
 import { criarContrato, uploadAnexo, adicionarAgregadoAoContrato } from '../services/contratoService' // ALTEARADO: Importe 'adicionarAgregadoAoContrato'
@@ -23,13 +25,18 @@ import { getColaboradores } from '../services/colaboradorService'
 import { criarEntregavel } from '../services/entregavelService'
 
 export default function CadastrarContratoStepper() {
-  const [step, setStep] = useState(0)
+  const [step, setStep] = useState(0);
+  const navigate = useNavigate();
   const [finish, setFinish] = useState(false)
   const [cnpjInvalido, setCnpjInvalido] = useState(false)
   const [dataEntregaInvalida, setDataEntregaInvalida] = useState(false)
   const [cnpjsValidos, setCnpjsValidos] = useState([])
   const [colaboradores, setColaboradores] = useState([])
-  const [empresa, setEmpresa] = useState(null) // Estado para armazenar a empresa selecionada
+  const [empresa, setEmpresa] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isFinishing, setIsFinishing] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     cnpj: '',
@@ -58,6 +65,8 @@ export default function CadastrarContratoStepper() {
     const novosAgregados = [...formData.agregados]
     novosAgregados[index][name] = value
     setFormData((prev) => ({ ...prev, agregados: novosAgregados }))
+    setShowSuccessAlert(false);
+    setError(null);
   }
 
   // Função para remover um agregado do estado
@@ -97,6 +106,8 @@ export default function CadastrarContratoStepper() {
     if (name === 'dataInicio' || name === 'dataEntrega') {
       setDataEntregaInvalida(false)
     }
+    setShowSuccessAlert(false);
+    setError(null);
   }
 
   const handleEntregavelChange = (index, e) => {
@@ -104,6 +115,8 @@ export default function CadastrarContratoStepper() {
     const novosEntregaveis = [...formData.entregaveis]
     novosEntregaveis[index][name] = value
     setFormData((prev) => ({ ...prev, entregaveis: novosEntregaveis }))
+    setShowSuccessAlert(false);
+    setError(null);
   }
 
   const adicionarEntregavel = () => {
@@ -160,7 +173,7 @@ export default function CadastrarContratoStepper() {
 
   const handleNext = () => {
     if (!isStepValid()) {
-      alert('Preencha todos os campos obrigatórios desta etapa.')
+      setError('Preencha todos os campos obrigatórios desta etapa.')
       return
     }
 
@@ -182,12 +195,24 @@ export default function CadastrarContratoStepper() {
 
         if (dataEntrega < dataInicio) {
           setDataEntregaInvalida(true)
-          alert('A Data de Entrega não pode ser anterior à Data de Início.')
+          setError('A Data de Entrega não pode ser anterior à Data de Início.')
+          return
+        }
+
+        const hoje = new Date()
+        hoje.setDate(hoje.getDate() - 1)
+        hoje.setHours(0, 0, 0, 0)
+
+        const dInicio = dataInicio.toISOString();
+        const dHoje = hoje.toISOString();
+        if (dInicio !== dHoje) {
+          setError('A Data de Início não pode ser diferente de hoje.')
           return
         }
       }
     }
-
+    setShowSuccessAlert(false);
+    setError(null);
     setStep((prev) => prev + 1)
   }
 
@@ -196,23 +221,35 @@ export default function CadastrarContratoStepper() {
   }
 
   const handleFinish = async () => {
+    setIsFinishing(true);
+    setShowSuccessAlert(false);
+    setError(null);
     if (!isStepValid()) {
-      alert('Preencha todos os campos obrigatórios desta etapa.')
+      setError('Preencha todos os campos obrigatórios desta etapa.')
       return
     }
     // Repete a validação de data para o caso do usuário ir e voltar no formulário
-    if (formData.dataInicio && formData.dataEntrega) {
-      const dataInicio = new Date(formData.dataInicio)
-      const dataEntrega = new Date(formData.dataEntrega)
+    const dataInicio = new Date(formData.dataInicio)
+    const dataEntrega = new Date(formData.dataEntrega)
 
-      dataInicio.setHours(0, 0, 0, 0)
-      dataEntrega.setHours(0, 0, 0, 0)
+    dataInicio.setHours(0, 0, 0, 0)
+    dataEntrega.setHours(0, 0, 0, 0)
 
-      if (dataEntrega < dataInicio) {
-        setDataEntregaInvalida(true)
-        alert('A Data de Entrega não pode ser anterior à Data de Início.')
-        return
-      }
+    if (dataEntrega < dataInicio) {
+      setDataEntregaInvalida(true)
+      setError('A Data de Entrega não pode ser anterior à Data de Início.')
+      return
+    }
+
+    const hoje = new Date()
+    hoje.setDate(hoje.getDate() - 1)
+    hoje.setHours(0, 0, 0, 0)
+
+    const dInicio = dataInicio.toISOString();
+    const dHoje = hoje.toISOString();
+    if (dInicio !== dHoje) {
+      setError('A Data de Início não pode ser diferente de hoje.')
+      return
     }
 
     try {
@@ -227,9 +264,9 @@ export default function CadastrarContratoStepper() {
       }
 
       // Cria o contrato
-      const response = await criarContrato(contratoDTO)
-      const contratoId = response.data.id
-      console.log('Contrato criado com ID:', contratoId)
+      const response = await criarContrato(contratoDTO);
+      const contratoId = response.data.id;
+      console.log('Contrato criado com ID:', contratoId);
 
       // --- ALTERAÇÃO AQUI: ENVIANDO CADA AGREGADO INDIVIDUALMENTE ---
       if (formData.agregados.length > 0) {
@@ -265,33 +302,20 @@ export default function CadastrarContratoStepper() {
         console.log('Todos os entregáveis foram criados.')
       }
 
-      alert('Contrato cadastrado com sucesso!')
-      console.log('Contrato cadastrado:', response.data)
-      setFinish(true)
-    } catch (error) {
-      console.error('Erro ao cadastrar contrato:', error)
-      // Melhorar a mensagem de erro para o usuário se possível
-      alert('Ocorreu um erro ao cadastrar o contrato. Verifique o console para mais detalhes.')
-    }
-  }
+      console.log('Contrato cadastrado:', response.data);
+      setShowSuccessAlert(true);
+      setFinish(true);
 
-  const handleReset = () => {
-    setFormData({
-      cnpj: '',
-      tipoContrato: '',
-      valorContrato: '',
-      funcionarioResponsavel: '',
-      dataInicio: '',
-      dataEntrega: '',
-      descricao: '',
-      entregaveis: [{ descricao: '', observacao: '', dataFinal: '' }],
-      anexo: null,
-      agregados: [], // Resetar também os agregados
-    })
-    setStep(0)
-    setFinish(false)
-    setCnpjInvalido(false)
-    setDataEntregaInvalida(false)
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+        navigate("/contrato");
+      }, 1000);
+    } catch (error) {
+      setShowSuccessAlert(false);
+      console.error('Erro ao cadastrar contrato:', error)
+      // TODO: Melhorar a mensagem de erro para o usuário, se possível
+      setError('Ocorreu um erro ao cadastrar o contrato. Verifique o console para mais detalhes.')
+    }
   }
 
   const steps = [
@@ -392,7 +416,6 @@ export default function CadastrarContratoStepper() {
               value={formData.dataInicio}
               onChange={handleChange}
               required
-              invalid={dataEntregaInvalida}
             />
           </CCol>
           <CCol md={6}>
@@ -403,11 +426,7 @@ export default function CadastrarContratoStepper() {
               value={formData.dataEntrega}
               onChange={handleChange}
               required
-              invalid={dataEntregaInvalida}
             />
-            {dataEntregaInvalida && (
-              <div className="text-danger mt-2">A Data de Entrega não pode ser anterior à Data de Início.</div>
-            )}
           </CCol>
         </>
       ),
@@ -540,107 +559,112 @@ export default function CadastrarContratoStepper() {
     <CCard className="p-4">
       <CCardBody>
         <CCardTitle className="h4 mb-3">Cadastro de Contrato</CCardTitle>
-        {!finish ? (
-          <>
-            <div className="d-flex justify-content-between mb-4 position-relative">
-              {steps.map((s, index) => (
-                <div key={index} className="text-center flex-fill px-2 position-relative" style={{ zIndex: 1 }}>
-                  <div
-                    className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
-                      index === step
-                        ? 'bg-primary text-white'
-                        : index < step
-                        ? 'bg-success text-white'
-                        : 'bg-light text-muted'
-                    }`}
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      border: '2px solid #ccc',
-                    }}
-                  >
-                    {index + 1}
-                  </div>
-                  <small
-                    className={`d-block ${
-                      index === step
-                        ? 'fw-bold text-primary'
-                        : index < step
-                        ? 'text-success'
-                        : 'text-muted'
-                    }`}
-                  >
-                    {s.title}
-                  </small>
-                </div>
-              ))}
-            </div>
-            {step !== 0 &&
-              <div>
-                <CRow className='mb-3'>
-                  <CCol md={6}>
-                    {/* CNPJ em itálico */}
-                    <CFormLabel className='italic'>CNPJ</CFormLabel>
-                    <CFormInput
-                      name="cnpj-show"
-                      className="cnpj italic"
-                      value={formData.cnpj}
-                      placeholder='00.000.000/0000-00'
-                      disabled
-                    />
-                  </CCol>
-                  <CCol md={6}>
-                    <CFormLabel className='italic'>Nome da Empresa</CFormLabel>
-                    <CFormInput
-                      className='italic'
-                      name="nomeEmpresa-show"
-                      value={empresa ? empresa.nomeFantasia : ''}
-                      onChange={handleChange}
-                      placeholder="Nome da Empresa"
-                      disabled
-                    />
-                  </CCol>
-                </CRow>
-              </div>
-            }
-
-            <h5>{steps[step].title}</h5>
-            <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
-
-            <div className="mt-4 d-flex justify-content-between">
-              <div className="d-flex gap-2">
-                {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
-              </div>
-              <div className="d-flex gap-2">
-                {step >= 0 && (
-                  <CButton color="secondary" href="/contrato">
-                    Cancelar
-                  </CButton>
-                )}
-                {step < steps.length - 1 && (
-                  <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}>
-                    Próximo
-                  </CButton>
-                )}
-                {step === steps.length - 1 && (
-                  <CButton color="success" style={{ color: '#FFFFFF' }} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
-                    Finalizar
-                  </CButton>
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <CCardText className="text-success mt-3">Contrato cadastrado com sucesso!</CCardText>
-            <CButton color="success" className="mt-3 text-white" onClick={handleReset}>
-              Cadastrar Novo Contrato
-            </CButton>
-            <Link to="/contrato" className="btn btn-secondary mt-3 ms-2">
-              Ver Contratos
-            </Link>
-          </>
+        
+        {showSuccessAlert && (
+          <CAlert color="success" dismissible className="mb-3">
+            Contrato cadastrado com sucesso!
+          </CAlert>
         )}
+        {error && (
+          <CAlert color="danger" dismissible className="mb-3">
+            {error}
+          </CAlert>
+        )}
+
+        <div className="d-flex justify-content-between mb-4 position-relative">
+          {steps.map((s, index) => (
+            <div key={index} className="text-center flex-fill px-2 position-relative" style={{ zIndex: 1 }}>
+              <div
+                className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
+                  index === step
+                    ? 'bg-primary text-white'
+                    : index < step
+                    ? 'bg-success text-white'
+                    : 'bg-light text-muted'
+                }`}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '2px solid #ccc',
+                }}
+              >
+                {index + 1}
+              </div>
+              <small
+                className={`d-block ${
+                  index === step
+                    ? 'fw-bold text-primary'
+                    : index < step
+                    ? 'text-success'
+                    : 'text-muted'
+                }`}
+              >
+                {s.title}
+              </small>
+            </div>
+          ))}
+        </div>
+        {step !== 0 &&
+          <div>
+            <CRow className='mb-3'>
+              <CCol md={6}>
+                {/* CNPJ em itálico */}
+                <CFormLabel className='italic'>CNPJ</CFormLabel>
+                <CFormInput
+                  name="cnpj-show"
+                  className="cnpj italic"
+                  value={formData.cnpj}
+                  placeholder='00.000.000/0000-00'
+                  disabled
+                />
+              </CCol>
+              <CCol md={6}>
+                <CFormLabel className='italic'>Nome da Empresa</CFormLabel>
+                <CFormInput
+                  className='italic'
+                  name="nomeEmpresa-show"
+                  value={empresa ? empresa.nomeFantasia : ''}
+                  onChange={handleChange}
+                  placeholder="Nome da Empresa"
+                  disabled
+                />
+              </CCol>
+            </CRow>
+          </div>
+        }
+
+        <h5>{steps[step].title}</h5>
+        <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
+
+        <div className="mt-4 d-flex justify-content-between">
+          <div className="d-flex gap-2">
+            {step > 0 && <CButton color="secondary" onClick={handleBack}>Voltar</CButton>}
+          </div>
+          <div className="d-flex gap-2">
+            {step >= 0 && (
+              <CButton color="secondary" href="/contrato">
+                Cancelar
+              </CButton>
+            )}
+            {step < steps.length - 1 && (
+              <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}>
+                Próximo
+              </CButton>
+            )}
+            {step === steps.length - 1 && (
+              <CButton color="success" style={{ color: '#FFFFFF' }} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
+                {isFinishing ? (
+                  <>
+                    <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
+                    Finalizando...
+                  </>
+                ) : (
+                  "Finalizar"
+                )}
+              </CButton>
+            )}
+          </div>
+        </div>
       </CCardBody>
     </CCard>
   )
