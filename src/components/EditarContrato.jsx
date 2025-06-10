@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate  } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
   buscarContratoPorId,
-  ativarContrato,
+  editarContrato,
 } from "../services/contratoService";
 import {
   CForm,
@@ -25,52 +25,55 @@ export default function EditarContrato() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
+    // Estes campos são para exibição, serão preenchidos pelo `buscarContratoPorId`
     nomeFantasia: '',
     cnpj: '',
-    statusContrato: '',
     valor: '',
-    descricao: '',
-    tipo: '',
     dataInicio: '',
     dataFim: '',
+    // Estes campos são editáveis e correspondem ao ContratoPatchDTO
+    statusContrato: '', // No front, manteremos este nome para o estado
+    descricao: '',
+    tipo: '',
     nomeResponsavel: '',
-  })
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false)
-  const [error, setError] = useState(null)
+  });
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchContrato = async () => {
       try {
-        const response = await buscarContratoPorId(id)
-        const data = response.data
+        const response = await buscarContratoPorId(id);
+        const data = response.data;
         setFormData({
+          // Campos desabilitados para exibição
           nomeFantasia: data.nomeFantasia || '',
           cnpj: data.cnpj || '',
-          statusContrato: data.statusContrato || '',
           valor: data.valor || '',
-          descricao: data.descricao || '',
-          tipo: data.tipo || '',
           dataInicio: data.dataInicio || '',
           dataFim: data.dataFim || '',
+          // Campos editáveis (para ContratoPatchDTO)
+          statusContrato: data.statusContrato || '', // Note que o backend pode retornar 'status' ou 'statusContrato' dependendo do DTO de exibição
+          descricao: data.descricao || '',
+          tipo: data.tipo || '',
           nomeResponsavel: data.nomeResponsavel || '',
-        })
+        });
       } catch (err) {
-        console.error('Erro ao buscar contrato:', err)
-        setError('Não foi possível carregar os dados do contrato.')
+        console.error('Erro ao buscar contrato:', err);
+        setError('Não foi possível carregar os dados do contrato.');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
     fetchContrato();
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Limpa alerts e erros ao começar a digitar/alterar
-    setShowSuccessAlert(false)
+    setShowSuccessAlert(false);
     setError(null);
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,22 +81,29 @@ export default function EditarContrato() {
     setShowSuccessAlert(false);
     setError(null);
 
-    // Apagar essas 3 linhas após criação do endpoint
-    setError("Erro ao atualizar contrato. Criação do endpoint em progresso.");
-    setIsSaving(false);
-    return;
+    // --- AQUI ESTÁ A MUDANÇA PRINCIPAL: MONTANDO O DTO PARA O BACKEND ---
+    const contratoParaAtualizar = {
+      descricao: formData.descricao,
+      tipo: formData.tipo,
+      status: formData.statusContrato, // Renomeando de 'statusContrato' (front) para 'status' (back)
+      nomeResponsavel: formData.nomeResponsavel,
+    };
+
     try {
-      await ativarContrato(id);
+      
+
+      await editarContrato(id, contratoParaAtualizar); // Envia o DTO filtrado
       setShowSuccessAlert(true);
 
-      // Não redireciona imediatamente, espera o alert desaparecer
       setTimeout(() => {
         setShowSuccessAlert(false);
         navigate("/contrato");
-      }, 3000); // Exibe o alert por 3 segundos
+      }, 1000);
     } catch (error) {
       console.error("Erro ao atualizar contrato:", error);
-      setError("Erro ao atualizar contrato. Verifique os campos.");
+      // Detalhar o erro se o backend retornar mais informações úteis
+      const errorMessage = error.response?.data?.message || "Erro ao atualizar contrato. Verifique os campos.";
+      setError(errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -131,6 +141,7 @@ export default function EditarContrato() {
         )}
 
         <CForm onSubmit={handleSubmit} className="row g-3">
+          {/* Campos que não são editáveis e são exibidos como 'disabled' */}
           <CCol md={6}>
             <CFormLabel htmlFor="nomeFantasia">Nome Fantasia</CFormLabel>
             <CFormInput
@@ -153,6 +164,7 @@ export default function EditarContrato() {
             />
           </CCol>
 
+          {/* Campo 'statusContrato' no front, mas é 'status' no DTO do back */}
           <CCol md={4}>
             <CFormLabel htmlFor="statusContrato">Status do Contrato (*)</CFormLabel>
             <CFormSelect
@@ -164,8 +176,8 @@ export default function EditarContrato() {
             >
               <option value="">Selecione...</option>
               <option value="ATIVO">Ativo</option>
-              <option value="INATIVO">Inativo</option>
-              <option value="ENCERRADO">Encerrado</option>
+              <option value="CANCELADO">Inativo</option>
+              <option value="ARQUIVADO">Arquivado</option>
             </CFormSelect>
           </CCol>
 
@@ -180,6 +192,7 @@ export default function EditarContrato() {
             />
           </CCol>
 
+          {/* Campo 'tipo' */}
           <CCol md={4}>
             <CFormLabel htmlFor="tipo">Tipo (*)</CFormLabel>
             <CFormSelect
@@ -190,10 +203,11 @@ export default function EditarContrato() {
               required
             >
               <option value="">Selecione...</option>
-              <option value="COMUNICACAO">COMUNICAÇÃO</option>
-              <option value="SERVICO">SERVIÇO</option>
-              <option value="INFRAESTRUTURA">INFRAESTRUTURA</option>
               <option value="POSTO_DE_SERVICO">POSTO DE SERVIÇO</option>
+              <option value="SERVICO">SERVIÇO</option>
+              <option value="COMUNICACAO">COMUNICAÇÃO</option>
+              <option value="INFRAESTRUTURA">INFRAESTRUTURA</option>
+              <option value="DESENVOLVIMENTO">DESENVOLVIMENTO</option>
             </CFormSelect>
           </CCol>
 
@@ -204,6 +218,7 @@ export default function EditarContrato() {
               name="dataInicio"
               type="date"
               value={formData.dataInicio}
+              onChange={handleChange} // Mantenha o onChange para evitar warning, mas o campo está disabled
               disabled
             />
           </CCol>
@@ -215,10 +230,12 @@ export default function EditarContrato() {
               name="dataFim"
               type="date"
               value={formData.dataFim}
+              onChange={handleChange} // Mantenha o onChange para evitar warning, mas o campo está disabled
               disabled
             />
           </CCol>
 
+          {/* Campo 'descricao' */}
           <CCol xs={12}>
             <CFormTextarea
               id="descricao"
@@ -231,6 +248,7 @@ export default function EditarContrato() {
             />
           </CCol>
 
+          {/* Campo 'nomeResponsavel' */}
           <CCol md={6}>
             <CFormLabel htmlFor="nomeResponsavel">Nome do Responsável (*)</CFormLabel>
             <CFormInput
@@ -260,5 +278,5 @@ export default function EditarContrato() {
         </CForm>
       </CCardBody>
     </CCard>
-  )
+  );
 }

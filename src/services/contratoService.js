@@ -46,3 +46,6 @@ export const ativarContrato = (id) => api.patch(`/contratos/ativar/${id}`)
 
 // Arquivar um contrato
 export const arquivarContrato = (id) => api.delete(`/contratos/arquivar/${id}`)
+
+// Editar um contrato
+export const editarContrato = (id, contrato) => api.patch(`/contratos/editar/${id}`, contrato)
