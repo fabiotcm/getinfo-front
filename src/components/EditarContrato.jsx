@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate  } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   buscarContratoPorId,
-  ativarContrato,
+  editarContrato,
 } from "../services/contratoService";
+
+import { getColaboradores } from "../services/colaboradorService";
+
+// Importando componentes do CoreUI
 import {
   CForm,
   CFormInput,
@@ -17,7 +21,7 @@ import {
   CCardTitle,
   CSpinner,
   CAlert,
-} from '@coreui/react'
+} from '@coreui/react';
 
 export default function EditarContrato() {
   const { id } = useParams();
@@ -27,50 +31,62 @@ export default function EditarContrato() {
   const [formData, setFormData] = useState({
     nomeFantasia: '',
     cnpj: '',
-    statusContrato: '',
     valor: '',
-    descricao: '',
-    tipo: '',
     dataInicio: '',
     dataFim: '',
-    nomeResponsavel: '',
-  })
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false)
-  const [error, setError] = useState(null)
+    statusContrato: '',
+    descricao: '',
+    tipo: '',
+    nomeResponsavel: '', // Este armazenará o nome completo do colaborador
+  });
+  const [colaboradores, setColaboradores] = useState([]);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchContrato = async () => {
+    const fetchData = async () => {
       try {
-        const response = await buscarContratoPorId(id)
-        const data = response.data
+        const contratoResponse = await buscarContratoPorId(id);
+        const contratoData = contratoResponse.data;
+
+        const colaboradoresResponse = await getColaboradores();
+        // Assume que colaboradoresResponse.data é um array de objetos colaborador
+        // E que cada objeto colaborador tem uma propriedade 'nomeCompleto' (ou similar)
+        const colaboradoresAtivos = colaboradoresResponse.data.filter(
+          (colaborador) => colaborador.status == 'ATIVO'
+        );
+        setColaboradores(colaboradoresAtivos);
+
         setFormData({
-          nomeFantasia: data.nomeFantasia || '',
-          cnpj: data.cnpj || '',
-          statusContrato: data.statusContrato || '',
-          valor: data.valor || '',
-          descricao: data.descricao || '',
-          tipo: data.tipo || '',
-          dataInicio: data.dataInicio || '',
-          dataFim: data.dataFim || '',
-          nomeResponsavel: data.nomeResponsavel || '',
-        })
+          nomeFantasia: contratoData.nomeFantasia || '',
+          cnpj: contratoData.cnpj || '',
+          valor: contratoData.valor || '',
+          dataInicio: contratoData.dataInicio || '',
+          dataFim: contratoData.dataFim || '',
+          statusContrato: contratoData.statusContrato || '',
+          descricao: contratoData.descricao || '',
+          tipo: contratoData.tipo || '',
+          // Definir o nomeResponsavel do formData com o valor exato que vem do contrato original
+          nomeResponsavel: contratoData.nomeResponsavel || '',
+        });
+
       } catch (err) {
-        console.error('Erro ao buscar contrato:', err)
-        setError('Não foi possível carregar os dados do contrato.')
+        console.error('Erro ao buscar dados:', err);
+        setError('Não foi possível carregar os dados do contrato ou dos colaboradores.');
+      'Erro ao buscar dados: Não foi possível carregar os dados do contrato ou dos colaboradores.'
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
-    fetchContrato();
+    fetchData();
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Limpa alerts e erros ao começar a digitar/alterar
-    setShowSuccessAlert(false)
+    setShowSuccessAlert(false);
     setError(null);
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,22 +94,26 @@ export default function EditarContrato() {
     setShowSuccessAlert(false);
     setError(null);
 
-    // Apagar essas 3 linhas após criação do endpoint
-    setError("Erro ao atualizar contrato. Criação do endpoint em progresso.");
-    setIsSaving(false);
-    return;
+    const contratoParaAtualizar = {
+      descricao: formData.descricao,
+      tipo: formData.tipo,
+      status: formData.statusContrato,
+      // Envia o nome completo do responsável, conforme selecionado no dropdown
+      nomeResponsavel: formData.nomeResponsavel, 
+    };
+
     try {
-      await ativarContrato(id);
+      await editarContrato(id, contratoParaAtualizar);
       setShowSuccessAlert(true);
 
-      // Não redireciona imediatamente, espera o alert desaparecer
       setTimeout(() => {
         setShowSuccessAlert(false);
         navigate("/contrato");
-      }, 3000); // Exibe o alert por 3 segundos
+      }, 1000);
     } catch (error) {
       console.error("Erro ao atualizar contrato:", error);
-      setError("Erro ao atualizar contrato. Verifique os campos.");
+      const errorMessage = error.response?.data?.message || "Erro ao atualizar contrato. Verifique os campos.";
+      setError(errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -111,7 +131,7 @@ export default function EditarContrato() {
       >
         <CSpinner color="primary" />
       </CCard>
-    )
+    );
   }
 
   return (
@@ -131,6 +151,7 @@ export default function EditarContrato() {
         )}
 
         <CForm onSubmit={handleSubmit} className="row g-3">
+          {/* Campos que não são editáveis e são exibidos como 'disabled' */}
           <CCol md={6}>
             <CFormLabel htmlFor="nomeFantasia">Nome Fantasia</CFormLabel>
             <CFormInput
@@ -163,9 +184,10 @@ export default function EditarContrato() {
               required
             >
               <option value="">Selecione...</option>
+              <option value="PENDENTE">Pendente</option>
               <option value="ATIVO">Ativo</option>
-              <option value="INATIVO">Inativo</option>
-              <option value="ENCERRADO">Encerrado</option>
+              <option value="CANCELADO">Cancelado</option>
+              <option value="ARQUIVADO">Arquivado</option>
             </CFormSelect>
           </CCol>
 
@@ -190,10 +212,11 @@ export default function EditarContrato() {
               required
             >
               <option value="">Selecione...</option>
-              <option value="COMUNICACAO">COMUNICAÇÃO</option>
-              <option value="SERVICO">SERVIÇO</option>
-              <option value="INFRAESTRUTURA">INFRAESTRUTURA</option>
               <option value="POSTO_DE_SERVICO">POSTO DE SERVIÇO</option>
+              <option value="SERVICO">SERVIÇO</option>
+              <option value="COMUNICACAO">COMUNICAÇÃO</option>
+              <option value="INFRAESTRUTURA">INFRAESTRUTURA</option>
+              <option value="DESENVOLVIMENTO">DESENVOLVIMENTO</option>
             </CFormSelect>
           </CCol>
 
@@ -204,6 +227,7 @@ export default function EditarContrato() {
               name="dataInicio"
               type="date"
               value={formData.dataInicio}
+              onChange={handleChange}
               disabled
             />
           </CCol>
@@ -215,6 +239,7 @@ export default function EditarContrato() {
               name="dataFim"
               type="date"
               value={formData.dataFim}
+              onChange={handleChange}
               disabled
             />
           </CCol>
@@ -231,15 +256,27 @@ export default function EditarContrato() {
             />
           </CCol>
 
+          {/* Campo 'nomeResponsavel' agora é um CFormSelect */}
           <CCol md={6}>
             <CFormLabel htmlFor="nomeResponsavel">Nome do Responsável (*)</CFormLabel>
-            <CFormInput
+            <CFormSelect
               id="nomeResponsavel"
               name="nomeResponsavel"
               value={formData.nomeResponsavel}
               onChange={handleChange}
               required
-            />
+            >
+              
+              {/* Renderiza as opções do dropdown */}
+              {colaboradores.map((colaborador) => (
+                <option 
+                  key={colaborador.id} // Chave única para cada opção
+                  value={colaborador.nome + ' ' + colaborador.sobrenome || ''} // Usar 'nomeCompleto' ou a propriedade correta
+                >
+                  {colaborador.nome + ' ' + colaborador.sobrenome || 'Nome Indisponível'} {/* Exibir 'nomeCompleto' ou a propriedade correta */}
+                </option>
+              ))}
+            </CFormSelect>
           </CCol>
 
           <CCol xs={12} className="mt-4 text-end">
@@ -260,5 +297,5 @@ export default function EditarContrato() {
         </CForm>
       </CCardBody>
     </CCard>
-  )
+  );
 }
