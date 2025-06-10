@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   buscarContratoPorId,
   editarContrato,
 } from "../services/contratoService";
+
+import { getColaboradores } from "../services/colaboradorService";
+
+// Importando componentes do CoreUI
 import {
   CForm,
   CFormInput,
@@ -17,7 +21,7 @@ import {
   CCardTitle,
   CSpinner,
   CAlert,
-} from '@coreui/react'
+} from '@coreui/react';
 
 export default function EditarContrato() {
   const { id } = useParams();
@@ -25,47 +29,56 @@ export default function EditarContrato() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
-    // Estes campos são para exibição, serão preenchidos pelo `buscarContratoPorId`
     nomeFantasia: '',
     cnpj: '',
     valor: '',
     dataInicio: '',
     dataFim: '',
-    // Estes campos são editáveis e correspondem ao ContratoPatchDTO
-    statusContrato: '', // No front, manteremos este nome para o estado
+    statusContrato: '',
     descricao: '',
     tipo: '',
-    nomeResponsavel: '',
+    nomeResponsavel: '', // Este armazenará o nome completo do colaborador
   });
+  const [colaboradores, setColaboradores] = useState([]);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchContrato = async () => {
+    const fetchData = async () => {
       try {
-        const response = await buscarContratoPorId(id);
-        const data = response.data;
+        const contratoResponse = await buscarContratoPorId(id);
+        const contratoData = contratoResponse.data;
+
+        const colaboradoresResponse = await getColaboradores();
+        // Assume que colaboradoresResponse.data é um array de objetos colaborador
+        // E que cada objeto colaborador tem uma propriedade 'nomeCompleto' (ou similar)
+        const colaboradoresAtivos = colaboradoresResponse.data.filter(
+          (colaborador) => colaborador.status == 'ATIVO'
+        );
+        setColaboradores(colaboradoresAtivos);
+
         setFormData({
-          // Campos desabilitados para exibição
-          nomeFantasia: data.nomeFantasia || '',
-          cnpj: data.cnpj || '',
-          valor: data.valor || '',
-          dataInicio: data.dataInicio || '',
-          dataFim: data.dataFim || '',
-          // Campos editáveis (para ContratoPatchDTO)
-          statusContrato: data.statusContrato || '', // Note que o backend pode retornar 'status' ou 'statusContrato' dependendo do DTO de exibição
-          descricao: data.descricao || '',
-          tipo: data.tipo || '',
-          nomeResponsavel: data.nomeResponsavel || '',
+          nomeFantasia: contratoData.nomeFantasia || '',
+          cnpj: contratoData.cnpj || '',
+          valor: contratoData.valor || '',
+          dataInicio: contratoData.dataInicio || '',
+          dataFim: contratoData.dataFim || '',
+          statusContrato: contratoData.statusContrato || '',
+          descricao: contratoData.descricao || '',
+          tipo: contratoData.tipo || '',
+          // Definir o nomeResponsavel do formData com o valor exato que vem do contrato original
+          nomeResponsavel: contratoData.nomeResponsavel || '',
         });
+
       } catch (err) {
-        console.error('Erro ao buscar contrato:', err);
-        setError('Não foi possível carregar os dados do contrato.');
+        console.error('Erro ao buscar dados:', err);
+        setError('Não foi possível carregar os dados do contrato ou dos colaboradores.');
+      'Erro ao buscar dados: Não foi possível carregar os dados do contrato ou dos colaboradores.'
       } finally {
         setLoading(false);
       }
     };
-    fetchContrato();
+    fetchData();
   }, [id]);
 
   const handleChange = (e) => {
@@ -81,18 +94,16 @@ export default function EditarContrato() {
     setShowSuccessAlert(false);
     setError(null);
 
-    // --- AQUI ESTÁ A MUDANÇA PRINCIPAL: MONTANDO O DTO PARA O BACKEND ---
     const contratoParaAtualizar = {
       descricao: formData.descricao,
       tipo: formData.tipo,
-      status: formData.statusContrato, // Renomeando de 'statusContrato' (front) para 'status' (back)
-      nomeResponsavel: formData.nomeResponsavel,
+      status: formData.statusContrato,
+      // Envia o nome completo do responsável, conforme selecionado no dropdown
+      nomeResponsavel: formData.nomeResponsavel, 
     };
 
     try {
-      
-
-      await editarContrato(id, contratoParaAtualizar); // Envia o DTO filtrado
+      await editarContrato(id, contratoParaAtualizar);
       setShowSuccessAlert(true);
 
       setTimeout(() => {
@@ -101,7 +112,6 @@ export default function EditarContrato() {
       }, 1000);
     } catch (error) {
       console.error("Erro ao atualizar contrato:", error);
-      // Detalhar o erro se o backend retornar mais informações úteis
       const errorMessage = error.response?.data?.message || "Erro ao atualizar contrato. Verifique os campos.";
       setError(errorMessage);
     } finally {
@@ -121,7 +131,7 @@ export default function EditarContrato() {
       >
         <CSpinner color="primary" />
       </CCard>
-    )
+    );
   }
 
   return (
@@ -164,7 +174,6 @@ export default function EditarContrato() {
             />
           </CCol>
 
-          {/* Campo 'statusContrato' no front, mas é 'status' no DTO do back */}
           <CCol md={4}>
             <CFormLabel htmlFor="statusContrato">Status do Contrato (*)</CFormLabel>
             <CFormSelect
@@ -175,8 +184,9 @@ export default function EditarContrato() {
               required
             >
               <option value="">Selecione...</option>
+              <option value="PENDENTE">Pendente</option>
               <option value="ATIVO">Ativo</option>
-              <option value="CANCELADO">Inativo</option>
+              <option value="CANCELADO">Cancelado</option>
               <option value="ARQUIVADO">Arquivado</option>
             </CFormSelect>
           </CCol>
@@ -192,7 +202,6 @@ export default function EditarContrato() {
             />
           </CCol>
 
-          {/* Campo 'tipo' */}
           <CCol md={4}>
             <CFormLabel htmlFor="tipo">Tipo (*)</CFormLabel>
             <CFormSelect
@@ -218,7 +227,7 @@ export default function EditarContrato() {
               name="dataInicio"
               type="date"
               value={formData.dataInicio}
-              onChange={handleChange} // Mantenha o onChange para evitar warning, mas o campo está disabled
+              onChange={handleChange}
               disabled
             />
           </CCol>
@@ -230,12 +239,11 @@ export default function EditarContrato() {
               name="dataFim"
               type="date"
               value={formData.dataFim}
-              onChange={handleChange} // Mantenha o onChange para evitar warning, mas o campo está disabled
+              onChange={handleChange}
               disabled
             />
           </CCol>
 
-          {/* Campo 'descricao' */}
           <CCol xs={12}>
             <CFormTextarea
               id="descricao"
@@ -248,16 +256,27 @@ export default function EditarContrato() {
             />
           </CCol>
 
-          {/* Campo 'nomeResponsavel' */}
+          {/* Campo 'nomeResponsavel' agora é um CFormSelect */}
           <CCol md={6}>
             <CFormLabel htmlFor="nomeResponsavel">Nome do Responsável (*)</CFormLabel>
-            <CFormInput
+            <CFormSelect
               id="nomeResponsavel"
               name="nomeResponsavel"
               value={formData.nomeResponsavel}
               onChange={handleChange}
               required
-            />
+            >
+              
+              {/* Renderiza as opções do dropdown */}
+              {colaboradores.map((colaborador) => (
+                <option 
+                  key={colaborador.id} // Chave única para cada opção
+                  value={colaborador.nome + ' ' + colaborador.sobrenome || ''} // Usar 'nomeCompleto' ou a propriedade correta
+                >
+                  {colaborador.nome + ' ' + colaborador.sobrenome || 'Nome Indisponível'} {/* Exibir 'nomeCompleto' ou a propriedade correta */}
+                </option>
+              ))}
+            </CFormSelect>
           </CCol>
 
           <CCol xs={12} className="mt-4 text-end">
