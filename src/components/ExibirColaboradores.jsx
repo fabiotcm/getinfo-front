@@ -8,6 +8,7 @@ import {
   CTableDataCell,
   CButton,
   CFormInput,
+  CFormCheck,
   CTooltip,
   CCard,
   CCardBody,
@@ -16,12 +17,18 @@ import {
   CAlert
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { cilPencil, cilInbox, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
+import {
+  cilPencil,
+  cilInbox,
+  cilPlus,
+  cilArrowTop,
+  cilArrowBottom,
+} from "@coreui/icons";
 import { getColaboradores, deleteColaborador } from "../services/colaboradorService";
 import { useNavigate } from "react-router-dom";
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import logo from 'src/assets/brand/logo.png';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import logo from "src/assets/brand/logo.png";
 
 export default function ExibirColaboradores() {
   const [colaboradores, setColaboradores] = useState([]);
@@ -30,6 +37,8 @@ export default function ExibirColaboradores() {
   const [error, setError] = useState(null);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [showAtivos, setShowAtivos] = useState(true);
+  const [showInativos, setShowInativos] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,8 +48,7 @@ export default function ExibirColaboradores() {
       try {
         const response = await getColaboradores();
         const data = Array.isArray(response.data) ? response.data : [];
-        const data_filtered = data.filter((colaborador) => colaborador.status === "ATIVO");
-        setColaboradores(data_filtered);
+        setColaboradores(data);
       } catch (err) {
         console.error("Erro ao buscar colaboradores:", err);
         setError("Não foi possível carregar os colaboradores. Tente novamente mais tarde.");
@@ -69,7 +77,12 @@ export default function ExibirColaboradores() {
   const handleAdd = () => navigate("/cadastrar-colaborador");
   const handleRowClick = (id) => navigate(`/colaboradores/${id}`);
 
+  // Filtragem por status e termo
   const filteredColaboradores = colaboradores.filter((colab) => {
+    // filtro de status
+    if (!showAtivos && colab.status === 'ATIVO') return false;
+    if (!showInativos && colab.status === 'INATIVO') return false;
+    // filtro de busca
     const fullName = `${colab.nome || ''} ${colab.sobrenome || ''}`.toLowerCase();
     const termo = searchTerm.toLowerCase();
     return (
@@ -80,6 +93,7 @@ export default function ExibirColaboradores() {
     );
   });
 
+  // Ordenação
   const sortedColaboradores = [...filteredColaboradores].sort((a, b) => {
     if (!sortConfig.key) return 0;
     const aVal = (a[sortConfig.key] || '').toString().toLowerCase();
@@ -135,16 +149,34 @@ export default function ExibirColaboradores() {
     <div className="p-4">
       <CCard className="mb-4">
         <CCardBody>
-          <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
             <CCardTitle className="h4 mb-0">Colaboradores</CCardTitle>
             <CButton color="secondary" onClick={exportToPDF}>Exportar PDF</CButton>
-            <CFormInput
-              type="search"
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ maxWidth: "250px" }}
-            />
+            <div className="d-flex align-items-center">
+              <CFormCheck
+                type="checkbox"
+                id="filtro-ativos"
+                label="Ativos"
+                checked={showAtivos}
+                onChange={() => setShowAtivos(prev => !prev)}
+                className="me-3"
+              />
+              <CFormCheck
+                type="checkbox"
+                id="filtro-inativos"
+                label="Inativos"
+                checked={showInativos}
+                onChange={() => setShowInativos(prev => !prev)}
+                className="me-3"
+              />
+              <CFormInput
+                type="search"
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{ maxWidth: "250px" }}
+              />
+            </div>
           </div>
           <div className="d-flex justify-content-start mb-3">
             <CTooltip content="Adicionar novo colaborador" placement="top">
@@ -195,10 +227,18 @@ export default function ExibirColaboradores() {
               <CTableBody>
                 {sortedColaboradores.map(colab => (
                   <CTableRow key={colab.id}>
-                    <CTableDataCell onClick={e => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}> {colab.nome} {colab.sobrenome} </CTableDataCell>
-                    <CTableDataCell onClick={e => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}> {colab.cargo} </CTableDataCell>
-                    <CTableDataCell onClick={e => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}> {colab.email} </CTableDataCell>
-                    <CTableDataCell onClick={e => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}> {colab.status} </CTableDataCell>
+                    <CTableDataCell onClick={e => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>
+                      {colab.nome} {colab.sobrenome}
+                    </CTableDataCell>
+                    <CTableDataCell onClick={e => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>
+                      {colab.cargo}
+                    </CTableDataCell>
+                    <CTableDataCell onClick={e => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>
+                      {colab.email}
+                    </CTableDataCell>
+                    <CTableDataCell onClick={e => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>
+                      {colab.status}
+                    </CTableDataCell>
                     <CTableDataCell className="text-center">
                       <CTooltip content="Editar Colaborador" placement="top">
                         <CButton color="primary" variant="outline" size="sm" className="me-2" onClick={e => { e.stopPropagation(); navigate(`/colaboradores/${colab.id}/editar`); }}>
