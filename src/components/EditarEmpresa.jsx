@@ -13,15 +13,18 @@ import {
   CCardTitle,
   CCardText,
   CSpinner,
+  CAlert
 } from "@coreui/react";
 import { getEmpresaById, updateEmpresa } from "../services/empresaService";
 
 export default function EditarEmpresa() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState(null);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchEmpresa() {
@@ -30,7 +33,7 @@ export default function EditarEmpresa() {
         setFormData(response.data || {});
       } catch (error) {
         console.error("Erro ao buscar empresa:", error);
-        alert("Erro ao carregar dados da empresa.");
+        setError("Erro ao carregar dados da empresa.");
       } finally {
         setLoading(false);
       }
@@ -42,19 +45,29 @@ export default function EditarEmpresa() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setShowSuccessAlert(false);
+    setError(null);
   };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setShowSuccessAlert(false);
+    setError(null);
 
-  const handleSave = async () => {
     try {
-      setSaving(true);
-      await updateEmpresa(id, formData);
-      alert("Empresa atualizada com sucesso!");
-      navigate("/clientes");
+      await updateEmpresa(id, formData); // Envia formData com nome e sobrenome
+      setShowSuccessAlert(true);
+
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+        navigate("/clientes");
+      }, 1000);
     } catch (error) {
-      console.error("Erro ao atualizar empresa", error);
-      alert("Erro ao atualizar. Verifique os dados e tente novamente.");
+      console.error("Erro ao atualizar empresa:", error);
+      setError("Erro ao atualizar empresa. Verifique os campos.");
     } finally {
-      setSaving(false);
+      setIsSaving(false); // Desativa o estado de salvando
     }
   };
 
@@ -71,7 +84,18 @@ export default function EditarEmpresa() {
       <CCardBody>
         <CCardTitle className="h4 mb-3">Editar Empresa</CCardTitle>
 
-        <CForm className="row g-3">
+        {showSuccessAlert && (
+            <CAlert color="success" dismissible className="mb-3">
+              Colaborador atualizado com sucesso!
+            </CAlert>
+          )}
+          {error && (
+            <CAlert color="danger" dismissible className="mb-3">
+              {error}
+            </CAlert>
+          )}
+  
+          <CForm onSubmit={handleSubmit} className="row g-3">
           {/* Informações Básicas */}
           <CCol xs={12}>
             <h5>Informações Básicas</h5>
@@ -202,8 +226,8 @@ export default function EditarEmpresa() {
             <CButton color="secondary" className="me-2" onClick={() => navigate("/clientes")}>
               Cancelar
             </CButton>
-            <CButton color="success" onClick={handleSave} disabled={saving} className="text-white">
-              {saving ? (
+            <CButton type="submit" color="success" disabled={isSaving} className="text-white">
+              {isSaving ? (
                 <>
                   <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
                   Salvando...
