@@ -84,7 +84,7 @@ export default function EditarEmpresa() {
       <CCardBody>
         <CCardTitle className="h4 mb-3">Editar Empresa</CCardTitle>
 
-        {showSuccessAlert && (
+          {showSuccessAlert && (
             <CAlert color="success" dismissible className="mb-3">
               Colaborador atualizado com sucesso!
             </CAlert>
