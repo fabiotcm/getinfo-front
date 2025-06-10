@@ -23,6 +23,7 @@ import EdicaoColaborador from './views/pages/EdicaoColaborador'
 import Colaborador from './views/pages/Colaborador'
 import Dashboard from './views/pages/Dashboard'
 import Contratos from './views/pages/Contratos'
+import ClienteContratos from './views/pages/ClienteContratos'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 	'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -74,6 +75,7 @@ const App = () => {
           <Route path="/colaboradores/:id/editar" element={<EdicaoColaborador />} />
           <Route path="/clientes/:id" element={<ClienteDetalhes />} />
           <Route path="/clientes/:id/editar" element={<EdicaoEmpresa />} />
+          <Route path="/clientes/:id/contratos" element={<ClienteContratos />} />
           <Route path="/contrato" element={<Contratos />} />
           <Route path="/contrato/:id" element={<ContratoDetalhes />} />
           <Route path="/contrato/:id/editar" element={<EdicaoContrato />} />

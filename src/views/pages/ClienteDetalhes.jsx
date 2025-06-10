@@ -165,7 +165,7 @@ export default function ClienteDetalhes() {
                 Editar Empresa
               </CButton>
               {/* Exemplo de outro botão, se aplicável, como em ContratoDetalhes */}
-              <CButton color="success" className="text-white"> {/*onClick={handleNavigateToContratos */}
+              <CButton onClick={handleNavigateToContratos} color="success" className="text-white"> 
                 Ver Contratos
               </CButton>
             </div>
