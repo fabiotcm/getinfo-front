@@ -10,6 +10,7 @@ import {
   CTableDataCell,
   CButton,
   CFormInput,
+  CFormCheck,
   CTooltip,
   CBadge,
   CCard,
@@ -30,6 +31,8 @@ export default function CardClientes() {
   const [loading, setLoading] = useState(true);
   const [fetchingError, setFetchingError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [showAtivos, setShowAtivos] = useState(true);
+  const [showInativos, setShowInativos] = useState(true);
   const navigate = useNavigate();
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [error, setError] = useState(null);
@@ -41,7 +44,7 @@ export default function CardClientes() {
       try {
         const response = await getEmpresas();
         const data = Array.isArray(response.data) ? response.data : [];
-        setClientes(data.filter((empresa) => empresa.ativo));
+        setClientes(data);
       } catch (err) {
         console.error("Erro ao buscar empresas:", err);
         setFetchingError("Não foi possível carregar as empresas. Tente novamente mais tarde.");
@@ -69,13 +72,16 @@ export default function CardClientes() {
     );
   };
 
+  // Filtragem por status e termo
   const filteredClientes = clientes.filter((cliente) => {
+    if (!showAtivos && cliente.ativo) return false;
+    if (!showInativos && !cliente.ativo) return false;
     const termo = searchTerm.toLowerCase();
     return (
       (cliente.razaoSocial?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeFantasia?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeResponsavel?.toLowerCase() || '').includes(termo) ||
-      (cliente.ativo?.toLowerCase() || '').includes(termo)
+      (cliente.ativo ? 'ativo' : 'inativo').includes(termo)
     );
   });
 
@@ -95,15 +101,14 @@ export default function CardClientes() {
         await deleteEmpresa(id);
         setClientes((prev) => prev.filter((c) => c.id !== id));
         setShowSuccessAlert(true);
-        setTimeout(() => {
-          setShowSuccessAlert(false);
-        }, 2000);
+        setTimeout(() => setShowSuccessAlert(false), 2000);
       } catch (err) {
         console.error("Erro ao arquivar empresa:", err);
         setError("Erro ao arquivar empresa. Verifique se ela possui contratos ativos ou se ela existe.");
       }
     }
   };
+
   const handleAdd = () => navigate('/cadastrar-empresa');
   const handleRowClick = (id) => navigate(`/clientes/${id}`);
 
@@ -114,10 +119,9 @@ export default function CardClientes() {
       c.razaoSocial,
       c.nomeFantasia,
       `${c.nomeResponsavel}`,
-      c.ativo ? 'Ativo' : 'Inativo'
+      c.ativo ? 'ATIVO' : 'INATIVO'
     ]);
 
-    // Logo e título
     doc.addImage(logo, 'PNG', 14, 10, 30, 25);
     doc.setFontSize(14);
     doc.text('Lista de Clientes', 50, 30);
@@ -137,27 +141,43 @@ export default function CardClientes() {
     doc.save('clientes.pdf');
   };
 
-  const getStatusBadgeColor = (status) => {
-    const desc = status
-    if (desc === true) return 'success'
-    if (desc === false) return 'danger'
-    return 'dark'
-  }
+  const getStatusBadgeColor = (ativo) => {
+    if (ativo) return 'success';
+    return 'danger';
+  };
 
   return (
     <div className="p-4">
       <CCard className="mb-4">
         <CCardBody>
-          <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
             <CCardTitle className="h4 mb-0">Empresas Cadastradas</CCardTitle>
             <CButton color="secondary" onClick={exportToPDF}>Exportar PDF</CButton>
-            <CFormInput
-              type="search"
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ maxWidth: '250px' }}
-            />
+            <div className="d-flex align-items-center">
+              <CFormCheck
+                type="checkbox"
+                id="filtro-ativos"
+                label="Ativos"
+                checked={showAtivos}
+                onChange={() => setShowAtivos(prev => !prev)}
+                className="me-3"
+              />
+              <CFormCheck
+                type="checkbox"
+                id="filtro-inativos"
+                label="Inativos"
+                checked={showInativos}
+                onChange={() => setShowInativos(prev => !prev)}
+                className="me-3"
+              />
+              <CFormInput
+                type="search"
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ maxWidth: '250px' }}
+              />
+            </div>
           </div>
           <div className="d-flex justify-content-start mb-3">
             <CTooltip content="Adicionar nova empresa" placement="top">
