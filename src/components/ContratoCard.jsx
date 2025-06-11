@@ -7,7 +7,7 @@ import {
   CSpinner, CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilPencil, cilInbox, cilPlus, cilArrowTop, cilArrowBottom } from '@coreui/icons'
+import { cilPencil, cilEnvelopeClosed, cilPlus, cilArrowTop, cilArrowBottom, cilEnvelopeLetter } from '@coreui/icons'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import logo from 'src/assets/brand/logo.png'
@@ -196,7 +196,11 @@ export default function ContratoCard() {
                     <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}><CBadge color={getStatusBadgeColor(contrato.statusContrato)}>{contrato.statusContrato}</CBadge></CTableDataCell>
                     <CTableDataCell className="text-center">
                       <CTooltip content="Editar Contrato" placement="top"><CButton color="primary" variant="outline" size="sm" className="me-2" onClick={e => { e.stopPropagation(); handleEdit(contrato.id); }}><CIcon icon={cilPencil} /></CButton></CTooltip>
-                      <CTooltip content="Arquivar Contrato" placement="top"><CButton color="danger" variant="outline" size="sm" onClick={e => { e.stopPropagation(); handleArchive(contrato.id); }}><CIcon icon={cilInbox} /></CButton></CTooltip>
+                      <CTooltip content={contrato.statusContrato?.toUpperCase() === 'ARQUIVADO' ? "Reativar Contrato" : "Arquivar Contrato"} placement="top">
+                        <CButton color={contrato.statusContrato?.toUpperCase() === 'ARQUIVADO' ? "success" : "danger"} variant="outline" size="sm" className="ms-2" onClick={e => { e.stopPropagation(); handleArchive(contrato.id); }}>
+                          <CIcon icon={contrato.statusContrato?.toUpperCase() === 'ARQUIVADO' ? cilEnvelopeLetter : cilEnvelopeClosed} />
+                        </CButton>
+                      </CTooltip>
                     </CTableDataCell>
                   </CTableRow>
                 ))}
