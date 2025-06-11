@@ -87,9 +87,10 @@ export default function CadastrarContratoStepper() {
 
   const requiredFieldsPerStep = [
     ['cnpj'],
-    ['tipoContrato', 'valorContrato', 'funcionarioResponsavel'],
-    ['dataInicio', 'dataEntrega'],
-    ['descricao', 'entregaveis'],
+    ['tipoContrato', 'valorContrato', 'funcionarioResponsavel', 'dataInicio', 'dataEntrega'],
+    [],
+    ['entregaveis'],
+    ['descricao'],
   ]
 
   const handleChange = (e) => {
@@ -181,6 +182,7 @@ export default function CadastrarContratoStepper() {
       const cnpjLimpo = formData.cnpj.replace(/\D/g, '')
       if (!cnpjsValidos.includes(cnpjLimpo)) {
         setCnpjInvalido(true)
+        setError('CNPJ inválido ou não cadastrado.')
         return
       }
     }
@@ -226,6 +228,7 @@ export default function CadastrarContratoStepper() {
     setError(null);
     if (!isStepValid()) {
       setError('Preencha todos os campos obrigatórios desta etapa.')
+      setIsSaving(false);
       return
     }
     // Repete a validação de data para o caso do usuário ir e voltar no formulário
@@ -238,6 +241,7 @@ export default function CadastrarContratoStepper() {
     if (dataEntrega < dataInicio) {
       setDataEntregaInvalida(true)
       setError('A Data de Entrega não pode ser anterior à Data de Início.')
+      setIsSaving(false);
       return
     }
 
@@ -249,6 +253,7 @@ export default function CadastrarContratoStepper() {
     const dHoje = hoje.toISOString();
     if (dInicio !== dHoje) {
       setError('A Data de Início não pode ser diferente de hoje.')
+      setIsSaving(false);
       return
     }
 
@@ -316,6 +321,7 @@ export default function CadastrarContratoStepper() {
       console.error('Erro ao cadastrar contrato:', error)
       // TODO: Melhorar a mensagem de erro para o usuário, se possível
       setError('Ocorreu um erro ao cadastrar o contrato. Verifique o console para mais detalhes.')
+      setIsSaving(false);
     }
   }
 
@@ -478,19 +484,9 @@ export default function CadastrarContratoStepper() {
       ),
     },
     {
-      title: 'Descrição e Anexos',
+      title: 'Entregáveis',
       content: (
         <>
-          <CCol md={12}>
-            <CFormLabel>Descrição do Contrato (*)</CFormLabel>
-            <CFormTextarea
-              name="descricao"
-              value={formData.descricao}
-              onChange={handleChange}
-              rows={4}
-              required
-            />
-          </CCol>
           <CCol md={12}>
             <CFormLabel>Entregáveis</CFormLabel>
             {formData.entregaveis.map((entregavel, index) => (
@@ -540,6 +536,23 @@ export default function CadastrarContratoStepper() {
             <CButton color="secondary" onClick={adicionarEntregavel}>
               Novo Entregável
             </CButton>
+          </CCol>
+        </>
+      ),
+    },
+    {
+      title: 'Descrição e Anexos',
+      content: (
+        <>
+          <CCol md={12}>
+            <CFormLabel>Descrição do Contrato (*)</CFormLabel>
+            <CFormTextarea
+              name="descricao"
+              value={formData.descricao}
+              onChange={handleChange}
+              rows={4}
+              required
+            />
           </CCol>
 
           <CCol md={12}>
