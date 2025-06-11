@@ -10,6 +10,7 @@ import {
   CTableDataCell,
   CButton,
   CFormInput,
+  CFormCheck,
   CTooltip,
   CBadge,
   CCard,
@@ -28,21 +29,25 @@ export default function CardClientes() {
   const [clientes, setClientes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [fetchingError, setFetchingError] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [showAtivos, setShowAtivos] = useState(true);
+  const [showInativos, setShowInativos] = useState(true);
   const navigate = useNavigate();
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchEmpresas() {
       setLoading(true);
-      setError(null);
+      setFetchingError(null);
       try {
         const response = await getEmpresas();
         const data = Array.isArray(response.data) ? response.data : [];
-        setClientes(data.filter((empresa) => empresa.ativo));
+        setClientes(data);
       } catch (err) {
         console.error("Erro ao buscar empresas:", err);
-        setError("Não foi possível carregar as empresas. Tente novamente mais tarde.");
+        setFetchingError("Não foi possível carregar as empresas. Tente novamente mais tarde.");
       } finally {
         setLoading(false);
       }
@@ -67,13 +72,16 @@ export default function CardClientes() {
     );
   };
 
+  // Filtragem por status e termo
   const filteredClientes = clientes.filter((cliente) => {
+    if (!showAtivos && cliente.ativo) return false;
+    if (!showInativos && !cliente.ativo) return false;
     const termo = searchTerm.toLowerCase();
     return (
       (cliente.razaoSocial?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeFantasia?.toLowerCase() || '').includes(termo) ||
       (cliente.nomeResponsavel?.toLowerCase() || '').includes(termo) ||
-      (cliente.ativo?.toLowerCase() || '').includes(termo)
+      (cliente.ativo ? 'ativo' : 'inativo').includes(termo)
     );
   });
 
@@ -92,13 +100,15 @@ export default function CardClientes() {
       try {
         await deleteEmpresa(id);
         setClientes((prev) => prev.filter((c) => c.id !== id));
-        alert("Empresa arquivada com sucesso!");
+        setShowSuccessAlert(true);
+        setTimeout(() => setShowSuccessAlert(false), 2000);
       } catch (err) {
         console.error("Erro ao arquivar empresa:", err);
-        alert("Erro ao arquivar empresa. Verifique se ela possui contratos ativos ou se ela existe.");
+        setError("Erro ao arquivar empresa. Verifique se ela possui contratos ativos ou se ela existe.");
       }
     }
   };
+
   const handleAdd = () => navigate('/cadastrar-empresa');
   const handleRowClick = (id) => navigate(`/clientes/${id}`);
 
@@ -109,10 +119,9 @@ export default function CardClientes() {
       c.razaoSocial,
       c.nomeFantasia,
       `${c.nomeResponsavel}`,
-      c.ativo ? 'Ativo' : 'Inativo'
+      c.ativo ? 'ATIVO' : 'INATIVO'
     ]);
 
-    // Logo e título
     doc.addImage(logo, 'PNG', 14, 10, 30, 25);
     doc.setFontSize(14);
     doc.text('Lista de Clientes', 50, 30);
@@ -132,49 +141,73 @@ export default function CardClientes() {
     doc.save('clientes.pdf');
   };
 
-  const getStatusBadgeColor = (status) => {
-    const desc = status
-    if (desc === true) return 'success'
-    if (desc === false) return 'danger'
-    return 'dark'
-  }
+  const getStatusBadgeColor = (ativo) => {
+    if (ativo) return 'success';
+    return 'danger';
+  };
 
   return (
     <div className="p-4">
       <CCard className="mb-4">
         <CCardBody>
-          <div className="d-flex justify-content-between align-items-center mb-4">
+          <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
             <CCardTitle className="h4 mb-0">Empresas Cadastradas</CCardTitle>
             <CButton color="secondary" onClick={exportToPDF}>Exportar PDF</CButton>
-            <CFormInput
-              type="search"
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ maxWidth: '250px' }}
-            />
+            <div className="d-flex align-items-center">
+              <CFormCheck
+                type="checkbox"
+                id="filtro-ativos"
+                label="Ativos"
+                checked={showAtivos}
+                onChange={() => setShowAtivos(prev => !prev)}
+                className="me-3"
+              />
+              <CFormCheck
+                type="checkbox"
+                id="filtro-inativos"
+                label="Inativos"
+                checked={showInativos}
+                onChange={() => setShowInativos(prev => !prev)}
+                className="me-3"
+              />
+              <CFormInput
+                type="search"
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ maxWidth: '250px' }}
+              />
+            </div>
           </div>
-
-        <div className="d-flex justify-content-start mb-3">
-        <CTooltip content="Adicionar nova empresa" placement="top">
-          <CButton
-            color="success"
-            onClick={handleAdd}
-            className='d-flex align-items-center justify-content-center text-white'
-          >
-            <CIcon icon={cilPlus} size="xl" className='text-white me-1' />
-            Nova Empresa
-          </CButton>
-        </CTooltip>
-      </div>
-
+          <div className="d-flex justify-content-start mb-3">
+            <CTooltip content="Adicionar nova empresa" placement="top">
+              <CButton
+                color="success"
+                onClick={handleAdd}
+                className='d-flex align-items-center justify-content-center text-white'
+              >
+                <CIcon icon={cilPlus} size="xl" className='text-white me-1' />
+                Nova Empresa
+              </CButton>
+            </CTooltip>
+          </div>
+          {showSuccessAlert && (
+            <CAlert color="success" dismissible className="mb-3">
+              Empresa arquivada com sucesso!
+            </CAlert>
+          )}
+          {error && (
+            <CAlert color="danger" dismissible className="mb-3">
+              {error}
+            </CAlert>
+          )}
           {loading ? (
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '150px' }}>
               <CSpinner color="primary" />
               <span className="ms-2">Carregando empresas...</span>
             </div>
-          ) : error ? (
-            <CAlert color="danger" className="mb-3">{error}</CAlert>
+          ) : fetchingError ? (
+            <CAlert color="danger" className="mb-3">{fetchingError}</CAlert>
           ) : sortedClientes.length === 0 ? (
             <CAlert color="info" className="mb-3">Nenhuma empresa encontrada.</CAlert>
           ) : (
