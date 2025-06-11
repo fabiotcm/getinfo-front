@@ -70,6 +70,7 @@ export default function ClienteContratos () {
         console.log(id)
         const response = await contratosByEmpresa(id)
         console.log(response)
+        const contratosCliente = response.data
         setContratos(contratosCliente)
       } catch (err) {
         console.error('Erro ao buscar contratos:', err)
