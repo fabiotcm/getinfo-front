@@ -10,6 +10,7 @@ import {
   CFormInput,
   CFormCheck,
   CTooltip,
+  CBadge,
   CCard,
   CCardBody,
   CCardTitle,
@@ -237,7 +238,9 @@ export default function ExibirColaboradores() {
                       {colab.email}
                     </CTableDataCell>
                     <CTableDataCell onClick={e => { e.stopPropagation(); handleRowClick(colab.id); }} style={{ cursor: 'pointer' }}>
-                      {colab.status}
+                      <CBadge color={colab.status === 'ATIVO' ? 'success' : 'secondary'}>
+                        {colab.status}
+                      </CBadge>
                     </CTableDataCell>
                     <CTableDataCell className="text-center">
                       <CTooltip content="Editar Colaborador" placement="top">
