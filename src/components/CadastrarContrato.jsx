@@ -34,7 +34,7 @@ export default function CadastrarContratoStepper() {
   const [colaboradores, setColaboradores] = useState([])
   const [empresa, setEmpresa] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isFinishing, setIsFinishing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [error, setError] = useState(null);
 
@@ -221,7 +221,7 @@ export default function CadastrarContratoStepper() {
   }
 
   const handleFinish = async () => {
-    setIsFinishing(true);
+    setIsSaving(true);
     setShowSuccessAlert(false);
     setError(null);
     if (!isStepValid()) {
@@ -653,13 +653,13 @@ export default function CadastrarContratoStepper() {
             )}
             {step === steps.length - 1 && (
               <CButton color="success" style={{ color: '#FFFFFF' }} onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}>
-                {isFinishing ? (
+                {isSaving ? (
                   <>
                     <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
-                    Finalizando...
+                    Salvando...
                   </>
                 ) : (
-                  "Finalizar"
+                  "Salvar"
                 )}
               </CButton>
             )}

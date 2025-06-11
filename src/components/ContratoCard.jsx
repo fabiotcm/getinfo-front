@@ -16,21 +16,25 @@ export default function ContratoCard() {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [contratos, setContratos] = useState([])
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false)
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' })
 
   const handleRowClick = (id) => navigate(`/contrato/${id}`)
   const handleEdit = (id) => navigate(`/contrato/${id}/editar`)
-  const handleArchive = async (id) => arquivarContrato(id)
-    .then(() => {
-      setContratos((prev) => prev.filter((contrato) => contrato.id !== id))
-      alert('Contrato arquivado com sucesso!')
-    })
-    .catch((err) => {
+  const handleArchive = async (id) => {
+    if (!window.confirm('Tem certeza que deseja arquivar este contrato?')) return;
+    try {
+      await arquivarContrato(id)
+      setContratos(prev => prev.filter(c => c.id !== id))
+      setShowSuccessAlert(true)
+      setTimeout(() => setShowSuccessAlert(false), 2000)
+    } catch (err) {
       console.error('Erro ao arquivar contrato:', err)
-      alert('Não foi possível arquivar o contrato. Tente novamente mais tarde.')
-    })
+      setError('Não foi possível arquivar o contrato. Tente novamente mais tarde.')
+    }
+  }
   const handleAdd = () => navigate('/cadastrar-contrato')
 
   const getStatusBadgeColor = (status) => {
@@ -59,12 +63,11 @@ export default function ContratoCard() {
   }
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     const fetchContratos = async () => {
       try {
         const response = await listarContratos()
-        // Filtra contratos que não estão arquivados
         const contratosAtivos = response.data.filter(
           contrato => contrato.statusContrato?.toUpperCase() !== 'ARQUIVADO'
         )
@@ -80,7 +83,7 @@ export default function ContratoCard() {
   }, [])
 
   const handleSort = (key) => {
-    setSortConfig((prev) => ({
+    setSortConfig(prev => ({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
     }))
@@ -100,18 +103,12 @@ export default function ContratoCard() {
     if (!sortConfig.key) return 0
     const getValue = (obj) => {
       switch (sortConfig.key) {
-        case 'id':
-          return obj.id
-        case 'nomeFantasia':
-          return obj.nomeFantasia?.toLowerCase() || ''
-        case 'valor':
-          return Number(obj.valor)
-        case 'dataInicio':
-          return new Date(obj.dataInicio).getTime()
-        case 'statusContrato':
-          return obj.statusContrato?.toLowerCase() || ''
-        default:
-          return ''
+        case 'id': return obj.id
+        case 'nomeFantasia': return obj.nomeFantasia?.toLowerCase() || ''
+        case 'valor': return Number(obj.valor)
+        case 'dataInicio': return new Date(obj.dataInicio).getTime()
+        case 'statusContrato': return obj.statusContrato?.toLowerCase() || ''
+        default: return ''
       }
     }
     const aValue = getValue(a)
@@ -162,114 +159,87 @@ export default function ContratoCard() {
               type="search"
               placeholder="Buscar..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               style={{ maxWidth: '250px' }}
             />
           </div>
 
-        <div className="mb-4">
-        <CTooltip content="Adicionar novo contrato" placement="top">
-          <CButton
-            color="success"
-            onClick={handleAdd}
-            className='d-flex align-items-center justify-content-center text-white'
-          >
-            <CIcon icon={cilPlus} size="xl" className='text-white me-1' />
-            Novo Contrato
-          </CButton>
-        </CTooltip>
-      </div>
+          <div className="d-flex justify-content-start mb-3">
+            <CTooltip content="Adicionar novo contrato" placement="top">
+              <CButton color="success" onClick={handleAdd} className="d-flex align-items-center justify-content-center text-white">
+                <CIcon icon={cilPlus} size="xl" className="text-white me-1" />
+                Novo Contrato
+              </CButton>
+            </CTooltip>
+          </div>
 
-      {loading ? (
-                  <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '150px' }}>
-                    <CSpinner color="primary" />
-                    <span className="ms-2">Carregando contratos...</span>
-                  </div>
-                ) : error ? (
-                  <CAlert color="danger" className="mb-3">{error}</CAlert>
-                ) : sortedContratos.length === 0 ? (
-                  <CAlert color="info" className="mb-3">Nenhuma contrato encontrado.</CAlert>
-                ) : (
-          <CTable hover responsive>
-            <CTableHead color="light">
-              <CTableRow>
-                <CTableHeaderCell onClick={() => handleSort('id')} style={{ cursor: 'pointer' }}>
-                  N° do Contrato {getSortIcon('id')}
-                </CTableHeaderCell>
-                <CTableHeaderCell onClick={() => handleSort('nomeFantasia')} style={{ cursor: 'pointer' }}>
-                  Empresa {getSortIcon('nomeFantasia')}
-                </CTableHeaderCell>
-                <CTableHeaderCell onClick={() => handleSort('valor')} style={{ cursor: 'pointer' }}>
-                  Valor {getSortIcon('valor')}
-                </CTableHeaderCell>
-                <CTableHeaderCell onClick={() => handleSort('dataInicio')} style={{ cursor: 'pointer' }}>
-                  Período {getSortIcon('dataInicio')}
-                </CTableHeaderCell>
-                <CTableHeaderCell onClick={() => handleSort('statusContrato')} style={{ cursor: 'pointer' }}>
-                  Status {getSortIcon('statusContrato')}
-                </CTableHeaderCell>
-                <CTableHeaderCell className="text-center">Ações</CTableHeaderCell>
-              </CTableRow>
-            </CTableHead>
-            
-            <CTableBody>
-              {sortedContratos.map((contrato) => (
-                <CTableRow key={contrato.id}>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
-                    {contrato.id}
-                  </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
-                    {contrato.nomeFantasia || 'Empresa não encontrada'}
-                  </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
-                    R$ {Number(contrato.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
-                    {formatarData(contrato.dataInicio)} → {formatarData(contrato.dataFim)}
-                  </CTableDataCell>
-                  <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>
-                    <CBadge color={getStatusBadgeColor(contrato.statusContrato)}>
-                      {contrato.statusContrato || 'Desconhecido'}
-                    </CBadge>
-                  </CTableDataCell>
-                  <CTableDataCell className="text-center">
-                    <CTooltip content="Editar Contrato" placement="top">
-                      <CButton
-                        color="primary"
-                        variant="outline"
-                        size="sm"
-                        className="me-2"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleEdit(contrato.id)
-                        }}
-                      >
-                        <CIcon icon={cilPencil} />
-                      </CButton>
-                    </CTooltip>
-                    <CTooltip content="Arquivar Contrato" placement="top">
-                      <CButton
-                        color="danger"
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleArchive(contrato.id)
-                        }}
-                      >
-                        <CIcon icon={cilInbox} />
-                      </CButton>
-                    </CTooltip>
-                  </CTableDataCell>
+          {showSuccessAlert && (
+            <CAlert color="success" dismissible className="mb-3">
+              Contrato arquivado com sucesso!
+            </CAlert>
+          )}
+          {error && (
+            <CAlert color="danger" dismissible className="mb-3">
+              {error}
+            </CAlert>
+          )}
+
+          {loading ? (
+            <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '150px' }}>
+              <CSpinner color="primary" />
+              <span className="ms-2">Carregando contratos...</span>
+            </div>
+          ) : sortedContratos.length === 0 ? (
+            <CAlert color="info" className="mb-3">Nenhum contrato encontrado.</CAlert>
+          ) : (
+            <CTable hover responsive>
+              <CTableHead color="light">
+                <CTableRow>
+                  <CTableHeaderCell onClick={() => handleSort('id')} style={{ cursor: 'pointer' }}>
+                    N° do Contrato {getSortIcon('id')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('nomeFantasia')} style={{ cursor: 'pointer' }}>
+                    Empresa {getSortIcon('nomeFantasia')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('valor')} style={{ cursor: 'pointer' }}>
+                    Valor {getSortIcon('valor')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('dataInicio')} style={{ cursor: 'pointer' }}>
+                    Período {getSortIcon('dataInicio')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell onClick={() => handleSort('statusContrato')} style={{ cursor: 'pointer' }}>
+                    Status {getSortIcon('statusContrato')}
+                  </CTableHeaderCell>
+                  <CTableHeaderCell className="text-center">Ações</CTableHeaderCell>
                 </CTableRow>
-              ))}
-            </CTableBody>
-          </CTable>
-        )}
+              </CTableHead>
+              <CTableBody>
+                {sortedContratos.map(contrato => (
+                  <CTableRow key={contrato.id}>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>{contrato.id}</CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>{contrato.nomeFantasia || 'Empresa não encontrada'}</CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>R$ {Number(contrato.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}>{formatarData(contrato.dataInicio)} → {formatarData(contrato.dataFim)}</CTableDataCell>
+                    <CTableDataCell onClick={() => handleRowClick(contrato.id)} style={{ cursor: 'pointer' }}><CBadge color={getStatusBadgeColor(contrato.statusContrato)}>{contrato.statusContrato || 'Desconhecido'}</CBadge></CTableDataCell>
+                    <CTableDataCell className="text-center">
+                      <CTooltip content="Editar Contrato" placement="top">
+                        <CButton color="primary" variant="outline" size="sm" className="me-2" onClick={e => { e.stopPropagation(); handleEdit(contrato.id); }}>
+                          <CIcon icon={cilPencil} />
+                        </CButton>
+                      </CTooltip>
+                      <CTooltip content="Arquivar Contrato" placement="top">
+                        <CButton color="danger" variant="outline" size="sm" onClick={e => { e.stopPropagation(); handleArchive(contrato.id); }}>
+                          <CIcon icon={cilInbox} />
+                        </CButton>
+                      </CTooltip>
+                    </CTableDataCell>
+                  </CTableRow>
+                ))}
+              </CTableBody>
+            </CTable>
+          )}
         </CCardBody>
       </CCard>
-
-      
     </div>
   )
 }

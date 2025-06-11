@@ -11,27 +11,27 @@ import {
   CCard,
   CCardBody,
   CCardTitle,
-  CCardText,
+  CAlert,
+  CSpinner
 } from "@coreui/react";
+import { useNavigate } from 'react-router-dom'
 import { createEmpresa, getEmpresas } from "../services/empresaService";
 import $ from 'jquery';
 import 'jquery-mask-plugin';
 import { cpf, cnpj } from 'cpf-cnpj-validator'; // Importa as funções de validação
-import { func } from 'prop-types';
-
 
 export default function CadastrarEmpresa() {
   const [step, setStep] = useState(0);
-  const [finish, setFinish] = useState(false);
-  const [empresas, setEmpresas] = useState([]);
-
+  const navigate = useNavigate();
   const [cnpjInvalido, setCnpjInvalido] = useState(false);
   const [cpfResponsavelInvalido, setCpfResponsavelInvalido] = useState(false);
   const [emailInvalido, setEmailInvalido] = useState(false);
   const [telefoneInvalido, setTelefoneInvalido] = useState(false);
   const [emailResponsavelInvalido, setEmailResponsavelInvalido] = useState(false);
   const [telefoneResponsavelInvalido, setTelefoneResponsavelInvalido] = useState(false);
-
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     cnpj: "",
@@ -73,6 +73,8 @@ export default function CadastrarEmpresa() {
     if (name === "telefone") setTelefoneInvalido(false);
     if (name === "emailResponsavel") setEmailResponsavelInvalido(false);
     if (name === "telefoneResponsavel") setTelefoneResponsavelInvalido(false);
+    setShowSuccessAlert(false);
+    setError(null);
   }
 
   const isStepValid = () => {
@@ -91,9 +93,9 @@ export default function CadastrarEmpresa() {
     return cleanedPhone.length === 10 || cleanedPhone.length === 11; // 10 ou 11 dígitos para telefone/celular
   };
 
-
   const handleNext = async () => {
     if (!isStepValid()) {
+      setError('Preencha todos os campos obrigatórios desta etapa.');
       const requiredFields = requiredFieldsPerStep[step];
       requiredFields.map((field) => {
         if (!formData[field]) {
@@ -111,6 +113,7 @@ export default function CadastrarEmpresa() {
       const cnpjValue = formData.cnpj.replace(/\D/g, ''); // Remove caracteres não numéricos
       if (!cnpj.isValid(cnpjValue)) {
         setCnpjInvalido(true);
+        setError("CNPJ inválido.");
         return;
       } else {
         setCnpjInvalido(false);
@@ -121,14 +124,14 @@ export default function CadastrarEmpresa() {
         const cnpjExistente = existe.data.some((empresa) => empresa.cnpj === cnpjValue);
         if (cnpjExistente) {
           setCnpjInvalido(true);
-          alert("CNPJ já cadastrado.");
+          setError("CNPJ já cadastrado.");
           return;
         } else {
           setCnpjInvalido(false);
         }
       } catch (error) {
         console.error("Erro ao verificar CNPJ:", error);
-        alert("Erro ao verificar se o CNPJ já está cadastrado.");
+        setError("Erro ao verificar se o CNPJ já está cadastrado.");
         return;
       }
     }
@@ -137,12 +140,14 @@ export default function CadastrarEmpresa() {
     if (step === 2) {
       if (!validateEmail(formData.email)) {
         setEmailInvalido(true);
+        setError("Email inválido.");
         return;
       } else {
         setEmailInvalido(false);
       }
       if (!validatePhone(formData.telefone)) {
         setTelefoneInvalido(true);
+        setError("Telefone inválido.");
         return;
       } else {
         setTelefoneInvalido(false);
@@ -154,18 +159,21 @@ export default function CadastrarEmpresa() {
       const cpfResponsavelValue = formData.cpfResponsavel.replace(/\D/g, ''); // Remove caracteres não numéricos
       if (!cpf.isValid(cpfResponsavelValue)) {
         setCpfResponsavelInvalido(true);
+        setError("CPF do responsável inválido.");
         return;
       } else {
         setCpfResponsavelInvalido(false);
       }
       if (!validateEmail(formData.emailResponsavel)) {
         setEmailResponsavelInvalido(true);
+        setError("Email do responsável inválido.");
         return;
       } else {
         setEmailResponsavelInvalido(false);
       }
       if (!validatePhone(formData.telefoneResponsavel)) {
         setTelefoneResponsavelInvalido(true);
+        setError("Telefone do responsável inválido.");
         return;
       } else {
         setTelefoneResponsavelInvalido(false);
@@ -179,8 +187,10 @@ export default function CadastrarEmpresa() {
   };
 
   const handleFinish = async () => {
+    setShowSuccessAlert(false);
+    setError(null);
     if (!isStepValid()) {
-      alert("Preencha todos os campos desta etapa.");
+      setError("Preencha todos os campos desta etapa.");
       return;
     }
 
@@ -188,64 +198,36 @@ export default function CadastrarEmpresa() {
     const cpfValue = formData.cpfResponsavel.replace(/\D/g, ''); // Remove caracteres não numéricos
     if (!cpf.isValid(cpfValue)) {
       setCpfResponsavelInvalido(true);
-      
+      setError("CPF do responsável inválido.");
       return;
     }
     // Validação de e-mail e telefone do responsável antes de enviar
     if (!validateEmail(formData.emailResponsavel)) {
       setEmailResponsavelInvalido(true);
-      
+      setError("Email do responsável inválido.");
       return;
     }
     if (!validatePhone(formData.telefoneResponsavel)) {
       setTelefoneResponsavelInvalido(true);
-      
+      setError("Telefone do responsável inválido.");
       return;
     }
+    setIsSaving(true);
 
     try {
       await createEmpresa(formData);
-      alert("Empresa cadastrada com sucesso!");
-      setFinish(true);
+      setShowSuccessAlert(true);
+      setIsSaving(false);
+
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+        navigate("/clientes");
+      }, 2000);
     } catch (error) {
       console.error("Erro ao cadastrar cliente", error);
       console.error("Detalhes do backend:", error.response?.data);
-      alert(
-        "Erro ao cadastrar: " +
-        (error.response?.data?.message || "Verifique os campos")
-      );
+      setError("Ocorreu um erro ao cadastrar a empresa. Verifique o console para mais detalhes.");
     }
-  };
-
-  const handleReset = () => {
-    setFormData({
-      cnpj: "",
-      razaoSocial: "",
-      nomeFantasia: "",
-      tipo: "",
-      cep: "",
-      logradouro: "",
-      bairro: "",
-      // tag: "", // 'tag' não estava no formData inicial e pode causar problemas se não for usada
-      numero: "",
-      cidade: "",
-      estado: "",
-      complemento: "",
-      email: "",
-      telefone: "",
-      nomeResponsavel: "",
-      emailResponsavel: "",
-      telefoneResponsavel: "",
-      cpfResponsavel: "",
-    });
-    setFinish(false);
-    setStep(0);
-    setCnpjInvalido(false);
-    setCpfResponsavelInvalido(false);
-    setEmailInvalido(false);
-    setTelefoneInvalido(false);
-    setEmailResponsavelInvalido(false);
-    setTelefoneResponsavelInvalido(false);
   };
 
   // useEffect para aplicar máscaras e lógica do CEP após a renderização
@@ -256,19 +238,6 @@ export default function CadastrarEmpresa() {
     $('.email').unmask(); // Descomente se o email tiver máscara que precisa ser removida
     $('.tel').mask('(00) 00000-0000');
     $('.cpfResponsavel').mask('000.000.000-00');
-
-    function limpa_formulario_cep_state() {
-      // Limpa valores no estado do React
-      setFormData(prev => ({
-        ...prev,
-        logradouro: "",
-        bairro: "",
-        cidade: "",
-        complemento: "",
-        estado: "", // Limpa o estado também
-        // cep: "", // Não limpa o próprio campo CEP no estado, para o usuário poder corrigir
-      }));
-    }
 
     // Removendo a função buscarCep que estava global dentro do useEffect e duplicada
     // A lógica de busca de CEP será chamada diretamente no onClick do botão "Buscar"
@@ -398,7 +367,7 @@ export default function CadastrarEmpresa() {
                           complemento: "",
                           estado: "",
                         }));
-                        alert("CEP não encontrado.");
+                        setError("CEP não encontrado.");
                       }
                     } catch (error) {
                       console.error("Erro ao buscar CEP:", error);
@@ -411,7 +380,7 @@ export default function CadastrarEmpresa() {
                         complemento: "",
                         estado: "",
                       }));
-                      alert("Erro ao buscar CEP. Tente novamente.");
+                      setError("Erro ao buscar CEP. Tente novamente.");
                     }
                   } else if (cepValue !== "") {
                     setFormData(prev => ({
@@ -423,7 +392,7 @@ export default function CadastrarEmpresa() {
                       complemento: "",
                       estado: "",
                     }));
-                    alert("Formato de CEP inválido.");
+                    setError("Formato de CEP inválido.");
                   }
                 }}
               >
@@ -621,83 +590,85 @@ export default function CadastrarEmpresa() {
     <CCard className="p-4">
       <CCardBody>
         <CCardTitle className="h4 mb-3">Cadastro de Empresa</CCardTitle>
-        {!finish ? (
-          <>
-            {/* Indicadores de Passo */}
-            <div className="d-flex justify-content-between mb-4 position-relative">
-              {steps.map((s, index) => (
-                <div key={index} className="text-center flex-fill px-2 position-relative" style={{ zIndex: 1 }}>
-                  <div
-                    className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
-                      index === step
-                        ? "bg-primary text-white"
-                        : index < step
-                          ? "bg-success text-white"
-                          : "bg-light text-muted"
-                      }`}
-                    style={{ width: "40px", height: "40px", border: "2px solid #ccc" }}
-                  >
-                    {index + 1}
-                  </div>
-                  <small
-                    className={`d-block ${
-                      index === step
-                        ? "fw-bold text-primary"
-                        : index < step
-                          ? "text-success"
-                          : "text-muted"
-                      }`}
-                  >
-                    {s.title}
-                  </small>
-                </div>
-              ))}
-
-            </div>
-
-            {/* Conteúdo do Passo Atual */}
-            <h5>{steps[step].title}</h5>
-            <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
-
-            {/* Botões de Navegação */}
-            <div className="mt-4 d-flex justify-content-between">
-              <div className="d-flex gap-2"> {/* Flex para alinhar os botões à esquerda */}
-                {step > 0 && (
-                  <CButton color="secondary" onClick={handleBack}>
-                    Voltar
-                  </CButton>
-                )}
-              </div>
-              <div className="d-flex gap-2 end-0"> {/* Flex para alinhar os botões à direita */}
-                {step >= 0 && (
-                  <CButton color='secondary' href='/clientes'>
-                    Cancelar
-                  </CButton>
-                )}
-                {step < steps.length - 1 && (
-                  <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto no primeiro passo se não houver botão "Voltar" */}
-                    Próximo
-                  </CButton>
-                )}
-                {step === steps.length - 1 && (
-                  <CButton style={{ color: '#FFFFFF' }} color="success" onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto se for o único botão */}
-                    Finalizar
-                  </CButton>
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Tela de Sucesso */}
-            <CCardText className="text-success mt-3">
-              Empresa cadastrada com sucesso!
-            </CCardText>
-            <CButton color="success" className="mt-3" onClick={handleReset}>
-              Cadastrar Nova Empresa
-            </CButton>
-          </>
+        
+        {showSuccessAlert && (
+          <CAlert color="success" dismissible className="mb-3">
+            Empresa cadastrada com sucesso!
+          </CAlert>
         )}
+        {error && (
+          <CAlert color="danger" dismissible className="mb-3">
+            {error}
+          </CAlert>
+        )}
+        
+        {/* Indicadores de Passo */}
+        <div className="d-flex justify-content-between mb-4 position-relative">
+          {steps.map((s, index) => (
+            <div key={index} className="text-center flex-fill px-2 position-relative" style={{ zIndex: 1 }}>
+              <div
+                className={`rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center ${
+                  index === step
+                    ? "bg-primary text-white"
+                    : index < step
+                      ? "bg-success text-white"
+                      : "bg-light text-muted"
+                  }`}
+                style={{ width: "40px", height: "40px", border: "2px solid #ccc" }}
+              >
+                {index + 1}
+              </div>
+              <small
+                className={`d-block ${
+                  index === step
+                    ? "fw-bold text-primary"
+                    : index < step
+                      ? "text-success"
+                      : "text-muted"
+                  }`}
+              >
+                {s.title}
+              </small>
+            </div>
+          ))}
+        </div>
+        {/* Conteúdo do Passo Atual */}
+        <h5>{steps[step].title}</h5>
+        <CForm className="row g-3 mt-2">{steps[step].content}</CForm>
+        {/* Botões de Navegação */}
+        <div className="mt-4 d-flex justify-content-between">
+          <div className="d-flex gap-2"> {/* Flex para alinhar os botões à esquerda */}
+            {step > 0 && (
+              <CButton color="secondary" onClick={handleBack}>
+                Voltar
+              </CButton>
+            )}
+          </div>
+          <div className="d-flex gap-2 end-0"> {/* Flex para alinhar os botões à direita */}
+            {step >= 0 && (
+              <CButton color='secondary' href='/clientes'>
+                Cancelar
+              </CButton>
+            )}
+            {step < steps.length - 1 && (
+              <CButton color="primary" onClick={handleNext} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto no primeiro passo se não houver botão "Voltar" */}
+                Próximo
+              </CButton>
+            )}
+            {step === steps.length - 1 && (
+              <CButton style={{ color: '#FFFFFF' }} color="success" onClick={handleFinish} className={step === 0 ? 'ms-auto' : ''}> {/* Adiciona ms-auto se for o único botão */}
+                {isSaving ? (
+                  <>
+                    <CSpinner component="span" size="sm" aria-hidden="true" className="me-2" />
+                    Salvando...
+                  </>
+                ) : (
+                  "Salvar"
+                )}
+              </CButton>
+            )}
+          </div>
+        </div>
       </CCardBody>
     </CCard>
   );
