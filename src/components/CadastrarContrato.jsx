@@ -292,11 +292,12 @@ export default function CadastrarContratoStepper() {
       if (formData.entregaveis.length > 0 && contratoId) {
         for (const ent of formData.entregaveis) {
           console.log('Criando entregável:', ent)
-          await criarEntregavel({
-            contratoId,
+          const dataFormatada = new Date(ent.dataFinal).toISOString().split('T')[0]; // Formata a data para YYYY-MM-DD
+
+          await criarEntregavel(contratoId, {
             descricao: ent.descricao,
             observacao: ent.observacao,
-            dataFinal: ent.dataFinal,
+            dataFinal: dataFormatada,
           })
         }
         console.log('Todos os entregáveis foram criados.')
