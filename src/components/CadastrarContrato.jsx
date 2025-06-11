@@ -547,7 +547,7 @@ export default function CadastrarContratoStepper() {
               type="file"
               name="anexo"
               onChange={handleChange}
-              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+              accept=".pdf"
             />
           </CCol>
         </>
