@@ -254,6 +254,7 @@ export default function ContratoDetalhes() {
                           overflow: 'hidden',
                           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                           backgroundColor: '#f9f9f9',
+                          position: 'relative',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -261,12 +262,12 @@ export default function ContratoDetalhes() {
                       }}>
                           <iframe
                             src={anexoUrl}
-                            width="100%"
-                            height="100%"
+                            width="150%"
+                            height="140%"
                             title="Mini Prévia do Anexo"
-                            style={{ border: 'none', transform: 'scale(0.7)', transformOrigin: '0 0' }}
-                            scrolling="no"
+                            style={{ border: 'none', transform: 'scale(0.95)', position: 'absolute', top: '-10%', left: '-20%' }}
                             onError={(e) => console.error('Erro ao renderizar mini iframe:', e)}
+
                           >
                             PDF
                           </iframe>
