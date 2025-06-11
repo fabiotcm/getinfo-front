@@ -13,7 +13,8 @@ import {
   buscarAgregados,
   buscarEntregaveis,
   viewAnexo,
-  downloadAnexo
+  downloadAnexo,
+  exibirAditivosDoContrato // Importado o novo endpoint de aditivos
 } from '../../services/contratoService'
 
 export default function ContratoDetalhes() {
@@ -23,6 +24,7 @@ export default function ContratoDetalhes() {
   const [contrato, setContrato] = useState(null)
   const [colaboradores, setColaboradores] = useState([])
   const [entregaveis, setEntregaveis] = useState([])
+  const [aditivos, setAditivos] = useState([]) // Novo estado para os aditivos
   const [anexoUrl, setAnexoUrl] = useState(null)
   const [loadingAnexo, setLoadingAnexo] = useState(true);
 
@@ -32,15 +34,18 @@ export default function ContratoDetalhes() {
     const fetchContratoData = async () => {
       setLoadingAnexo(true);
       try {
-        const [contratoRes, agregadosRes, entregaveisRes] = await Promise.all([
+        // Incluindo a busca por aditivos na Promise.all
+        const [contratoRes, agregadosRes, entregaveisRes, aditivosRes] = await Promise.all([
           buscarContratoPorId(id),
           buscarAgregados(id),
-          buscarEntregaveis(id)
+          buscarEntregaveis(id),
+          exibirAditivosDoContrato(id) // Nova chamada de API
         ])
 
         setContrato(contratoRes.data)
         setColaboradores(agregadosRes.data)
         setEntregaveis(entregaveisRes.data)
+        setAditivos(aditivosRes.data) // Atualizando o estado dos aditivos
 
         try {
           const anexoRes = await viewAnexo(id)
@@ -65,6 +70,7 @@ export default function ContratoDetalhes() {
         console.log('Contrato:', contratoRes.data)
         console.log('Colaboradores:', agregadosRes.data)
         console.log('Entregáveis:', entregaveisRes.data)
+        console.log('Aditivos:', aditivosRes.data) // Log dos aditivos
 
       } catch (error) {
         console.error('Erro ao buscar dados do contrato:', error)
@@ -124,7 +130,7 @@ export default function ContratoDetalhes() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `anexo_contrato_${id}.pdf`); 
+      link.setAttribute('download', `anexo_contrato_${id}.pdf`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -220,6 +226,7 @@ export default function ContratoDetalhes() {
                       Status: {e.status} <br />
                       {e.dataEntrega && <>Data Entrega: {formatarData(e.dataEntrega)}<br /></>}
                       {e.dataCancelamento && <>Data Cancelamento: {formatarData(e.dataCancelamento)}<br /></>}
+                      {e.observacao && <>Observação: {e.observacao}<br /></>} {/* Campo observacao adicionado */}
                     </CListGroupItem>
                   ))}
                 </CListGroup>
@@ -227,7 +234,29 @@ export default function ContratoDetalhes() {
             </CCardBody>
           </CCard>
 
-          {/* --- NOVO CARD: Anexo do Contrato (Estilo Gmail com prévia pequena e clique no texto) --- */}
+          {/* --- NOVO CARD: Aditivos --- */}
+          <CCard className="mb-4">
+            <CCardBody>
+              <CCardTitle className="h5">Aditivos</CCardTitle>
+              {aditivos.length === 0 ? (
+                <p>Nenhum aditivo registrado para este contrato.</p>
+              ) : (
+                <CListGroup flush>
+                  {aditivos.map(aditivo => (
+                    <CListGroupItem key={aditivo.id}>
+                      <strong>Aditivo #{aditivo.id}</strong><br />
+                      Descrição: {aditivo.descricao}<br />
+                      Dias Aditivados: {aditivo.diasAditivo} dias<br />
+                      Valor Aditivado: R$ {parseFloat(aditivo.valorAditivo).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </CListGroupItem>
+                  ))}
+                </CListGroup>
+              )}
+            </CCardBody>
+          </CCard>
+          {/* --- FIM DO NOVO CARD --- */}
+
+          {/* Card de Anexo do Contrato (Estilo Gmail com prévia pequena e clique no texto) */}
           <CCard className="mb-4">
             <CCardBody>
               <CCardTitle className="h5">Anexos do Contrato</CCardTitle>
@@ -241,9 +270,9 @@ export default function ContratoDetalhes() {
                   <CListGroupItem className="d-flex align-items-center justify-content-between">
                     {/* Contêiner da Prévia e Nome - AGORA CLICÁVEL */}
                     <div
-                      className="d-flex align-items-center flex-grow-1" // flex-grow-1 para ocupar espaço e permitir clique
-                      onClick={() => window.open(anexoUrl, '_blank')} // Abre em nova aba ao clicar
-                      style={{ cursor: 'pointer' }} // Cursor de ponteiro para indicar clicável
+                      className="d-flex align-items-center flex-grow-1"
+                      onClick={() => window.open(anexoUrl, '_blank')}
+                      style={{ cursor: 'pointer' }}
                     >
                       {/* Mini Prévia do PDF */}
                       <div className="me-3" style={{
@@ -262,23 +291,21 @@ export default function ContratoDetalhes() {
                       }}>
                           <iframe
                             src={anexoUrl}
+                            title="Mini Prévia do Anexo"
                             width="150%"
                             height="140%"
-                            title="Mini Prévia do Anexo"
-                            style={{ border: 'none', transform: 'scale(0.95)', position: 'absolute', top: '-10%', left: '-20%' }}
+                            style={{ border: 'none', position: 'absolute', top: '-10%', left: '-20%' }}
                             onError={(e) => console.error('Erro ao renderizar mini iframe:', e)}
-
                           >
-                            PDF
+                            Seu navegador não suporta a prévia.
                           </iframe>
                       </div>
                       
                       {/* Nome do Anexo - Com estilos de hover */}
                       <div
                         className="d-flex flex-column"
-                        // Estilos para hover: texto azul e sublinhado
                         onMouseEnter={(e) => {
-                          e.currentTarget.querySelector('span.anexo-nome').style.color = '#007bff'; // Bootstrap blue
+                          e.currentTarget.querySelector('span.anexo-nome').style.color = '#007bff';
                           e.currentTarget.querySelector('span.anexo-nome').style.textDecoration = 'underline';
                         }}
                         onMouseLeave={(e) => {
@@ -286,14 +313,13 @@ export default function ContratoDetalhes() {
                           e.currentTarget.querySelector('span.anexo-nome').style.textDecoration = 'none';
                         }}
                       >
-                          <span className="fw-bold anexo-nome">Contrato Anexo (PDF)</span> {/* Adicionado classe 'anexo-nome' */}
+                          <span className="fw-bold anexo-nome">Contrato Anexo (PDF)</span>
                           <small className="text-muted">Clique para visualizar o arquivo completo.</small>
                       </div>
                     </div>
 
-                    {/* Botões de Ação - Mantidos separados para Download */}
+                    {/* Botões de Ação - Download */}
                     <div>
-                      {/* Removido o botão "Visualizar em Nova Aba" daqui */}
                       <CButton
                         color="success"
                         variant="ghost"
