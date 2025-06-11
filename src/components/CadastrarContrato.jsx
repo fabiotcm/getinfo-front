@@ -22,7 +22,7 @@ import { color, fontString } from 'chart.js/helpers'
 import { criarContrato, uploadAnexo, adicionarAgregadoAoContrato } from '../services/contratoService' // ALTEARADO: Importe 'adicionarAgregadoAoContrato'
 import { getEmpresas } from '../services/empresaService'
 import { getColaboradores } from '../services/colaboradorService'
-import { criarEntregavel } from '../services/entregavelService'
+import { criarEntregavel } from '../services/contratoService'
 
 export default function CadastrarContratoStepper() {
   const [step, setStep] = useState(0);
@@ -292,11 +292,12 @@ export default function CadastrarContratoStepper() {
       if (formData.entregaveis.length > 0 && contratoId) {
         for (const ent of formData.entregaveis) {
           console.log('Criando entregável:', ent)
-          await criarEntregavel({
-            contratoId,
+          const dataFormatada = new Date(ent.dataFinal).toISOString().split('T')[0]; // Formata a data para YYYY-MM-DD
+
+          await criarEntregavel(contratoId, {
             descricao: ent.descricao,
             observacao: ent.observacao,
-            dataFinal: ent.dataFinal,
+            dataFinal: dataFormatada,
           })
         }
         console.log('Todos os entregáveis foram criados.')
@@ -547,7 +548,7 @@ export default function CadastrarContratoStepper() {
               type="file"
               name="anexo"
               onChange={handleChange}
-              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+              accept=".pdf"
             />
           </CCol>
         </>
