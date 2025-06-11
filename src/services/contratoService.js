@@ -27,6 +27,11 @@ export const buscarAgregados = (id) => api.get(`/contratos/agregados/${id}`)
 // Buscar entregáveis de um contrato
 export const buscarEntregaveis = (id) => api.get(`/contratos/entregaveis/${id}`)
 
+// Vizualizar anexo de um contrato
+export const viewAnexo = (id) => api.get(`/contratos/view/${id}`, {
+  responseType: 'blob' 
+})
+
 // Fazer download do anexo de um contrato
 export const downloadAnexo = (id) => api.get(`/contratos/download/${id}`, {
   responseType: 'blob'
