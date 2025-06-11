@@ -22,7 +22,7 @@ import { color, fontString } from 'chart.js/helpers'
 import { criarContrato, uploadAnexo, adicionarAgregadoAoContrato } from '../services/contratoService' // ALTEARADO: Importe 'adicionarAgregadoAoContrato'
 import { getEmpresas } from '../services/empresaService'
 import { getColaboradores } from '../services/colaboradorService'
-import { criarEntregavel } from '../services/entregavelService'
+import { criarEntregavel } from '../services/contratoService'
 
 export default function CadastrarContratoStepper() {
   const [step, setStep] = useState(0);

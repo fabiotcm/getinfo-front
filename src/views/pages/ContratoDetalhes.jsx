@@ -1,25 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import { Document, Page, pdfjs } from 'react-pdf'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   CButton, CCard, CCardBody, CCardTitle, CCardText, CListGroup,
-  CListGroupItem, CRow, CCol, CProgress
+  CListGroupItem, CRow, CCol, CProgress, CSpinner
 } from '@coreui/react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
-import { cilDataTransferDown, cilFile } from '@coreui/icons' // cilDataTransferDown será para download
+import { cilDataTransferDown, cilFile, cilArrowRight } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import 'react-pdf/dist/Page/TextLayer.css'
-import 'react-pdf/dist/Page/AnnotationLayer.css';
 
 import {
   buscarContratoPorId,
   buscarAgregados,
   buscarEntregaveis,
   viewAnexo,
-  downloadAnexo // Importe o novo endpoint de download
+  downloadAnexo
 } from '../../services/contratoService'
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 export default function ContratoDetalhes() {
   const { id } = useParams()
@@ -29,12 +24,13 @@ export default function ContratoDetalhes() {
   const [colaboradores, setColaboradores] = useState([])
   const [entregaveis, setEntregaveis] = useState([])
   const [anexoUrl, setAnexoUrl] = useState(null)
-  const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
-
+  const [loadingAnexo, setLoadingAnexo] = useState(true);
 
   useEffect(() => {
+    let createdUrl = null;
+
     const fetchContratoData = async () => {
+      setLoadingAnexo(true);
       try {
         const [contratoRes, agregadosRes, entregaveisRes] = await Promise.all([
           buscarContratoPorId(id),
@@ -50,6 +46,7 @@ export default function ContratoDetalhes() {
           const anexoRes = await viewAnexo(id)
           if (anexoRes.data && anexoRes.data.type === 'application/pdf') {
             const url = URL.createObjectURL(anexoRes.data)
+            createdUrl = url;
             setAnexoUrl(url)
             console.log('Anexo PDF URL para visualização:', url)
           } else {
@@ -57,8 +54,12 @@ export default function ContratoDetalhes() {
             setAnexoUrl(null)
           }
         } catch (anexoError) {
-          console.warn('Contrato não possui anexo ou erro ao buscar anexo para visualização:', anexoError)
-          setAnexoUrl(null)
+          if (anexoError.response && anexoError.response.status === 404) {
+             console.info('Nenhum anexo encontrado para este contrato (Status 404).');
+          } else {
+             console.warn('Erro ao buscar anexo para visualização:', anexoError);
+          }
+          setAnexoUrl(null);
         }
 
         console.log('Contrato:', contratoRes.data)
@@ -67,22 +68,19 @@ export default function ContratoDetalhes() {
 
       } catch (error) {
         console.error('Erro ao buscar dados do contrato:', error)
+      } finally {
+        setLoadingAnexo(false);
       }
     }
 
     fetchContratoData()
 
     return () => {
-      if (anexoUrl) {
-        URL.revokeObjectURL(anexoUrl)
+      if (createdUrl) {
+        URL.revokeObjectURL(createdUrl);
       }
     }
-  }, [id, anexoUrl])
-
-  function onDocumentLoadSuccess({ numPages }) {
-    setNumPages(numPages);
-    setPageNumber(1);
-  }
+  }, [id])
 
   const formatarData = (data) => {
     return new Intl.DateTimeFormat('pt-BR').format(new Date(data))
@@ -120,22 +118,17 @@ export default function ContratoDetalhes() {
     navigate(`/contrato/${id}/${path}`)
   }
 
-  const goToNextPage = () => setPageNumber(prevPageNumber => Math.min(prevPageNumber + 1, numPages));
-  const goToPrevPage = () => setPageNumber(prevPageNumber => Math.max(prevPageNumber - 1, 1));
-
-  // NOVA FUNÇÃO: Para fazer o download do anexo
   const handleDownloadAnexo = async () => {
     try {
       const response = await downloadAnexo(id);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      // Define um nome de arquivo padrão, você pode tentar pegar do header 'Content-Disposition' do backend se disponível
       link.setAttribute('download', `anexo_contrato_${id}.pdf`); 
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url); // Limpa a URL do objeto
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Erro ao fazer download do anexo:', error);
       alert('Não foi possível fazer o download do anexo.');
@@ -234,47 +227,86 @@ export default function ContratoDetalhes() {
             </CCardBody>
           </CCard>
 
-          {/* --- NOVO CARD: Anexo do Contrato --- */}
+          {/* --- NOVO CARD: Anexo do Contrato (Estilo Gmail com prévia pequena e clique no texto) --- */}
           <CCard className="mb-4">
             <CCardBody>
-              <CCardTitle className="h5">Anexos do Contrato <CIcon icon={cilFile} size="lg" /></CCardTitle>
-              {anexoUrl ? (
-                <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px' }}>
-                  <p>Visualização da Página {pageNumber} de {numPages || '...'}</p>
-                  <div style={{ maxHeight: '600px', overflowY: 'auto', textAlign: 'center' }}>
-                    <Document
-                      file={anexoUrl}
-                      onLoadSuccess={onDocumentLoadSuccess}
-                      onLoadError={(error) => console.error('Erro ao carregar PDF para visualização:', error)}
+              <CCardTitle className="h5">Anexos do Contrato</CCardTitle>
+              {loadingAnexo ? (
+                 <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80px' }}>
+                   <CSpinner color="primary" size="sm" />
+                   <span className="ms-2">Carregando anexo...</span>
+                 </div>
+              ) : anexoUrl ? (
+                <CListGroup flush>
+                  <CListGroupItem className="d-flex align-items-center justify-content-between">
+                    {/* Contêiner da Prévia e Nome - AGORA CLICÁVEL */}
+                    <div
+                      className="d-flex align-items-center flex-grow-1" // flex-grow-1 para ocupar espaço e permitir clique
+                      onClick={() => window.open(anexoUrl, '_blank')} // Abre em nova aba ao clicar
+                      style={{ cursor: 'pointer' }} // Cursor de ponteiro para indicar clicável
                     >
-                      <Page
-                        pageNumber={pageNumber}
-                        renderTextLayer={true}
-                        renderAnnotationLayer={true}
-                        width={Math.min(window.innerWidth * 0.75, 600)}
-                      />
-                    </Document>
-                  </div>
-                  <div className="d-flex justify-content-center gap-2 mt-3">
-                    <CButton color="secondary" onClick={goToPrevPage} disabled={pageNumber <= 1}>
-                      Anterior
-                    </CButton>
-                    <CButton color="secondary" onClick={goToNextPage} disabled={pageNumber >= numPages}>
-                      Próxima
-                    </CButton>
-                  </div>
-                  <div className="mt-3 text-center">
-                      <p>Opções para o anexo:</p>
-                      <CButton color="info" className="text-white me-2" onClick={() => window.open(anexoUrl, '_blank')}>
-                         <CIcon icon={cilFile} className="me-2" /> Visualizar em Nova Aba
+                      {/* Mini Prévia do PDF */}
+                      <div className="me-3" style={{
+                          width: '80px',
+                          height: '100px',
+                          border: '1px solid #e0e0e0',
+                          borderRadius: '4px',
+                          overflow: 'hidden',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                          backgroundColor: '#f9f9f9',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                      }}>
+                          <iframe
+                            src={anexoUrl}
+                            width="100%"
+                            height="100%"
+                            title="Mini Prévia do Anexo"
+                            style={{ border: 'none', transform: 'scale(0.7)', transformOrigin: '0 0' }}
+                            scrolling="no"
+                            onError={(e) => console.error('Erro ao renderizar mini iframe:', e)}
+                          >
+                            PDF
+                          </iframe>
+                      </div>
+                      
+                      {/* Nome do Anexo - Com estilos de hover */}
+                      <div
+                        className="d-flex flex-column"
+                        // Estilos para hover: texto azul e sublinhado
+                        onMouseEnter={(e) => {
+                          e.currentTarget.querySelector('span.anexo-nome').style.color = '#007bff'; // Bootstrap blue
+                          e.currentTarget.querySelector('span.anexo-nome').style.textDecoration = 'underline';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.querySelector('span.anexo-nome').style.color = 'inherit';
+                          e.currentTarget.querySelector('span.anexo-nome').style.textDecoration = 'none';
+                        }}
+                      >
+                          <span className="fw-bold anexo-nome">Contrato Anexo (PDF)</span> {/* Adicionado classe 'anexo-nome' */}
+                          <small className="text-muted">Clique para visualizar o arquivo completo.</small>
+                      </div>
+                    </div>
+
+                    {/* Botões de Ação - Mantidos separados para Download */}
+                    <div>
+                      {/* Removido o botão "Visualizar em Nova Aba" daqui */}
+                      <CButton
+                        color="success"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDownloadAnexo}
+                        title="Fazer Download"
+                      >
+                         <CIcon icon={cilDataTransferDown} />
                       </CButton>
-                      <CButton color="success" className="text-white" onClick={handleDownloadAnexo}>
-                         <CIcon icon={cilDataTransferDown} className="me-2" /> Fazer Download
-                      </CButton>
-                  </div>
-                </div>
+                    </div>
+                  </CListGroupItem>
+                </CListGroup>
               ) : (
-                <p>Nenhum anexo em formato PDF disponível para este contrato ou erro ao carregá-lo.</p>
+                <p>Nenhum anexo disponível.</p>
               )}
             </CCardBody>
           </CCard>
