@@ -1,6 +1,6 @@
 import React from 'react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
-import ColaboradorDetalhes from '../../components/ColaboradorDetalhes'
+import DetalhesColaborador from 'src/components/DetalhesColaborador.jsx'
 
 const Colaborador = () => {
   return (
@@ -9,7 +9,7 @@ const Colaborador = () => {
       <div className="wrapper d-flex flex-column min-vh-100">
         <AppHeader />
         <div className="body flex-grow-1">
-          <ColaboradorDetalhes/>
+          <DetalhesColaborador/>
         </div>
         <AppFooter />
       </div>

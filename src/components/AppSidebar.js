@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { SidebarDarkExample } from './SidebarDarkExample';
+import { SidebarDarkExample } from './SidebarDark';
 
 import {
   CCloseButton,
