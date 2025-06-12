@@ -11,7 +11,7 @@ import './scss/examples.scss'
 import CadastroContrato from './views/pages/CadastroContrato'
 import Clientes from './views/pages/Clientes'
 import Cliente from './views/pages/Cliente'
-import ContratoDetalhes from './views/pages/ContratoDetalhes'
+import Contrato from './views/pages/Contrato'
 import CadastroEmpresa from './views/pages/CadastroEmpresa'
 import CadastroColaborador from './views/pages/CadastroColaborador'
 import EdicaoContrato from './views/pages/EdicaoContrato'
@@ -77,7 +77,7 @@ const App = () => {
           <Route path="/clientes/:id/editar" element={<EdicaoEmpresa />} />
           <Route path="/clientes/:id/contratos" element={<ClienteContratos />} />
           <Route path="/contrato" element={<Contratos />} />
-          <Route path="/contrato/:id" element={<ContratoDetalhes />} />
+          <Route path="/contrato/:id" element={<Contrato />} />
           <Route path="/contrato/:id/editar" element={<EdicaoContrato />} />
           <Route path="/contrato/:id/aditivo" element={<Aditivo />} />
           <Route path="/contrato/:id/repactuacao" element={<Repactuacao />} />
