@@ -101,6 +101,14 @@ const Register = () => {
                     </CButton>
                   </div>
                 </CForm>
+                <div>
+                  <p className="text-center mt-3">
+                    Já tem uma conta? <a href="" onClick={(e) => 
+                      e.preventDefault() ||
+                      navigate('/')
+                    }>Faça o login</a>
+                  </p>
+                </div>
               </CCardBody>
             </CCard>
           </CCol>
