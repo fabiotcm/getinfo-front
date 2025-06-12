@@ -1,31 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  CButton, CCard, CCardBody, CCardTitle, CCardText, CListGroup,
-  CListGroupItem, CRow, CCol, CProgress, CSpinner
+  CButton,
+  CCard,
+  CCardBody,
+  CCardTitle,
+  CListGroup,
+  CListGroupItem,
+  CRow,
+  CCol,
+  CProgress,
+  CSpinner
 } from '@coreui/react'
-import { cilDataTransferDown, cilFile } from '@coreui/icons' // Removido cilArrowRight
+import { cilDataTransferDown } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 
 import {
   buscarContratoPorId,
   buscarAgregados,
   buscarEntregaveis,
-  viewAnexo, // Para anexo principal do contrato
-  downloadAnexo, // Para anexo principal do contrato
-  exibirAditivosDoContrato // Para buscar os aditivos
+  viewAnexo,
+  downloadAnexo,
+  exibirAditivosDoContrato
 } from '../services/contratoService'
-
 import {
-  viewAnexoAditivo, // Para anexo de aditivo
-  downloadAnexoAditivo // Para anexo de aditivo
-} from '../services/aditivoService' // Importa o serviço de aditivo
-
+  viewAnexoAditivo,
+  downloadAnexoAditivo
+} from '../services/aditivoService'
 import {
-  listarTodasRepactuacoes, // NOVO: Para buscar todas as repactuações
-  viewAnexoRepactuacao, // NOVO: Para anexo de repactuação
-  downloadAnexoRepactuacao // NOVO: Para anexo de repactuação
-} from '../services/repactuacaoService'; // NOVO: Importa o serviço de repactuação
+  listarTodasRepactuacoes,
+  viewAnexoRepactuacao,
+  downloadAnexoRepactuacao
+} from '../services/repactuacaoService'
 
 export default function ContratoDetalhes() {
   const { id } = useParams()
@@ -35,206 +41,164 @@ export default function ContratoDetalhes() {
   const [colaboradores, setColaboradores] = useState([])
   const [entregaveis, setEntregaveis] = useState([])
   const [aditivos, setAditivos] = useState([])
-  const [repactuacoes, setRepactuacoes] = useState([]); // NOVO: Estado para as repactuações
-  const [allAttachments, setAllAttachments] = useState([]); // Estado para todos os anexos (principal + aditivos + repactuações)
-  const [loadingAttachments, setLoadingAttachments] = useState(true);
-
-  // Variável para armazenar URLs criadas para revogação no cleanup
-  const createdObjectUrls = [];
+  const [repactuacoes, setRepactuacoes] = useState([])
+  const [allAttachments, setAllAttachments] = useState([])
+  const [loadingAttachments, setLoadingAttachments] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState(null)
 
   useEffect(() => {
     const fetchContratoData = async () => {
-      setLoadingAttachments(true);
+      setLoading(true)
+      setLoadingAttachments(true)
       try {
-        // Busca dados do contrato, agregados, entregáveis, aditivos E repactuações
-        const [contratoRes, agregadosRes, entregaveisRes, aditivosRes, repactuacoesRes] = await Promise.all([
-          buscarContratoPorId(id),
-          buscarAgregados(id),
-          buscarEntregaveis(id),
-          exibirAditivosDoContrato(id), // Busca aditivos
-          listarTodasRepactuacoes() // NOVO: Busca TODAS as repactuações
-        ]);
+        const [contratoRes, agregadosRes, entregaveisRes, aditivosRes, repactuacoesRes] =
+          await Promise.all([
+            buscarContratoPorId(id),
+            buscarAgregados(id),
+            buscarEntregaveis(id),
+            exibirAditivosDoContrato(id),
+            listarTodasRepactuacoes()
+          ])
 
-        setContrato(contratoRes.data);
-        setColaboradores(agregadosRes.data);
-        setEntregaveis(entregaveisRes.data);
-        setAditivos(aditivosRes.data);
+        setContrato(contratoRes.data)
+        setColaboradores(agregadosRes.data)
+        setEntregaveis(entregaveisRes.data)
+        setAditivos(aditivosRes.data)
 
-        // NOVO: Filtra as repactuações que pertencem a este contrato
-        const filteredRepactuacoes = repactuacoesRes.data.filter(rep => String(rep.idContrato) === id);
-        setRepactuacoes(filteredRepactuacoes);
+        const filteredRepactuacoes = repactuacoesRes.data.filter(rep => String(rep.idContrato) === id)
+        setRepactuacoes(filteredRepactuacoes)
 
+        const fetchedAttachments = []
+        const createdObjectUrls = []
 
-        const fetchedAttachments = [];
-
-        // 1. Tenta buscar o anexo principal do contrato
+        // Anexo Principal
         try {
-          const mainAnexoRes = await viewAnexo(id);
-          if (mainAnexoRes.data && mainAnexoRes.data.type === 'application/pdf') {
-            const url = URL.createObjectURL(mainAnexoRes.data);
-            createdObjectUrls.push(url);
-            fetchedAttachments.push({
-              id: id,
-              type: 'main',
-              name: 'Anexo Principal do Contrato',
-              url: url
-            });
+          const mainAnexoRes = await viewAnexo(id)
+          if (mainAnexoRes.data.type === 'application/pdf') {
+            const url = URL.createObjectURL(mainAnexoRes.data)
+            createdObjectUrls.push(url)
+            fetchedAttachments.push({ id, type: 'main', name: 'Anexo Principal do Contrato', url })
           }
         } catch (error) {
-          if (error.response && error.response.status === 404) {
-            console.info('Nenhum anexo principal encontrado para este contrato (Status 404).');
-          } else {
-            console.warn('Erro ao buscar anexo principal para visualização:', error);
-          }
+          console.info('Nenhum anexo principal encontrado.')
         }
 
-        // 2. Tenta buscar anexos para cada aditivo
+        // Anexos de Aditivos
         for (const aditivo of aditivosRes.data) {
           try {
-            const aditivoAnexoRes = await viewAnexoAditivo(aditivo.id);
-            if (aditivoAnexoRes.data && aditivoAnexoRes.data.type === 'application/pdf') {
-              const url = URL.createObjectURL(aditivoAnexoRes.data);
-              createdObjectUrls.push(url);
-              fetchedAttachments.push({
-                id: aditivo.id,
-                type: 'aditivo',
-                name: `Anexo do Aditivo #${aditivo.id}`,
-                url: url
-              });
+            const aditivoAnexoRes = await viewAnexoAditivo(aditivo.id)
+            if (aditivoAnexoRes.data.type === 'application/pdf') {
+              const url = URL.createObjectURL(aditivoAnexoRes.data)
+              createdObjectUrls.push(url)
+              fetchedAttachments.push({ id: aditivo.id, type: 'aditivo', name: `Anexo do Aditivo #${aditivo.id}`, url })
             }
-          } catch (error) {
-            if (error.response && error.response.status === 404) {
-              console.info(`Nenhum anexo encontrado para o Aditivo #${aditivo.id} (Status 404).`);
-            } else {
-              console.warn(`Erro ao buscar anexo para o Aditivo #${aditivo.id}:`, error);
-            }
-          }
+          } catch {}
         }
 
-        // 3. NOVO: Tenta buscar anexos para cada repactuação do contrato
-        for (const repactuacao of filteredRepactuacoes) { // Usa a lista filtrada
+        // Anexos de Repactuações
+        for (const repactuacao of filteredRepactuacoes) {
           try {
-            const repactuacaoAnexoRes = await viewAnexoRepactuacao(repactuacao.id);
-            if (repactuacaoAnexoRes.data && repactuacaoAnexoRes.data.type === 'application/pdf') {
-              const url = URL.createObjectURL(repactuacaoAnexoRes.data);
-              createdObjectUrls.push(url);
-              fetchedAttachments.push({
-                id: repactuacao.id,
-                type: 'repactuacao',
-                name: `Anexo da Repactuação #${repactuacao.id}`,
-                url: url
-              });
+            const repactuacaoAnexoRes = await viewAnexoRepactuacao(repactuacao.id)
+            if (repactuacaoAnexoRes.data.type === 'application/pdf') {
+              const url = URL.createObjectURL(repactuacaoAnexoRes.data)
+              createdObjectUrls.push(url)
+              fetchedAttachments.push({ id: repactuacao.id, type: 'repactuacao', name: `Anexo da Repactuação #${repactuacao.id}`, url })
             }
-          } catch (error) {
-            if (error.response && error.response.status === 404) {
-              console.info(`Nenhum anexo encontrado para a Repactuação #${repactuacao.id} (Status 404).`);
-            } else {
-              console.warn(`Erro ao buscar anexo para a Repactuação #${repactuacao.id}:`, error);
-            }
-          }
+          } catch {}
         }
-        
-        setAllAttachments(fetchedAttachments);
 
+        setAllAttachments(fetchedAttachments)
+        // Cleanup URLs
+        return () => createdObjectUrls.forEach(URL.revokeObjectURL)
       } catch (error) {
-        console.error('Erro ao buscar dados do contrato ou anexos:', error);
+        console.error('Erro ao buscar dados do contrato:', error)
+        setErro('Erro ao carregar detalhes do contrato.')
       } finally {
-        setLoadingAttachments(false);
+        setLoading(false)
+        setLoadingAttachments(false)
       }
-    };
+    }
+    fetchContratoData()
+  }, [id])
 
-    fetchContratoData();
+  const formatarData = data => data ? new Intl.DateTimeFormat('pt-BR').format(new Date(data)) : 'N/A'
 
-    // Cleanup: revoga todas as URLs criadas para liberar memória
-    return () => {
-      createdObjectUrls.forEach(url => URL.revokeObjectURL(url));
-    };
-  }, [id]); // Dependência no 'id' para recarregar se o ID do contrato mudar
-
-  const formatarData = (data) => {
-    if (!data) return 'N/A';
-    return new Intl.DateTimeFormat('pt-BR').format(new Date(data));
-  };
-
-  const calcularDiasRestantes = (dataFinal) => {
-    const hoje = new Date();
-    const final = new Date(dataFinal);
-    hoje.setHours(0, 0, 0, 0);
-    final.setHours(0, 0, 0, 0);
-
-    const diffMs = final - hoje;
-    if (diffMs < 0) return 'Contrato encerrado';
-    const dias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-    if (dias === 0) return 'Último dia';
-    if (dias === 1) return '1 dia';
-    return `${dias} dias`;
-  };
+  const calcularDiasRestantes = dataFinal => {
+    const hoje = new Date(); hoje.setHours(0,0,0,0)
+    const final = new Date(dataFinal); final.setHours(0,0,0,0)
+    const diff = final - hoje
+    if (diff < 0) return 'Contrato encerrado'
+    const dias = Math.ceil(diff / (1000*60*60*24))
+    return dias === 0 ? 'Último dia' : `${dias} dia${dias>1?'s':''}`
+  }
 
   const calcularPorcentagemRestante = (inicio, fim) => {
-    const dInicio = new Date(inicio);
-    const dFim = new Date(fim);
-    const hoje = new Date();
-    
-    dInicio.setHours(0, 0, 0, 0);
-    dFim.setHours(0, 0, 0, 0);
-    hoje.setHours(0, 0, 0, 0);
+    const dInicio = new Date(inicio), dFim = new Date(fim), hoje = new Date()
+    hoje.setHours(0,0,0,0)
+    const total = dFim - dInicio
+    const restante = dFim - hoje
+    if (total <= 0) return 0
+    if (restante < 0) return 0
+    if (hoje < dInicio) return 100
+    return Math.round((restante/total)*100)
+  }
 
-    const total = dFim.getTime() - dInicio.getTime();
-    const restante = dFim.getTime() - hoje.getTime();
+  const getCorProgresso = pct => pct>60 ? 'success' : pct>30 ? 'warning' : 'danger'
 
-    if (total <= 0) return 0;
-    if (restante < 0) return 0;
-    if (hoje.getTime() < dInicio.getTime()) return 100;
+  const handleNavigate = path => navigate(`/contrato/${id}/${path}`)
 
-    return Math.round((restante / total) * 100);
-  };
-
-  const getCorProgresso = (porcentagem) => {
-    if (porcentagem > 60) return 'success';
-    if (porcentagem > 30) return 'warning';
-    return 'danger';
-  };
-
-  const handleNavigate = (path) => {
-    navigate(`/contrato/${id}/${path}`);
-  };
-
-  // Função genérica para download de anexos (principal, aditivo ou repactuação)
   const handleDownloadAttachment = async (attachmentId, type) => {
     try {
-      let response;
-      let filename;
+      let response, filename
       if (type === 'main') {
-        response = await downloadAnexo(attachmentId);
-        filename = `anexo_contrato_${attachmentId}.pdf`;
+        response = await downloadAnexo(attachmentId)
+        filename = `anexo_contrato_${attachmentId}.pdf`
       } else if (type === 'aditivo') {
-        response = await downloadAnexoAditivo(attachmentId);
-        filename = `anexo_aditivo_${attachmentId}.pdf`;
-      } else if (type === 'repactuacao') { // NOVO: Lógica para repactuação
-        response = await downloadAnexoRepactuacao(attachmentId);
-        filename = `anexo_repactuacao_${attachmentId}.pdf`;
+        response = await downloadAnexoAditivo(attachmentId)
+        filename = `anexo_aditivo_${attachmentId}.pdf`
       } else {
-        console.error('Tipo de anexo desconhecido para download.');
-        return;
+        response = await downloadAnexoRepactuacao(attachmentId)
+        filename = `anexo_repactuacao_${attachmentId}.pdf`
       }
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const url = URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url; link.setAttribute('download', filename)
+      document.body.appendChild(link); link.click()
+      document.body.removeChild(link); URL.revokeObjectURL(url)
     } catch (error) {
-      console.error(`Erro ao fazer download do anexo (${type}, ID: ${attachmentId}):`, error);
-      console.error('Não foi possível fazer o download do anexo.');
+      console.error('Erro no download do anexo:', error)
     }
-  };
+  }
 
-  if (!contrato) return <p>Carregando contrato...</p>;
+  // Loading Spinner
+  if (loading) {
+    return (
+      <div className="p-4 d-flex justify-content-center align-items-center" style={{ minHeight: '200px' }}>
+        <CSpinner color="primary" />
+        <span className="ms-2">Carregando detalhes do contrato...</span>
+      </div>
+    )
+  }
 
-  const porcentagemRestante = calcularPorcentagemRestante(contrato.dataInicio, contrato.dataFim);
+  // Error state
+  if (erro || !contrato) {
+    return (
+      <div className="p-4">
+        <CCard className="mb-4">
+          <CCardBody>
+            <CCardTitle className="h4">Erro</CCardTitle>
+            <p>{erro || 'Contrato não encontrado.'}</p>
+            <CButton color="secondary" onClick={() => navigate('/contratos')}>
+              Voltar para a lista de Contratos
+            </CButton>
+          </CCardBody>
+        </CCard>
+      </div>
+    )
+  }
+
+  const porcentagemRestante = calcularPorcentagemRestante(contrato.dataInicio, contrato.dataFim)
 
   return (
     <div className="body flex-grow-1 p-4">
