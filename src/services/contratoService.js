@@ -61,3 +61,10 @@ export const arquivarContrato = (id) => api.delete(`/contratos/arquivar/${id}`);
 
 // Editar um contrato
 export const editarContrato = (id, contrato) => api.patch(`/contratos/editar/${id}`, contrato);
+
+// Exibir repactuação de um contrato
+export const exibirRepactuacao = (id) => api.get(`/contratos/repactuacoes/${id}`);
+
+// Repactuar um contrato
+export const repactuarContrato = (id, repactuacaoData) =>
+  api.post(`/contratos/repactuar/${id}`, repactuacaoData);
