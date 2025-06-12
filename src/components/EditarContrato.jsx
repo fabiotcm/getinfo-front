@@ -252,6 +252,7 @@ export default function EditarContrato() {
               value={formData.descricao}
               onChange={handleChange}
               rows={4}
+              placeholder='Descreva o contrato aqui...'
               required
             />
           </CCol>
