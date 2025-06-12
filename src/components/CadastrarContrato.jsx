@@ -300,11 +300,13 @@ export default function CadastrarContratoStepper() {
           const dataFormatada = new Date(ent.dataFinal).toISOString().split('T')[0]; // Formata a data para YYYY-MM-DD
           console.log('Descrição do entregável:', ent.descricao);
           console.log('Data final do entregável:', dataFormatada);
-          await criarEntregavel(contratoId, {
-            descricao: ent.descricao,
-            observacao: ent.observacao,
+          const entregavelDTO = {
+            descricao: ent.descricao.trim(),
+            observacao: ent.observacao.trim(),
             dataFinal: dataFormatada,
-          })
+          }
+
+          await criarEntregavel(contratoId, entregavelDTO)
           console.log('Descrição do entregável:', ent.descricao);
         }
         console.log('Todos os entregáveis foram criados.')
