@@ -10,7 +10,7 @@ import './scss/style.scss'
 import './scss/examples.scss'
 import CadastroContrato from './views/pages/CadastroContrato'
 import Clientes from './views/pages/Clientes'
-import ClienteDetalhes from './views/pages/ClienteDetalhes'
+import Cliente from './views/pages/Cliente'
 import ContratoDetalhes from './views/pages/ContratoDetalhes'
 import CadastroEmpresa from './views/pages/CadastroEmpresa'
 import CadastroColaborador from './views/pages/CadastroColaborador'
@@ -73,7 +73,7 @@ const App = () => {
           <Route exact path="/colaboradores" element={<Colaboradores />} />
           <Route path="/colaboradores/:id" element={<Colaborador />} />
           <Route path="/colaboradores/:id/editar" element={<EdicaoColaborador />} />
-          <Route path="/clientes/:id" element={<ClienteDetalhes />} />
+          <Route path="/clientes/:id" element={<Cliente />} />
           <Route path="/clientes/:id/editar" element={<EdicaoEmpresa />} />
           <Route path="/clientes/:id/contratos" element={<ClienteContratos />} />
           <Route path="/contrato" element={<Contratos />} />
