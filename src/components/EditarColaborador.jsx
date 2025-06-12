@@ -125,6 +125,7 @@ export default function EditarColaborador() {
               name="nome"
               value={formData.nome}
               onChange={handleChange}
+              placeholder="Nome do Colaborador"
               required
             />
           </CCol>
@@ -137,6 +138,7 @@ export default function EditarColaborador() {
               name="sobrenome"
               value={formData.sobrenome}
               onChange={handleChange}
+              placeholder="Sobrenome do Colaborador"
               required
             />
           </CCol>
@@ -150,6 +152,7 @@ export default function EditarColaborador() {
               type="email"
               value={formData.email}
               onChange={handleChange}
+              placeholder="Email do Colaborador"
               required
             />
           </CCol>
@@ -162,6 +165,7 @@ export default function EditarColaborador() {
               name="telefone"
               value={formData.telefone}
               onChange={handleChange}
+              placeholder="Telefone do Colaborador"
               required
             />
           </CCol>
@@ -174,6 +178,7 @@ export default function EditarColaborador() {
               name="cargo"
               value={formData.cargo}
               onChange={handleChange}
+              placeholder="Cargo do Colaborador"
               required
             />
           </CCol>
