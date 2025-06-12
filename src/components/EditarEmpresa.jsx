@@ -127,6 +127,7 @@ export default function EditarEmpresa() {
               name="nomeFantasia"
               value={formData.nomeFantasia}
               onChange={handleChange}
+              placeholder="Nome Fantasia da Empresa"
             />
           </CCol>
 
@@ -150,23 +151,53 @@ export default function EditarEmpresa() {
 
           <CCol md={4}>
             <CFormLabel>CEP (*)</CFormLabel>
-            <CFormInput name="cep" value={formData.cep} onChange={handleChange} required />
+            <CFormInput
+            name="cep"
+            value={formData.cep}
+            onChange={handleChange}
+            placeholder="00000-000"
+            required
+            />
           </CCol>
           <CCol md={4}>
             <CFormLabel>Logradouro (*)</CFormLabel>
-            <CFormInput name="logradouro" value={formData.logradouro} onChange={handleChange} required />
+            <CFormInput
+            name="logradouro"
+            value={formData.logradouro}
+            onChange={handleChange}
+            placeholder="Rua, Avenida, etc."
+            required
+            />
           </CCol>
           <CCol md={4}>
             <CFormLabel>Bairro (*)</CFormLabel>
-            <CFormInput name="bairro" value={formData.bairro} onChange={handleChange} required />
+            <CFormInput
+            name="bairro"
+            value={formData.bairro}
+            onChange={handleChange}
+            placeholder="Bairro"
+            required
+            />
           </CCol>
           <CCol md={2}>
             <CFormLabel>Número (*)</CFormLabel>
-            <CFormInput name="numero" value={formData.numero} onChange={handleChange} required />
+            <CFormInput
+            name="numero"
+            value={formData.numero}
+            onChange={handleChange}
+            placeholder="Número"
+            required
+            />
           </CCol>
           <CCol md={3}>
             <CFormLabel>Cidade (*)</CFormLabel>
-            <CFormInput name="cidade" value={formData.cidade} onChange={handleChange} required />
+            <CFormInput
+            name="cidade"
+            value={formData.cidade}
+            onChange={handleChange}
+            placeholder="Cidade"
+            required
+            />
           </CCol>
           <CCol md={3}>
             <CFormLabel>Estado (*)</CFormLabel>
@@ -183,7 +214,12 @@ export default function EditarEmpresa() {
           </CCol>
           <CCol md={4}>
             <CFormLabel>Complemento</CFormLabel>
-            <CFormInput name="complemento" value={formData.complemento} onChange={handleChange} />
+            <CFormInput
+            name="complemento"
+            value={formData.complemento}
+            onChange={handleChange}
+            placeholder="Complemento (opcional)"
+            />
           </CCol>
 
           {/* Contato da Empresa */}
@@ -193,11 +229,23 @@ export default function EditarEmpresa() {
 
           <CCol md={6}>
             <CFormLabel>Email (*)</CFormLabel>
-            <CFormInput name="email" value={formData.email} onChange={handleChange} required />
+            <CFormInput
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email da Empresa"
+            required
+            />
           </CCol>
           <CCol md={6}>
             <CFormLabel>Telefone (*)</CFormLabel>
-            <CFormInput name="telefone" value={formData.telefone} onChange={handleChange} required />
+            <CFormInput
+            name="telefone"
+            value={formData.telefone}
+            onChange={handleChange}
+            placeholder="Telefone da Empresa"
+            required
+            />
           </CCol>
 
           {/* Responsável */}
@@ -207,19 +255,43 @@ export default function EditarEmpresa() {
 
           <CCol md={6}>
             <CFormLabel>Nome (*)</CFormLabel>
-            <CFormInput name="nomeResponsavel" value={formData.nomeResponsavel} onChange={handleChange} required />
+            <CFormInput
+            name="nomeResponsavel"
+            value={formData.nomeResponsavel}
+            onChange={handleChange}
+            placeholder="Nome do Responsável"
+            required
+            />
           </CCol>
           <CCol md={6}>
             <CFormLabel>Email (*)</CFormLabel>
-            <CFormInput name="emailResponsavel" value={formData.emailResponsavel} onChange={handleChange} required />
+            <CFormInput
+            name="emailResponsavel"
+            value={formData.emailResponsavel}
+            onChange={handleChange}
+            placeholder="Email do Responsável"
+            required
+            />
           </CCol>
           <CCol md={6}>
             <CFormLabel>Telefone (*)</CFormLabel>
-            <CFormInput name="telefoneResponsavel" value={formData.telefoneResponsavel} onChange={handleChange} required />
+            <CFormInput
+            name="telefoneResponsavel"
+            value={formData.telefoneResponsavel}
+            onChange={handleChange}
+            placeholder="Telefone do Responsável"
+            required
+            />
           </CCol>
           <CCol md={6}>
             <CFormLabel>CPF (*)</CFormLabel>
-            <CFormInput name="cpfResponsavel" value={formData.cpfResponsavel} onChange={handleChange} required />
+            <CFormInput
+            name="cpfResponsavel"
+            value={formData.cpfResponsavel}
+            onChange={handleChange}
+            placeholder="CPF do Responsável"
+            required
+            />
           </CCol>
 
           <CCol xs={12} className="mt-4 text-end">

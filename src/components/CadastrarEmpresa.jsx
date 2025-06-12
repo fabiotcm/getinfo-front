@@ -291,6 +291,7 @@ export default function CadastrarEmpresa() {
               name="razaoSocial"
               value={formData.razaoSocial}
               onChange={handleChange}
+              placeholder='Razão Social da Empresa'
               required
             />
           </CCol>
@@ -299,6 +300,7 @@ export default function CadastrarEmpresa() {
             <CFormInput name="nomeFantasia"
               value={formData.nomeFantasia}
               onChange={handleChange}
+              placeholder='Nome Fantasia da Empresa'
               required
             />
           </CCol>
@@ -407,6 +409,7 @@ export default function CadastrarEmpresa() {
               name="logradouro"
               value={formData.logradouro}
               onChange={handleChange}
+              placeholder='Rua, Avenida, etc.'
               required
             />
           </CCol>
@@ -417,6 +420,7 @@ export default function CadastrarEmpresa() {
               name="bairro"
               value={formData.bairro}
               onChange={handleChange}
+              placeholder='Bairro'
               required
             />
           </CCol>
@@ -427,6 +431,7 @@ export default function CadastrarEmpresa() {
               name="numero"
               value={formData.numero}
               onChange={handleChange}
+              placeholder='Número'
               required
             />
           </CCol>
@@ -467,6 +472,7 @@ export default function CadastrarEmpresa() {
               name="complemento"
               value={formData.complemento}
               onChange={handleChange}
+              placeholder='Apto, Bloco, etc.'
             />
           </CCol>
         </>

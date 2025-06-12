@@ -399,6 +399,7 @@ export default function CadastrarContratoStepper() {
               name="valorContrato"
               value={formData.valorContrato}
               onChange={handleChange}
+              placeholder="Valor do Contrato"
               required
             />
           </CCol>
@@ -554,6 +555,7 @@ export default function CadastrarContratoStepper() {
               name="descricao"
               value={formData.descricao}
               onChange={handleChange}
+              placeholder='Descreva o contrato aqui...'
               rows={4}
               required
             />
