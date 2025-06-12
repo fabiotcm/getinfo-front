@@ -256,6 +256,22 @@ export default function EditarContrato() {
               required
             />
           </CCol>
+          
+          {/* Mostra campo de cancelamento se StatusContrato for igual a "CANCELADO" */}
+          {formData.statusContrato === 'CANCELADO' && (
+            <CCol xs={12}>
+              <CFormTextarea
+                id="motivoCancelamento"
+                label="Motivo do Cancelamento (*)"
+                name="motivoCancelamento"
+                value={formData.motivoCancelamento || ''}
+                onChange={handleChange}
+                rows={4}
+                placeholder='Descreva o motivo do cancelamento...'
+                required
+              />
+            </CCol>
+          )}
 
           {/* Campo 'nomeResponsavel' agora é um CFormSelect */}
           <CCol md={6}>
