@@ -5,17 +5,28 @@ import {
   CListGroupItem, CRow, CCol, CProgress, CSpinner
 } from '@coreui/react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
-import { cilDataTransferDown, cilFile, cilArrowRight } from '@coreui/icons'
+import { cilDataTransferDown, cilFile } from '@coreui/icons' // Removido cilArrowRight
 import CIcon from '@coreui/icons-react'
 
 import {
   buscarContratoPorId,
   buscarAgregados,
   buscarEntregaveis,
-  viewAnexo,
-  downloadAnexo,
-  exibirAditivosDoContrato // Importado o novo endpoint de aditivos
+  viewAnexo, // Para anexo principal do contrato
+  downloadAnexo, // Para anexo principal do contrato
+  exibirAditivosDoContrato // Para buscar os aditivos
 } from '../../services/contratoService'
+
+import {
+  viewAnexoAditivo, // Para anexo de aditivo
+  downloadAnexoAditivo // Para anexo de aditivo
+} from '../../services/aditivoService' // Importa o serviço de aditivo
+
+import {
+  listarTodasRepactuacoes, // NOVO: Para buscar todas as repactuações
+  viewAnexoRepactuacao, // NOVO: Para anexo de repactuação
+  downloadAnexoRepactuacao // NOVO: Para anexo de repactuação
+} from '../../services/repactuacaoService'; // NOVO: Importa o serviço de repactuação
 
 export default function ContratoDetalhes() {
   const { id } = useParams()
@@ -24,127 +35,207 @@ export default function ContratoDetalhes() {
   const [contrato, setContrato] = useState(null)
   const [colaboradores, setColaboradores] = useState([])
   const [entregaveis, setEntregaveis] = useState([])
-  const [aditivos, setAditivos] = useState([]) // Novo estado para os aditivos
-  const [anexoUrl, setAnexoUrl] = useState(null)
-  const [loadingAnexo, setLoadingAnexo] = useState(true);
+  const [aditivos, setAditivos] = useState([])
+  const [repactuacoes, setRepactuacoes] = useState([]); // NOVO: Estado para as repactuações
+  const [allAttachments, setAllAttachments] = useState([]); // Estado para todos os anexos (principal + aditivos + repactuações)
+  const [loadingAttachments, setLoadingAttachments] = useState(true);
+
+  // Variável para armazenar URLs criadas para revogação no cleanup
+  const createdObjectUrls = [];
 
   useEffect(() => {
-    let createdUrl = null;
-
     const fetchContratoData = async () => {
-      setLoadingAnexo(true);
+      setLoadingAttachments(true);
       try {
-        // Incluindo a busca por aditivos na Promise.all
-        const [contratoRes, agregadosRes, entregaveisRes, aditivosRes] = await Promise.all([
+        // Busca dados do contrato, agregados, entregáveis, aditivos E repactuações
+        const [contratoRes, agregadosRes, entregaveisRes, aditivosRes, repactuacoesRes] = await Promise.all([
           buscarContratoPorId(id),
           buscarAgregados(id),
           buscarEntregaveis(id),
-          exibirAditivosDoContrato(id) // Nova chamada de API
-        ])
+          exibirAditivosDoContrato(id), // Busca aditivos
+          listarTodasRepactuacoes() // NOVO: Busca TODAS as repactuações
+        ]);
 
-        setContrato(contratoRes.data)
-        setColaboradores(agregadosRes.data)
-        setEntregaveis(entregaveisRes.data)
-        setAditivos(aditivosRes.data) // Atualizando o estado dos aditivos
+        setContrato(contratoRes.data);
+        setColaboradores(agregadosRes.data);
+        setEntregaveis(entregaveisRes.data);
+        setAditivos(aditivosRes.data);
 
+        // NOVO: Filtra as repactuações que pertencem a este contrato
+        const filteredRepactuacoes = repactuacoesRes.data.filter(rep => String(rep.idContrato) === id);
+        setRepactuacoes(filteredRepactuacoes);
+
+
+        const fetchedAttachments = [];
+
+        // 1. Tenta buscar o anexo principal do contrato
         try {
-          const anexoRes = await viewAnexo(id)
-          if (anexoRes.data && anexoRes.data.type === 'application/pdf') {
-            const url = URL.createObjectURL(anexoRes.data)
-            createdUrl = url;
-            setAnexoUrl(url)
-            console.log('Anexo PDF URL para visualização:', url)
-          } else {
-            console.warn('O anexo não é um PDF ou está vazio para visualização.')
-            setAnexoUrl(null)
+          const mainAnexoRes = await viewAnexo(id);
+          if (mainAnexoRes.data && mainAnexoRes.data.type === 'application/pdf') {
+            const url = URL.createObjectURL(mainAnexoRes.data);
+            createdObjectUrls.push(url);
+            fetchedAttachments.push({
+              id: id,
+              type: 'main',
+              name: 'Anexo Principal do Contrato',
+              url: url
+            });
           }
-        } catch (anexoError) {
-          if (anexoError.response && anexoError.response.status === 404) {
-             console.info('Nenhum anexo encontrado para este contrato (Status 404).');
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            console.info('Nenhum anexo principal encontrado para este contrato (Status 404).');
           } else {
-             console.warn('Erro ao buscar anexo para visualização:', anexoError);
+            console.warn('Erro ao buscar anexo principal para visualização:', error);
           }
-          setAnexoUrl(null);
         }
 
-        console.log('Contrato:', contratoRes.data)
-        console.log('Colaboradores:', agregadosRes.data)
-        console.log('Entregáveis:', entregaveisRes.data)
-        console.log('Aditivos:', aditivosRes.data) // Log dos aditivos
+        // 2. Tenta buscar anexos para cada aditivo
+        for (const aditivo of aditivosRes.data) {
+          try {
+            const aditivoAnexoRes = await viewAnexoAditivo(aditivo.id);
+            if (aditivoAnexoRes.data && aditivoAnexoRes.data.type === 'application/pdf') {
+              const url = URL.createObjectURL(aditivoAnexoRes.data);
+              createdObjectUrls.push(url);
+              fetchedAttachments.push({
+                id: aditivo.id,
+                type: 'aditivo',
+                name: `Anexo do Aditivo #${aditivo.id}`,
+                url: url
+              });
+            }
+          } catch (error) {
+            if (error.response && error.response.status === 404) {
+              console.info(`Nenhum anexo encontrado para o Aditivo #${aditivo.id} (Status 404).`);
+            } else {
+              console.warn(`Erro ao buscar anexo para o Aditivo #${aditivo.id}:`, error);
+            }
+          }
+        }
+
+        // 3. NOVO: Tenta buscar anexos para cada repactuação do contrato
+        for (const repactuacao of filteredRepactuacoes) { // Usa a lista filtrada
+          try {
+            const repactuacaoAnexoRes = await viewAnexoRepactuacao(repactuacao.id);
+            if (repactuacaoAnexoRes.data && repactuacaoAnexoRes.data.type === 'application/pdf') {
+              const url = URL.createObjectURL(repactuacaoAnexoRes.data);
+              createdObjectUrls.push(url);
+              fetchedAttachments.push({
+                id: repactuacao.id,
+                type: 'repactuacao',
+                name: `Anexo da Repactuação #${repactuacao.id}`,
+                url: url
+              });
+            }
+          } catch (error) {
+            if (error.response && error.response.status === 404) {
+              console.info(`Nenhum anexo encontrado para a Repactuação #${repactuacao.id} (Status 404).`);
+            } else {
+              console.warn(`Erro ao buscar anexo para a Repactuação #${repactuacao.id}:`, error);
+            }
+          }
+        }
+        
+        setAllAttachments(fetchedAttachments);
 
       } catch (error) {
-        console.error('Erro ao buscar dados do contrato:', error)
+        console.error('Erro ao buscar dados do contrato ou anexos:', error);
       } finally {
-        setLoadingAnexo(false);
+        setLoadingAttachments(false);
       }
-    }
+    };
 
-    fetchContratoData()
+    fetchContratoData();
 
+    // Cleanup: revoga todas as URLs criadas para liberar memória
     return () => {
-      if (createdUrl) {
-        URL.revokeObjectURL(createdUrl);
-      }
-    }
-  }, [id])
+      createdObjectUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [id]); // Dependência no 'id' para recarregar se o ID do contrato mudar
 
   const formatarData = (data) => {
-    return new Intl.DateTimeFormat('pt-BR').format(new Date(data))
-  }
+    if (!data) return 'N/A';
+    return new Intl.DateTimeFormat('pt-BR').format(new Date(data));
+  };
 
   const calcularDiasRestantes = (dataFinal) => {
-    const hoje = new Date()
-    const final = new Date(dataFinal)
-    const diffMs = final - hoje
-    if (diffMs < 0) return 'Contrato encerrado'
-    const dias = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
-    if (dias === 0) return 'Último dia'
-    if (dias === 1) return '1 dia'
-    return `${dias} dias`
-  }
+    const hoje = new Date();
+    const final = new Date(dataFinal);
+    hoje.setHours(0, 0, 0, 0);
+    final.setHours(0, 0, 0, 0);
+
+    const diffMs = final - hoje;
+    if (diffMs < 0) return 'Contrato encerrado';
+    const dias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    if (dias === 0) return 'Último dia';
+    if (dias === 1) return '1 dia';
+    return `${dias} dias`;
+  };
 
   const calcularPorcentagemRestante = (inicio, fim) => {
-    const dInicio = new Date(inicio)
-    const dFim = new Date(fim)
-    const hoje = new Date()
-    const total = dFim - dInicio
-    const restante = dFim - hoje
-    if (restante < 0) return 0
-    if (hoje < dInicio) return 100
-    return Math.round((restante / total) * 100)
-  }
+    const dInicio = new Date(inicio);
+    const dFim = new Date(fim);
+    const hoje = new Date();
+    
+    dInicio.setHours(0, 0, 0, 0);
+    dFim.setHours(0, 0, 0, 0);
+    hoje.setHours(0, 0, 0, 0);
+
+    const total = dFim.getTime() - dInicio.getTime();
+    const restante = dFim.getTime() - hoje.getTime();
+
+    if (total <= 0) return 0;
+    if (restante < 0) return 0;
+    if (hoje.getTime() < dInicio.getTime()) return 100;
+
+    return Math.round((restante / total) * 100);
+  };
 
   const getCorProgresso = (porcentagem) => {
-    if (porcentagem > 60) return 'success'
-    if (porcentagem > 30) return 'warning'
-    return 'danger'
-  }
+    if (porcentagem > 60) return 'success';
+    if (porcentagem > 30) return 'warning';
+    return 'danger';
+  };
 
   const handleNavigate = (path) => {
-    navigate(`/contrato/${id}/${path}`)
-  }
+    navigate(`/contrato/${id}/${path}`);
+  };
 
-  const handleDownloadAnexo = async () => {
+  // Função genérica para download de anexos (principal, aditivo ou repactuação)
+  const handleDownloadAttachment = async (attachmentId, type) => {
     try {
-      const response = await downloadAnexo(id);
+      let response;
+      let filename;
+      if (type === 'main') {
+        response = await downloadAnexo(attachmentId);
+        filename = `anexo_contrato_${attachmentId}.pdf`;
+      } else if (type === 'aditivo') {
+        response = await downloadAnexoAditivo(attachmentId);
+        filename = `anexo_aditivo_${attachmentId}.pdf`;
+      } else if (type === 'repactuacao') { // NOVO: Lógica para repactuação
+        response = await downloadAnexoRepactuacao(attachmentId);
+        filename = `anexo_repactuacao_${attachmentId}.pdf`;
+      } else {
+        console.error('Tipo de anexo desconhecido para download.');
+        return;
+      }
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `anexo_contrato_${id}.pdf`);
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Erro ao fazer download do anexo:', error);
-      alert('Não foi possível fazer o download do anexo.');
+      console.error(`Erro ao fazer download do anexo (${type}, ID: ${attachmentId}):`, error);
+      console.error('Não foi possível fazer o download do anexo.');
     }
   };
 
+  if (!contrato) return <p>Carregando contrato...</p>;
 
-  if (!contrato) return <p>Carregando contrato...</p>
-
-  const porcentagemRestante = calcularPorcentagemRestante(contrato.dataInicio, contrato.dataFim)
+  const porcentagemRestante = calcularPorcentagemRestante(contrato.dataInicio, contrato.dataFim);
 
   return (
     <div>
@@ -162,7 +253,7 @@ export default function ContratoDetalhes() {
                   <strong>Descrição:</strong> {contrato.descricao}
                 </CCol>
                 <CCol>
-                  <strong>Valor:</strong> R$ {parseFloat(contrato.valor).toLocaleString()} <br />
+                  <strong>Valor:</strong> R$ {parseFloat(contrato.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <br />
                   <strong>Status:</strong> {contrato.statusContrato}
                 </CCol>
               </CRow>
@@ -226,7 +317,7 @@ export default function ContratoDetalhes() {
                       Status: {e.status} <br />
                       {e.dataEntrega && <>Data Entrega: {formatarData(e.dataEntrega)}<br /></>}
                       {e.dataCancelamento && <>Data Cancelamento: {formatarData(e.dataCancelamento)}<br /></>}
-                      {e.observacao && <>Observação: {e.observacao}<br /></>} {/* Campo observacao adicionado */}
+                      {e.observacao && <>Observação: {e.observacao}<br /></>}
                     </CListGroupItem>
                   ))}
                 </CListGroup>
@@ -234,7 +325,7 @@ export default function ContratoDetalhes() {
             </CCardBody>
           </CCard>
 
-          {/* --- NOVO CARD: Aditivos --- */}
+          {/* Card: Aditivos */}
           <CCard className="mb-4">
             <CCardBody>
               <CCardTitle className="h5">Aditivos</CCardTitle>
@@ -254,90 +345,109 @@ export default function ContratoDetalhes() {
               )}
             </CCardBody>
           </CCard>
-          {/* --- FIM DO NOVO CARD --- */}
 
-          {/* Card de Anexo do Contrato (Estilo Gmail com prévia pequena e clique no texto) */}
+          {/* NOVO Card: Repactuações */}
           <CCard className="mb-4">
             <CCardBody>
-              <CCardTitle className="h5">Anexos do Contrato</CCardTitle>
-              {loadingAnexo ? (
-                 <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80px' }}>
-                   <CSpinner color="primary" size="sm" />
-                   <span className="ms-2">Carregando anexo...</span>
-                 </div>
-              ) : anexoUrl ? (
-                <CListGroup flush>
-                  <CListGroupItem className="d-flex align-items-center justify-content-between">
-                    {/* Contêiner da Prévia e Nome - AGORA CLICÁVEL */}
-                    <div
-                      className="d-flex align-items-center flex-grow-1"
-                      onClick={() => window.open(anexoUrl, '_blank')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {/* Mini Prévia do PDF */}
-                      <div className="me-3" style={{
-                          width: '80px',
-                          height: '100px',
-                          border: '1px solid #e0e0e0',
-                          borderRadius: '4px',
-                          overflow: 'hidden',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                          backgroundColor: '#f9f9f9',
-                          position: 'relative',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                      }}>
-                          <iframe
-                            src={anexoUrl}
-                            title="Mini Prévia do Anexo"
-                            width="150%"
-                            height="140%"
-                            style={{ border: 'none', position: 'absolute', top: '-10%', left: '-20%' }}
-                            onError={(e) => console.error('Erro ao renderizar mini iframe:', e)}
-                          >
-                            Seu navegador não suporta a prévia.
-                          </iframe>
-                      </div>
-                      
-                      {/* Nome do Anexo - Com estilos de hover */}
-                      <div
-                        className="d-flex flex-column"
-                        onMouseEnter={(e) => {
-                          e.currentTarget.querySelector('span.anexo-nome').style.color = '#007bff';
-                          e.currentTarget.querySelector('span.anexo-nome').style.textDecoration = 'underline';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.querySelector('span.anexo-nome').style.color = 'inherit';
-                          e.currentTarget.querySelector('span.anexo-nome').style.textDecoration = 'none';
-                        }}
-                      >
-                          <span className="fw-bold anexo-nome">Contrato Anexo (PDF)</span>
-                          <small className="text-muted">Clique para visualizar o arquivo completo.</small>
-                      </div>
-                    </div>
-
-                    {/* Botões de Ação - Download */}
-                    <div>
-                      <CButton
-                        color="success"
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleDownloadAnexo}
-                        title="Fazer Download"
-                      >
-                         <CIcon icon={cilDataTransferDown} />
-                      </CButton>
-                    </div>
-                  </CListGroupItem>
-                </CListGroup>
+              <CCardTitle className="h5">Repactuações</CCardTitle>
+              {repactuacoes.length === 0 ? (
+                <p>Nenhuma repactuação registrada para este contrato.</p>
               ) : (
-                <p>Nenhum anexo disponível.</p>
+                <CListGroup flush>
+                  {repactuacoes.map(repactuacao => (
+                    <CListGroupItem key={repactuacao.id}>
+                      <strong>Repactuação #{repactuacao.id}</strong><br />
+                      Motivo: {repactuacao.motivoRepactuacao}<br />
+                      Descrição: {repactuacao.descricao}<br />
+                      Novo Valor: R$ {parseFloat(repactuacao.novoValorContrato).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<br />
+                      Data da Repactuação: {formatarData(repactuacao.dataRepactuacao)}<br />
+                      Nova Data Final: {formatarData(repactuacao.novaDataFinal)}
+                    </CListGroupItem>
+                  ))}
+                </CListGroup>
               )}
             </CCardBody>
           </CCard>
-          {/* --- FIM DO NOVO CARD --- */}
+
+          {/* Card de Anexos do Contrato (Principal + Aditivos + Repactuações) */}
+          <CCard className="mb-4">
+            <CCardBody>
+              <CCardTitle className="h5">Anexos do Contrato</CCardTitle>
+              {loadingAttachments ? (
+                 <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80px' }}>
+                   <CSpinner color="primary" size="sm" />
+                   <span className="ms-2">Carregando anexos...</span>
+                 </div>
+               ) : allAttachments.length === 0 ? (
+                <p>Nenhum anexo disponível para este contrato, seus aditivos ou repactuações.</p>
+              ) : (
+                <CListGroup flush>
+                  {allAttachments.map((attachment, index) => (
+                    <CListGroupItem key={`${attachment.type}-${attachment.id}-${index}`} className="d-flex align-items-center justify-content-between">
+                      <div
+                        className="d-flex align-items-center flex-grow-1"
+                        onClick={() => window.open(attachment.url, '_blank')}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="me-3" style={{
+                            width: '80px',
+                            height: '100px',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '4px',
+                            overflow: 'hidden',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                            backgroundColor: '#f9f9f9',
+                            position: 'relative',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
+                          }}>
+                            <iframe
+                              src={attachment.url}
+                              title={`Prévia do Anexo ${attachment.name}`}
+                              width="150%"
+                              height="140%"
+                              style={{ border: 'none', position: 'absolute', top: '-10%', left: '-20%' }}
+                              onError={(e) => console.error(`Erro ao renderizar mini iframe para ${attachment.name}:`, e)}
+                            >
+                              Seu navegador não suporta a prévia.
+                            </iframe>
+                        </div>
+                        
+                        <div
+                          className="d-flex flex-column"
+                          onMouseEnter={(e) => {
+                            e.currentTarget.querySelector('span.anexo-nome').style.color = '#007bff';
+                            e.currentTarget.querySelector('span.anexo-nome').style.textDecoration = 'underline';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.querySelector('span.anexo-nome').style.color = 'inherit';
+                            e.currentTarget.querySelector('span.anexo-nome').style.textDecoration = 'none';
+                          }}
+                        >
+                              <span className="fw-bold anexo-nome">{attachment.name} (PDF)</span>
+                              <small className="text-muted">Clique para visualizar o arquivo completo.</small>
+                        </div>
+                      </div>
+
+                      <div>
+                        <CButton
+                          color="success"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDownloadAttachment(attachment.id, attachment.type)}
+                          title="Fazer Download"
+                        >
+                             <CIcon icon={cilDataTransferDown} />
+                         </CButton>
+                      </div>
+                    </CListGroupItem>
+                  ))}
+                </CListGroup>
+              )}
+            </CCardBody>
+          </CCard>
 
           <div className="d-flex gap-2 mt-3">
             <CButton color="primary" onClick={() => handleNavigate('editar')}>Editar</CButton>

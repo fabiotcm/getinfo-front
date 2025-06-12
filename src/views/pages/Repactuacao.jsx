@@ -15,7 +15,8 @@ import {
   CSpinner
 } from '@coreui/react';
 import { repactuarContrato, buscarContratoPorId } from '../../services/contratoService';
-import { AppSidebar, AppHeader, AppFooter } from '../../components'; // Mantido conforme sua estrutura
+import { uploadAnexoRepactuacao } from '../../services/repactuacaoService'; // Importa o serviço de upload de anexo de repactuação
+import { AppSidebar, AppHeader, AppFooter } from '../../components';
 
 export default function Repactuacao() {
   const { id } = useParams(); // ID do contrato
@@ -23,13 +24,14 @@ export default function Repactuacao() {
 
   const [formData, setFormData] = useState({
     novoValorContrato: '',
-    dataRepactuacao: new Date().toISOString().split('T')[0], // Define a data de repactuação como hoje por padrão
+    dataRepactuacao: new Date().toISOString().split('T')[0],
     novaDataFinal: '',
     descricao: '',
     motivoRepactuacao: '',
+    documentosAnexos: [], // NOVO: Estado para armazenar os documentos anexados
   });
 
-  const [contrato, setContrato] = useState(null); // Estado para armazenar os dados do contrato original
+  const [contrato, setContrato] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [error, setError] = useState(null);
@@ -40,14 +42,11 @@ export default function Repactuacao() {
       try {
         const response = await buscarContratoPorId(id);
         const contratoData = response.data;
-        setContrato(contratoData); // Armazena os dados do contrato original
+        setContrato(contratoData);
 
-        // Pré-preenche os campos do formulário com os dados do contrato original
         setFormData(prev => ({
           ...prev,
-          // Garante que o valor seja uma string e usa '|| ''` para evitar `null` ou `undefined`
           novoValorContrato: contratoData.valorContrato ? String(contratoData.valorContrato) : '',
-          // dataFim já é string no formato YYYY-MM-DD se vem do backend, ou vazia
           novaDataFinal: contratoData.dataFim || '',
         }));
       } catch (error) {
@@ -59,11 +58,16 @@ export default function Repactuacao() {
     if (id) {
       fetchContrato();
     }
-  }, [id]); // Dependência no 'id' para recarregar se o ID do contrato mudar
+  }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, files } = e.target;
+    if (name === 'documentosAnexos') {
+      // Converte FileList para Array para armazenar múltiplos arquivos
+      setFormData(prev => ({ ...prev, [name]: Array.from(files) }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
     setShowSuccessAlert(false);
     setError(null);
   };
@@ -96,7 +100,6 @@ export default function Repactuacao() {
     const dataRepactuacaoObj = new Date(formData.dataRepactuacao);
     const novaDataFinalObj = new Date(formData.novaDataFinal);
 
-    // Zera a hora para comparar apenas a data
     dataRepactuacaoObj.setHours(0, 0, 0, 0);
     novaDataFinalObj.setHours(0, 0, 0, 0);
 
@@ -106,14 +109,12 @@ export default function Repactuacao() {
       return;
     }
     
-    // A descrição é obrigatória no DTO
     if (!formData.descricao.trim()) {
       setError('A Descrição é obrigatória.');
       setIsSaving(false);
       return;
     }
 
-    // O motivo da repactuação é obrigatório no DTO
     if (!formData.motivoRepactuacao.trim()) {
       setError('O Motivo da Repactuação é obrigatório.');
       setIsSaving(false);
@@ -124,21 +125,32 @@ export default function Repactuacao() {
     try {
       const repactuacaoData = {
         novoValorContrato: parseFloat(formData.novoValorContrato),
-        dataRepactuacao: formData.dataRepactuacao, // Formato YYYY-MM-DD
-        novaDataFinal: formData.novaDataFinal, // Formato YYYY-MM-DD
-        descricao: formData.descricao.trim(), // Garante que a descrição é trimada
-        motivoRepactuacao: formData.motivoRepactuacao.trim(), // Garante que o motivo é trimado
+        dataRepactuacao: formData.dataRepactuacao,
+        novaDataFinal: formData.novaDataFinal,
+        descricao: formData.descricao.trim(),
+        motivoRepactuacao: formData.motivoRepactuacao.trim(),
       };
 
       console.log('Enviando dados da repactuação:', repactuacaoData);
       const response = await repactuarContrato(id, repactuacaoData);
-      console.log('Repactuação criada com sucesso:', response.data);
+      // Supondo que a resposta de 'repactuarContrato' contenha o ID da repactuação criada
+      const repactuacaoId = response.data.id; 
+      console.log('Repactuação criada com sucesso. ID:', repactuacaoId);
+
+      // NOVO: Faz upload dos anexos para a repactuação recém-criada
+      if (formData.documentosAnexos.length > 0) {
+        for (const file of formData.documentosAnexos) {
+          console.log('Enviando anexo para repactuação ID:', repactuacaoId, 'arquivo:', file.name);
+          await uploadAnexoRepactuacao(repactuacaoId, file);
+        }
+        console.log('Todos os anexos da repactuação foram enviados.');
+      }
 
       setShowSuccessAlert(true);
       setTimeout(() => {
         setShowSuccessAlert(false);
-        navigate(`/contrato/${id}`); // Redireciona de volta para os detalhes do contrato
-      }, 2000); // Exibe o alerta por 2 segundos antes de redirecionar
+        navigate(`/contrato/${id}`);
+      }, 2000);
 
     } catch (error) {
       setShowSuccessAlert(false);
@@ -160,7 +172,7 @@ export default function Repactuacao() {
             <CCardBody>
               <CCardTitle className="h4 mb-3">
                 Inserir Repactuação para o Contrato #{id}
-                {contrato && ` (${contrato.nomeFantasia})`} {/* Exemplo de como usar dados do contrato */}
+                {contrato && ` (${contrato.nomeFantasia})`}
               </CCardTitle>
 
               {showSuccessAlert && (
@@ -213,7 +225,7 @@ export default function Repactuacao() {
                     required
                   />
                   {contrato && (
-                    <small className='text-muted'>Data final original</small>
+                    <small className='text-muted'>Data final original: {contrato.dataFim ? new Date(contrato.dataFim).toLocaleDateString('pt-BR') : 'N/A'}</small>
                   )}
                 </CCol>
 
@@ -239,6 +251,20 @@ export default function Repactuacao() {
                     required
                     placeholder="Explique o motivo da repactuação."
                   />
+                </CCol>
+
+                {/* NOVO: Campo para Anexar Documentos */}
+                <CCol md={12}>
+                  <CFormLabel htmlFor="documentosAnexos">Anexar Documentos (PDF)</CFormLabel>
+                  <CFormInput
+                    type="file"
+                    id="documentosAnexos"
+                    name="documentosAnexos"
+                    onChange={handleChange}
+                    multiple // Permite selecionar múltiplos arquivos
+                    accept=".pdf" // Aceita apenas arquivos PDF
+                  />
+                  <small className="text-muted">Apenas arquivos PDF são aceitos. Você pode anexar múltiplos documentos.</small>
                 </CCol>
 
                 <CCol xs={12} className="d-flex justify-content-end gap-2 mt-4">
