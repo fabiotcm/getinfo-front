@@ -15,7 +15,7 @@ import Contrato from './views/pages/Contrato'
 import CadastroEmpresa from './views/pages/CadastroEmpresa'
 import CadastroColaborador from './views/pages/CadastroColaborador'
 import EdicaoContrato from './views/pages/EdicaoContrato'
-import Aditivo from './views/pages/Aditivo'
+import CAditivo from './views/pages/Aditivo'
 import Repactuacao from './views/pages/Repactuacao'
 import Colaboradores from './views/pages/Colaboradores'
 import EdicaoEmpresa from './views/pages/EdicaoEmpresa'
@@ -79,7 +79,7 @@ const App = () => {
           <Route path="/contrato" element={<Contratos />} />
           <Route path="/contrato/:id" element={<Contrato />} />
           <Route path="/contrato/:id/editar" element={<EdicaoContrato />} />
-          <Route path="/contrato/:id/aditivo" element={<Aditivo />} />
+          <Route path="/contrato/:id/aditivo" element={<CAditivo />} />
           <Route path="/contrato/:id/repactuacao" element={<Repactuacao />} />
           <Route path='/home' name="Home" element={<Dashboard/>}/>
           <Route exact path="/clientes" name="Clientes" element={<Clientes />} />
