@@ -163,6 +163,7 @@ export default function CadastrarColaborador() {
                 name="nome"
                 value={formData.nome}
                 onChange={handleChange}
+                placeholder="Nome do Colaborador"
                 required
               />
             </CCol>
@@ -173,6 +174,7 @@ export default function CadastrarColaborador() {
                 name="sobrenome"
                 value={formData.sobrenome}
                 onChange={handleChange}
+                placeholder="Sobrenome do Colaborador"
                 required
               />
             </CCol>
@@ -242,6 +244,7 @@ export default function CadastrarColaborador() {
                 name="cargo"
                 value={formData.cargo}
                 onChange={handleChange}
+                placeholder="Cargo do Colaborador"
                 required
               />
             </CCol>
