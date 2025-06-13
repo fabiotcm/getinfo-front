@@ -8,6 +8,7 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
 import { login } from '../../../services/authService'
+import logo_gcontratos from 'src/assets/brand/logo-Gcontratos.png'
 
 const Login = () => {
   const [username, setUsername] = useState('')
@@ -32,7 +33,7 @@ const Login = () => {
           <CCol md={8}>
             <CCardGroup>
               <CCard className="p-4">
-                  <img src="src/assets/brand/logo-Gcontratos.png" alt="Logo" />
+                  <img src={logo_gcontratos} alt="Logo" />
                 <CCardBody>
                   <CForm onSubmit={handleLogin}>
                     <h1>Login</h1>
