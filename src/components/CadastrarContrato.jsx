@@ -200,17 +200,6 @@ export default function CadastrarContratoStepper() {
           setError('A Data de Entrega não pode ser anterior à Data de Início.')
           return
         }
-
-        const hoje = new Date()
-        hoje.setDate(hoje.getDate() - 1)
-        hoje.setHours(0, 0, 0, 0)
-
-        const dInicio = dataInicio.toISOString();
-        const dHoje = hoje.toISOString();
-        if (dInicio !== dHoje) {
-          setError('A Data de Início não pode ser diferente de hoje.')
-          return
-        }
       }
     }
     setShowSuccessAlert(false);
@@ -241,18 +230,6 @@ export default function CadastrarContratoStepper() {
     if (dataEntrega < dataInicio) {
       setDataEntregaInvalida(true)
       setError('A Data de Entrega não pode ser anterior à Data de Início.')
-      setIsSaving(false);
-      return
-    }
-
-    const hoje = new Date()
-    hoje.setDate(hoje.getDate() - 1)
-    hoje.setHours(0, 0, 0, 0)
-
-    const dInicio = dataInicio.toISOString();
-    const dHoje = hoje.toISOString();
-    if (dInicio !== dHoje) {
-      setError('A Data de Início não pode ser diferente de hoje.')
       setIsSaving(false);
       return
     }
