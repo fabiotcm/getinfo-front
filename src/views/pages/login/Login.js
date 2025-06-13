@@ -32,8 +32,8 @@ const Login = () => {
           <CCol md={8}>
             <CCardGroup>
               <CCard className="p-4">
+                  <img src="src/assets/brand/logo-Gcontratos.png" alt="Logo" />
                 <CCardBody>
-                  <img src="src/assets/brand/logo-Gcontratos.png" alt="Logo" style={{ width: '100px' }} />
                   <CForm onSubmit={handleLogin}>
                     <h1>Login</h1>
                     <p className="text-body-secondary">Login com sua conta</p>
@@ -72,8 +72,8 @@ const Login = () => {
                 </CCardBody>
               </CCard>
               <CCard className="text-white bg-primary py-5" style={{ width: '44%' }}>
-                <CCardBody className="text-center">
-                  <div>
+                <CCardBody className="text-center d-flex flex-column justify-content-center">
+                  <div className='pt-5'>
                     <h2>Não possui uma conta?</h2>
                     <p>Registre-se e tenha acesso a todas as funcionalidades do sistema.</p>
                     <CButton color="light" className="mt-3" onClick={() => navigate('/register')}>
