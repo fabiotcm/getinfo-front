@@ -7,11 +7,8 @@ import {
   CButton,
   CRow,
   CCol,
-  CSpinner,
-  CListGroup,      // Adicionado para listas de detalhes
-  CListGroupItem,  // Adicionado para itens de lista
+  CSpinner
 } from "@coreui/react";
-import { AppSidebar, AppHeader, AppFooter } from "../components";
 import { getColaboradorById } from "../services/colaboradorService";
 
 export default function ColaboradorDetalhes() {

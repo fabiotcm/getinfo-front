@@ -8,22 +8,22 @@ import './scss/style.scss'
 
 // We use those styles to show code examples, you should remove them in your application.
 import './scss/examples.scss'
-import CadastroContrato from './views/pages/CadastroContrato'
-import Clientes from './views/pages/Clientes'
-import ClienteDetalhes from './views/pages/ClienteDetalhes'
-import ContratoDetalhes from './views/pages/ContratoDetalhes'
-import CadastroEmpresa from './views/pages/CadastroEmpresa'
 import CadastroColaborador from './views/pages/CadastroColaborador'
-import EdicaoContrato from './views/pages/EdicaoContrato'
-import Aditivo from './views/pages/Aditivo'
-import Repactuacao from './views/pages/Repactuacao'
+import CadastroContrato from './views/pages/CadastroContrato'
+import CadastroEmpresa from './views/pages/CadastroEmpresa'
+import CAditivo from './views/pages/Aditivo'
+import Cliente from './views/pages/Cliente'
+import Clientes from './views/pages/Clientes'
+import ClienteContratos from './views/pages/ClienteContratos'
+import Colaborador from './views/pages/Colaborador'
 import Colaboradores from './views/pages/Colaboradores'
+import Contrato from './views/pages/Contrato'
+import Contratos from './views/pages/Contratos'
+import CRepactuacao from './views/pages/Repactuacao'
+import Dashboard from './views/pages/Dashboard'
+import EdicaoContrato from './views/pages/EdicaoContrato'
 import EdicaoEmpresa from './views/pages/EdicaoEmpresa'
 import EdicaoColaborador from './views/pages/EdicaoColaborador'
-import Colaborador from './views/pages/Colaborador'
-import Dashboard from './views/pages/Dashboard'
-import Contratos from './views/pages/Contratos'
-import ClienteContratos from './views/pages/ClienteContratos'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 	'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -73,14 +73,14 @@ const App = () => {
           <Route exact path="/colaboradores" element={<Colaboradores />} />
           <Route path="/colaboradores/:id" element={<Colaborador />} />
           <Route path="/colaboradores/:id/editar" element={<EdicaoColaborador />} />
-          <Route path="/clientes/:id" element={<ClienteDetalhes />} />
+          <Route path="/clientes/:id" element={<Cliente />} />
           <Route path="/clientes/:id/editar" element={<EdicaoEmpresa />} />
           <Route path="/clientes/:id/contratos" element={<ClienteContratos />} />
           <Route path="/contrato" element={<Contratos />} />
-          <Route path="/contrato/:id" element={<ContratoDetalhes />} />
+          <Route path="/contrato/:id" element={<Contrato />} />
           <Route path="/contrato/:id/editar" element={<EdicaoContrato />} />
-          <Route path="/contrato/:id/aditivo" element={<Aditivo />} />
-          <Route path="/contrato/:id/repactuacao" element={<Repactuacao />} />
+          <Route path="/contrato/:id/aditivo" element={<CAditivo />} />
+          <Route path="/contrato/:id/repactuacao" element={<CRepactuacao />} />
           <Route path='/home' name="Home" element={<Dashboard/>}/>
           <Route exact path="/clientes" name="Clientes" element={<Clientes />} />
           <Route exact path="/register" name="Register Page" element={<Register />} />

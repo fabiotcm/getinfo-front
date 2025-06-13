@@ -1,15 +1,15 @@
 import React from 'react'
 import { AppSidebar, AppHeader, AppFooter } from '../../components'
-import ExibirClientes from 'src/components/ExibirClientes.jsx'
+import DetalhesCliente from 'src/components/DetalhesCliente.jsx'
 
-const Clientes = () => {
+const Cliente = () => {
   return (
     <div>
       <AppSidebar />
       <div className="wrapper d-flex flex-column min-vh-100">
         <AppHeader />
         <div className="body flex-grow-1">
-          <ExibirClientes />
+          <DetalhesCliente/>
         </div>
         <AppFooter />
       </div>
@@ -17,4 +17,4 @@ const Clientes = () => {
   )
 }
 
-export default Clientes;
+export default Cliente;
