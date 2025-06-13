@@ -33,6 +33,7 @@ const Login = () => {
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
+                  <img src="src/assets/brand/logo-Gcontratos.png" alt="Logo" style={{ width: '100px' }} />
                   <CForm onSubmit={handleLogin}>
                     <h1>Login</h1>
                     <p className="text-body-secondary">Login com sua conta</p>
