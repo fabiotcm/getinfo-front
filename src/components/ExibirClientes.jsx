@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getEmpresas, deleteEmpresa } from "../services/empresaService";
+import { getEmpresas, deleteEmpresa, updateEmpresa } from "../services/empresaService";
 import {
   CTable,
   CTableHead,
@@ -20,7 +20,7 @@ import {
   CAlert,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { cilPencil, cilInbox, cilPlus, cilArrowTop, cilArrowBottom } from "@coreui/icons";
+import { cilPencil, cilInbox, cilArrowTop, cilArrowBottom, cilPlus } from "@coreui/icons";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import logo from 'src/assets/brand/logo.png';
@@ -30,12 +30,13 @@ export default function CardClientes() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [fetchingError, setFetchingError] = useState(null);
+  const [error, setError] = useState(null);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [showAtivos, setShowAtivos] = useState(true);
   const [showInativos, setShowInativos] = useState(true);
   const navigate = useNavigate();
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchEmpresas() {
@@ -55,13 +56,40 @@ export default function CardClientes() {
     fetchEmpresas();
   }, []);
 
+  const handleToggleStatus = async (id) => {
+    const cliente = clientes.find(c => c.id === id);
+    if (!cliente) return;
+    const isInativo = !cliente.ativo;
+    const action = isInativo ? 'reativar' : 'arquivar';
+    if (!window.confirm(`Tem certeza que deseja ${action} esta empresa?`)) return;
+    try {
+      if (isInativo) {
+        await updateEmpresa(id, { ativo: true });
+        setClientes(prev => prev.map(c => c.id === id ? { ...c, ativo: true } : c));
+        setAlertMessage("Empresa reativada com sucesso!");
+      } else {
+        await deleteEmpresa(id);
+        setClientes(prev => prev.filter(c => c.id !== id));
+        setAlertMessage("Empresa arquivada com sucesso!");
+      }
+      setShowSuccessAlert(true);
+      setTimeout(() => setShowSuccessAlert(false), 2000);
+    } catch (err) {
+      console.error(`Erro ao ${action} empresa:`, err);
+      setError(`Não foi possível ${action} a empresa. Verifique se ela possui contratos ativos ou se ela existe.`);
+    }
+  };
+
+  const handleEdit = (id) => navigate(`/clientes/${id}/editar`);
+  const handleAdd = () => navigate('/cadastrar-empresa');
+  const handleRowClick = (id) => navigate(`/clientes/${id}`);
+
   const handleSort = (key) => {
     setSortConfig((prev) => ({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
     }));
   };
-
   const getSortIcon = (key) => {
     if (sortConfig.key !== key) return null;
     return (
@@ -71,6 +99,8 @@ export default function CardClientes() {
       />
     );
   };
+
+  const getStatusBadgeColor = (ativo) => (ativo ? 'success' : 'danger');
 
   // Filtragem por status e termo
   const filteredClientes = clientes.filter((cliente) => {
@@ -93,24 +123,6 @@ export default function CardClientes() {
     if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
     return 0;
   });
-
-  const handleEdit = (id) => navigate(`/clientes/${id}/editar`);
-  const handleDelete = async (id) => {
-    if (window.confirm("Tem certeza que deseja arquivar esta empresa?")) {
-      try {
-        await deleteEmpresa(id);
-        setClientes((prev) => prev.filter((c) => c.id !== id));
-        setShowSuccessAlert(true);
-        setTimeout(() => setShowSuccessAlert(false), 2000);
-      } catch (err) {
-        console.error("Erro ao arquivar empresa:", err);
-        setError("Erro ao arquivar empresa. Verifique se ela possui contratos ativos ou se ela existe.");
-      }
-    }
-  };
-
-  const handleAdd = () => navigate('/cadastrar-empresa');
-  const handleRowClick = (id) => navigate(`/clientes/${id}`);
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -141,17 +153,12 @@ export default function CardClientes() {
     doc.save('clientes.pdf');
   };
 
-  const getStatusBadgeColor = (ativo) => {
-    if (ativo) return 'success';
-    return 'danger';
-  };
-
   return (
     <div className="p-4">
       <CCard className="mb-4">
         <CCardBody>
           <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-            <CCardTitle className="h4 mb-0">Empresas Cadastradas</CCardTitle>
+            <CCardTitle className="h4 mb-0">Clientes Cadastrados</CCardTitle>
             <CButton color="secondary" onClick={exportToPDF}>Exportar PDF</CButton>
             <div className="d-flex align-items-center">
               <CFormCheck
@@ -193,7 +200,7 @@ export default function CardClientes() {
           </div>
           {showSuccessAlert && (
             <CAlert color="success" dismissible className="mb-3">
-              Empresa arquivada com sucesso!
+              {alertMessage}
             </CAlert>
           )}
           {error && (
@@ -204,12 +211,12 @@ export default function CardClientes() {
           {loading ? (
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '150px' }}>
               <CSpinner color="primary" />
-              <span className="ms-2">Carregando empresas...</span>
+              <span className="ms-2">Carregando clientes...</span>
             </div>
           ) : fetchingError ? (
             <CAlert color="danger" className="mb-3">{fetchingError}</CAlert>
           ) : sortedClientes.length === 0 ? (
-            <CAlert color="info" className="mb-3">Nenhuma empresa encontrada.</CAlert>
+            <CAlert color="info" className="mb-3">Nenhum cliente encontrado.</CAlert>
           ) : (
             <CTable hover responsive>
               <CTableHead color="light">
@@ -258,12 +265,12 @@ export default function CardClientes() {
                           <CIcon icon={cilPencil} />
                         </CButton>
                       </CTooltip>
-                      <CTooltip content="Arquivar Empresa" placement="top">
+                      <CTooltip content={cliente.ativo ? "Arquivar Empresa" : "Reativar Empresa"} placement="top">
                         <CButton
-                          color="danger"
+                          color={cliente.ativo ? 'danger' : 'success'}
                           variant="outline"
                           size="sm"
-                          onClick={(e) => { e.stopPropagation(); handleDelete(cliente.id); }}
+                          onClick={(e) => { e.stopPropagation(); handleToggleStatus(cliente.id); }}
                         >
                           <CIcon icon={cilInbox} />
                         </CButton>
